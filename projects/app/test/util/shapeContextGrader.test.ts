@@ -13,6 +13,7 @@ import type {
   SimilarCharacterReference,
 } from "#data/questions/hanziCharacterWriting.ts";
 import {
+  calculateShapeContextSustainedTangentRegions,
   gradeCharacterShape,
   extractReferenceStrokeSegment,
   extractWritingStrokeSegment,
@@ -29,11 +30,15 @@ import type {
 } from "#util/shapeContextGrader.ts";
 import type { ShapeContextGraderExample } from "#util/shapeContextGraderExample.ts";
 import {
+  calculateShapeContextStrokeGeometryDiagnostics,
+  calculateShapeContextTerminalHookDiagnostics,
+  calculateShapeContextTrajectoryDiagnostics,
   createShapeContextGraderDiagnostic,
   diagnoseShapeContextStrokePresence,
   evaluateWritingIssueExpectations,
   renderShapeContextGraderDiagnosticSvg,
 } from "#test/util/shapeContextGraderDiagnostics.ts";
+import { writeTerminalHookFixtureCsv } from "#test/util/shapeContextGraderFixtureReporting.ts";
 import {
   decodeShapeContextStrokes,
   encodeShapeContextStrokes,
@@ -101,6 +106,23 @@ type HandwritingEvaluationRecord = {
     deformationAlpha: number;
     comparison: HanziCharacterWritingAcceptanceDecision[`contrastiveCheck`][`candidates`][number];
   }>;
+  strokeGeometry: ReturnType<
+    typeof calculateShapeContextStrokeGeometryDiagnostics
+  >;
+  trajectory: ReturnType<typeof calculateShapeContextTrajectoryDiagnostics>;
+  originalStrokeGeometry: ReturnType<
+    typeof calculateShapeContextStrokeGeometryDiagnostics
+  >;
+  originalTrajectory: ReturnType<
+    typeof calculateShapeContextTrajectoryDiagnostics
+  >;
+  terminalHooks: ReturnType<
+    typeof calculateShapeContextTerminalHookDiagnostics
+  >;
+  matchedStrokeCount: number;
+  originalMatchedStrokeCount: number;
+  issueAwareMatchedStrokeCount: number;
+  excludedReversedStrokeCount: number;
 };
 
 const handwritingEvaluationRecords: HandwritingEvaluationRecord[] = [];
@@ -109,6 +131,20 @@ const handwritingReviewDirectory = path.resolve(
   process.cwd(),
   `.vitest/handwriting-review`,
 );
+const sustainedMismatchReportIds = new Set([
+  `师-1792978725612`,
+  `停-1793117596216`,
+  `短-1792983292286`,
+  `图-1792983175327`,
+  `鱼-1792714248657`,
+  `好-20261018150011`,
+  `请-1793667896558`,
+  `请-1792983162689`,
+  `百-1792851609147`,
+  `饿-1794480186144`,
+  `我-1793338521366`,
+  `发-1792657992672`,
+]);
 
 function artifactName(id: string): string {
   return encodeURIComponent(id).replaceAll(`%`, `_`);
@@ -120,6 +156,263 @@ function diagnosticPngPath(id: string): string {
     `diagnostics`,
     `${artifactName(id)}.png`,
   );
+}
+
+function escapeManualReviewXml(value: string): string {
+  return value
+    .replaceAll(`&`, `&amp;`)
+    .replaceAll(`<`, `&lt;`)
+    .replaceAll(`>`, `&gt;`)
+    .replaceAll(`"`, `&quot;`)
+    .replaceAll(`'`, `&apos;`);
+}
+
+function manualReviewPolylinePath(
+  points: readonly WritingStrokePoint[],
+  mapPoint: (point: WritingStrokePoint) => WritingStrokePoint,
+): string {
+  return points
+    .map((point, index) => {
+      const mapped = mapPoint(point);
+      return `${index === 0 ? `M` : `L`} ${mapped.x.toFixed(2)} ${mapped.y.toFixed(2)}`;
+    })
+    .join(` `);
+}
+
+function manualReviewBounds(
+  strokes: readonly (readonly WritingStrokePoint[])[],
+): { minX: number; minY: number; maxX: number; maxY: number } {
+  const points = strokes.flat();
+  if (points.length === 0) {
+    return { minX: 0, minY: 0, maxX: 100, maxY: 100 };
+  }
+  let minX = points[0]!.x;
+  let minY = points[0]!.y;
+  let maxX = points[0]!.x;
+  let maxY = points[0]!.y;
+  for (const point of points) {
+    minX = Math.min(minX, point.x);
+    minY = Math.min(minY, point.y);
+    maxX = Math.max(maxX, point.x);
+    maxY = Math.max(maxY, point.y);
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+async function generateTerminalHookManualReview(
+  records: readonly HandwritingEvaluationRecord[],
+): Promise<{
+  reviewDirectory: string;
+  distinctReferenceStrokeCount: number;
+  observationCount: number;
+  sheetCount: number;
+  annotationPath: string;
+  indexPath: string;
+}> {
+  const reviewDirectory = path.join(
+    handwritingReviewDirectory,
+    `terminal-hook-manual-review`,
+  );
+  await mkdir(reviewDirectory, { recursive: true });
+  const observations = records.flatMap((record) =>
+    record.terminalHooks.pairs
+      .filter(
+        (pair) =>
+          pair.observation ===
+            `reference-hook-present-handwriting-hook-missing` ||
+          pair.observation ===
+            `reference-hook-present-handwriting-hook-malformed`,
+      )
+      .map((pair) => ({ record, pair })),
+  );
+  const groups = new Map<
+    string,
+    Array<{
+      record: HandwritingEvaluationRecord;
+      pair: (typeof observations)[number][`pair`];
+    }>
+  >();
+  for (const observation of observations) {
+    const key = `${observation.record.character}|${observation.pair.referenceStrokeIndex}`;
+    const group = groups.get(key) ?? [];
+    group.push(observation);
+    groups.set(key, group);
+  }
+
+  const annotationLabels = [
+    `genuine-missing-hook`,
+    `malformed-hook`,
+    `acceptable-hook-variation`,
+    `reference-artifact-not-a-meaningful-hook`,
+    `uncertain`,
+  ] as const;
+  const annotationObservations = observations.map(({ record, pair }) => ({
+    fixtureId: record.id,
+    character: record.character,
+    handwritingStrokeIndex: pair.handwritingStrokeIndex,
+    referenceStrokeIndex: pair.referenceStrokeIndex,
+    expectedAcceptance: record.expectedAcceptance,
+    actualAcceptance: record.actualAcceptance,
+    detector: {
+      observation: pair.observation,
+      referenceTurnDegrees: pair.reference.terminalTurnDegrees,
+      referenceTerminalLengthFraction:
+        pair.reference.terminalSegmentLengthFraction,
+      referenceTerminalStartFraction:
+        pair.reference.terminalSegmentStartFraction,
+      referenceClassification: pair.reference.classification,
+      handwritingTurnDegrees: pair.handwriting.terminalTurnDegrees,
+      handwritingTerminalLengthFraction:
+        pair.handwriting.terminalSegmentLengthFraction,
+      handwritingTerminalStartFraction:
+        pair.handwriting.terminalSegmentStartFraction,
+      handwritingClassification: pair.handwriting.classification,
+    },
+    annotation: {
+      label: null as (typeof annotationLabels)[number] | null,
+      notes: ``,
+    },
+  }));
+
+  const sheetNames: string[] = [];
+  for (const [key, group] of [...groups.entries()].sort((left, right) =>
+    left[0].localeCompare(right[0]),
+  )) {
+    const keyParts = key.split(`|`);
+    const character = keyParts[0] ?? ``;
+    const referenceIndex = Number(keyParts[1] ?? 0);
+    const record = group[0]!.record;
+    const referencePath = record.referencePaths[referenceIndex];
+    const referencePoints =
+      referencePath == null ? [] : (pointsForPaths([referencePath])[0] ?? []);
+    const handwritingStrokes = group.map(
+      ({ record: exampleRecord, pair }) =>
+        exampleRecord.drawnStrokes[pair.handwritingStrokeIndex] ?? [],
+    );
+    const bounds = manualReviewBounds([referencePoints, ...handwritingStrokes]);
+    const paddingX = Math.max(1, (bounds.maxX - bounds.minX) * 0.08);
+    const paddingY = Math.max(1, (bounds.maxY - bounds.minY) * 0.08);
+    const viewMinX = bounds.minX - paddingX;
+    const viewMinY = bounds.minY - paddingY;
+    const viewWidth = bounds.maxX - bounds.minX + paddingX * 2;
+    const viewHeight = bounds.maxY - bounds.minY + paddingY * 2;
+    const cardWidth = 380;
+    const cardHeight = 250;
+    const cardColumns = 2;
+    const exampleRows = Math.max(1, Math.ceil(group.length / cardColumns));
+    const sheetHeight = 150 + (exampleRows + 1) * cardHeight;
+    const mapPoint =
+      (cardX: number, cardY: number) =>
+      (point: WritingStrokePoint): WritingStrokePoint => ({
+        x: cardX + ((point.x - viewMinX) / viewWidth) * (cardWidth - 30) + 15,
+        y: cardY + ((point.y - viewMinY) / viewHeight) * (cardHeight - 55) + 25,
+      });
+    const sheetName = `${artifactName(`${character}-R${referenceIndex + 1}`)}.svg`;
+    sheetNames.push(sheetName);
+    const referenceCardX = 20;
+    const referenceCardY = 110;
+    const referenceCard = [
+      `<rect x="${referenceCardX}" y="${referenceCardY}" width="${cardWidth}" height="${cardHeight}" fill="#f8fafc" stroke="#94a3b8"/>`,
+      `<text x="${referenceCardX + 15}" y="${referenceCardY + 18}" font-size="15" font-weight="600">Reference R${referenceIndex + 1}</text>`,
+      `<path d="${manualReviewPolylinePath(referencePoints, mapPoint(referenceCardX, referenceCardY))}" fill="none" stroke="#334155" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
+    ].join(``);
+    const exampleCards = group
+      .map(({ record: exampleRecord, pair }, index) => {
+        const column = index % cardColumns;
+        const row = Math.floor(index / cardColumns);
+        const cardX = 400 + column * cardWidth;
+        const cardY = 110 + row * cardHeight;
+        const handwritingPoints =
+          exampleRecord.drawnStrokes[pair.handwritingStrokeIndex] ?? [];
+        const terminalLengthIndex = Math.round(
+          pair.handwriting.terminalSegmentStartFraction *
+            Math.max(1, handwritingPoints.length - 1),
+        );
+        const terminalPoints = handwritingPoints.slice(
+          Math.max(0, terminalLengthIndex),
+        );
+        const map = mapPoint(cardX, cardY);
+        const terminalPath =
+          terminalPoints.length === 0
+            ? ``
+            : `<path d="${manualReviewPolylinePath(terminalPoints, map)}" fill="none" stroke="#7c3aed" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>`;
+        const detectorLabel =
+          pair.observation === `reference-hook-present-handwriting-hook-missing`
+            ? `detector: missing`
+            : `detector: malformed`;
+        return [
+          `<rect x="${cardX}" y="${cardY}" width="${cardWidth}" height="${cardHeight}" fill="#fff" stroke="#94a3b8"/>`,
+          `<text x="${cardX + 15}" y="${cardY + 18}" font-size="14" font-weight="600">${escapeManualReviewXml(exampleRecord.id)} · H${pair.handwritingStrokeIndex + 1}</text>`,
+          `<path d="${manualReviewPolylinePath(handwritingPoints, map)}" fill="none" stroke="#159fe8" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
+          terminalPath,
+          `<text x="${cardX + 15}" y="${cardY + cardHeight - 42}" font-size="11">${escapeManualReviewXml(detectorLabel)}</text>`,
+          `<text x="${cardX + 15}" y="${cardY + cardHeight - 28}" font-size="11">Ref turn ${pair.reference.terminalTurnDegrees.toFixed(1)}° · Ref length ${(pair.reference.terminalSegmentLengthFraction * 100).toFixed(1)}%</text>`,
+          `<text x="${cardX + 15}" y="${cardY + cardHeight - 14}" font-size="11">Hand turn ${pair.handwriting.terminalTurnDegrees.toFixed(1)}° · Hand length ${(pair.handwriting.terminalSegmentLengthFraction * 100).toFixed(1)}%</text>`,
+        ].join(``);
+      })
+      .join(``);
+    const sheet = [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${sheetHeight}" viewBox="0 0 1200 ${sheetHeight}">`,
+      `<rect width="1200" height="${sheetHeight}" fill="#fff"/>`,
+      `<text x="20" y="38" font-size="24" font-weight="700">Terminal-hook manual review: ${escapeManualReviewXml(character)} · Reference R${referenceIndex + 1}</text>`,
+      `<text x="20" y="62" font-size="12">Detector observations are visual context only. Leave manual annotation labels null until reviewed.</text>`,
+      `<text x="20" y="82" font-size="12">${observations.length} observations · ${groups.size} distinct reference strokes · ${group.length} examples on this sheet</text>`,
+      referenceCard,
+      exampleCards,
+      `</svg>`,
+    ].join(``);
+    await writeFile(path.join(reviewDirectory, sheetName), sheet);
+  }
+
+  const annotationPath = path.join(
+    handwritingReviewDirectory,
+    `terminal-hook-manual-review.json`,
+  );
+  await writeFile(
+    annotationPath,
+    JSON.stringify(
+      {
+        schemaVersion: 1,
+        annotationLabels: annotationLabels,
+        observations: annotationObservations,
+      },
+      null,
+      2,
+    ),
+  );
+
+  const indexPath = path.join(
+    handwritingReviewDirectory,
+    `terminal-hook-manual-review.html`,
+  );
+  const sheetLinks = sheetNames
+    .map(
+      (sheetName) =>
+        `<li><a href="./terminal-hook-manual-review/${encodeURIComponent(sheetName)}">${escapeManualReviewXml(sheetName)}</a></li>`,
+    )
+    .join(``);
+  await writeFile(
+    indexPath,
+    [
+      `<!doctype html>`,
+      `<html><head><meta charset="utf-8"><title>Terminal-hook manual review</title></head><body>`,
+      `<h1>Terminal-hook manual review</h1>`,
+      `<p>${observations.length} observations across ${groups.size} distinct character/reference-stroke groups.</p>`,
+      `<p>Annotation labels: ${annotationLabels.join(`, `)}</p>`,
+      `<p>Manual labels are stored separately in <code>terminal-hook-manual-review.json</code>. Detector classifications are not ground truth.</p>`,
+      `<ul>${sheetLinks}</ul>`,
+      `</body></html>`,
+    ].join(``),
+  );
+
+  return {
+    reviewDirectory,
+    distinctReferenceStrokeCount: groups.size,
+    observationCount: observations.length,
+    sheetCount: sheetNames.length,
+    annotationPath,
+    indexPath,
+  };
 }
 
 beforeAll(async () => {
@@ -157,11 +450,585 @@ afterAll(async () => {
           expectedAcceptance && !actualAcceptance,
       ).length,
     };
+    const csvEscape = (value: string | number | boolean): string =>
+      `"${String(value).replaceAll(`"`, `""`)}"`;
+    const csvHeader = [
+      `fixture_id`,
+      `character`,
+      `expected_acceptance`,
+      `actual_acceptance`,
+      `shape_similarity`,
+      `original_matched_strokes`,
+      `issue_aware_matched_strokes`,
+      `excluded_reversed_strokes`,
+      `original_mean_stroke_error`,
+      `issue_aware_mean_stroke_error`,
+      `original_maximum_stroke_error`,
+      `issue_aware_maximum_stroke_error`,
+      `original_p90_stroke_error`,
+      `issue_aware_p90_stroke_error`,
+      `original_arc_weighted_mean_stroke_error`,
+      `issue_aware_arc_weighted_mean_stroke_error`,
+      `original_fraction_exceeding_0.1`,
+      `issue_aware_fraction_exceeding_0.1`,
+      `original_fraction_exceeding_0.15`,
+      `issue_aware_fraction_exceeding_0.15`,
+      `original_fraction_exceeding_0.2`,
+      `issue_aware_fraction_exceeding_0.2`,
+      `original_fraction_exceeding_0.25`,
+      `issue_aware_fraction_exceeding_0.25`,
+      `original_fraction_exceeding_0.3`,
+      `issue_aware_fraction_exceeding_0.3`,
+      `original_maximum_stroke_tangent_mismatch`,
+      `issue_aware_maximum_stroke_tangent_mismatch`,
+      `original_p90_stroke_tangent_mismatch`,
+      `issue_aware_p90_stroke_tangent_mismatch`,
+      `original_mean_stroke_tangent_mismatch`,
+      `issue_aware_mean_stroke_tangent_mismatch`,
+      `original_unmatched_handwriting_bends`,
+      `issue_aware_unmatched_handwriting_bends`,
+      `original_unmatched_reference_bends`,
+      `issue_aware_unmatched_reference_bends`,
+      `worst_point_distance_pair`,
+      `worst_tangent_mismatch_pair`,
+      `worst_mean_point_distance_pair`,
+      `worst_p90_point_distance_pair`,
+      `worst_mean_tangent_mismatch_pair`,
+      `worst_p90_tangent_mismatch_pair`,
+    ].join(`,`);
+    const csvRows = handwritingEvaluationRecords.map((record) => {
+      const worstPointStroke =
+        record.originalStrokeGeometry.individualStrokes[0];
+      const worstTangentStroke = record.originalTrajectory.individualStrokes[0];
+      const worstPointPair =
+        worstPointStroke == null
+          ? ``
+          : `H${worstPointStroke.handwritingStrokeIndex + 1}/R${worstPointStroke.referenceStrokeIndex + 1}:${worstPointStroke.maximumPointDistance.toFixed(4)}`;
+      const worstTangentPair =
+        worstTangentStroke == null
+          ? ``
+          : `H${worstTangentStroke.handwritingStrokeIndex + 1}/R${worstTangentStroke.referenceStrokeIndex + 1}:${worstTangentStroke.maximumTangentMismatchDegrees.toFixed(2)}deg`;
+      const worstMeanPointStroke = [
+        ...record.originalStrokeGeometry.individualStrokes,
+      ].sort(
+        (left, right) => right.meanPointDistance - left.meanPointDistance,
+      )[0];
+      const worstP90PointStroke = [
+        ...record.originalStrokeGeometry.individualStrokes,
+      ].sort(
+        (left, right) => right.p90PointDistance - left.p90PointDistance,
+      )[0];
+      const worstMeanTangentStroke = [
+        ...record.originalTrajectory.individualStrokes,
+      ].sort(
+        (left, right) =>
+          right.meanTangentMismatchDegrees - left.meanTangentMismatchDegrees,
+      )[0];
+      const worstP90TangentStroke = [
+        ...record.originalTrajectory.individualStrokes,
+      ].sort(
+        (left, right) =>
+          right.p90TangentMismatchDegrees - left.p90TangentMismatchDegrees,
+      )[0];
+      const worstMeanPointPair =
+        worstMeanPointStroke == null
+          ? ``
+          : `H${worstMeanPointStroke.handwritingStrokeIndex + 1}/R${worstMeanPointStroke.referenceStrokeIndex + 1}:${worstMeanPointStroke.meanPointDistance.toFixed(4)}`;
+      const worstP90PointPair =
+        worstP90PointStroke == null
+          ? ``
+          : `H${worstP90PointStroke.handwritingStrokeIndex + 1}/R${worstP90PointStroke.referenceStrokeIndex + 1}:${worstP90PointStroke.p90PointDistance.toFixed(4)}`;
+      const worstMeanTangentPair =
+        worstMeanTangentStroke == null
+          ? ``
+          : `H${worstMeanTangentStroke.handwritingStrokeIndex + 1}/R${worstMeanTangentStroke.referenceStrokeIndex + 1}:${worstMeanTangentStroke.meanTangentMismatchDegrees.toFixed(2)}deg`;
+      const worstP90TangentPair =
+        worstP90TangentStroke == null
+          ? ``
+          : `H${worstP90TangentStroke.handwritingStrokeIndex + 1}/R${worstP90TangentStroke.referenceStrokeIndex + 1}:${worstP90TangentStroke.p90TangentMismatchDegrees.toFixed(2)}deg`;
+      return [
+        record.id,
+        record.character,
+        record.expectedAcceptance,
+        record.actualAcceptance,
+        record.shapeSimilarity,
+        record.originalMatchedStrokeCount,
+        record.issueAwareMatchedStrokeCount,
+        record.excludedReversedStrokeCount,
+        record.originalStrokeGeometry.meanStrokeError,
+        record.strokeGeometry.meanStrokeError,
+        record.originalStrokeGeometry.maximumStrokeError,
+        record.strokeGeometry.maximumStrokeError,
+        record.originalStrokeGeometry.p90StrokeError,
+        record.strokeGeometry.p90StrokeError,
+        record.originalStrokeGeometry.arcLengthWeightedMeanStrokeError,
+        record.strokeGeometry.arcLengthWeightedMeanStrokeError,
+        record.originalStrokeGeometry.strokeFractionsExceedingThreshold[`0.1`],
+        record.strokeGeometry.strokeFractionsExceedingThreshold[`0.1`],
+        record.originalStrokeGeometry.strokeFractionsExceedingThreshold[`0.15`],
+        record.strokeGeometry.strokeFractionsExceedingThreshold[`0.15`],
+        record.originalStrokeGeometry.strokeFractionsExceedingThreshold[`0.2`],
+        record.strokeGeometry.strokeFractionsExceedingThreshold[`0.2`],
+        record.originalStrokeGeometry.strokeFractionsExceedingThreshold[`0.25`],
+        record.strokeGeometry.strokeFractionsExceedingThreshold[`0.25`],
+        record.originalStrokeGeometry.strokeFractionsExceedingThreshold[`0.3`],
+        record.strokeGeometry.strokeFractionsExceedingThreshold[`0.3`],
+        record.originalTrajectory.maximumStrokeTangentMismatchDegrees,
+        record.trajectory.maximumStrokeTangentMismatchDegrees,
+        record.originalTrajectory.p90StrokeTangentMismatchDegrees,
+        record.trajectory.p90StrokeTangentMismatchDegrees,
+        record.originalTrajectory.meanStrokeTangentMismatchDegrees,
+        record.trajectory.meanStrokeTangentMismatchDegrees,
+        record.originalTrajectory.unmatchedHandwritingBendCount,
+        record.trajectory.unmatchedHandwritingBendCount,
+        record.originalTrajectory.unmatchedReferenceBendCount,
+        record.trajectory.unmatchedReferenceBendCount,
+        worstPointPair,
+        worstTangentPair,
+        worstMeanPointPair,
+        worstP90PointPair,
+        worstMeanTangentPair,
+        worstP90TangentPair,
+      ]
+        .map(csvEscape)
+        .join(`,`);
+    });
+    await mkdir(handwritingReviewDirectory, { recursive: true });
+    await writeFile(
+      path.join(handwritingReviewDirectory, `evaluation.csv`),
+      [csvHeader, ...csvRows].join(`\n`),
+    );
+    const sustainedFixtureHeader = [
+      `fixture_id`,
+      `character`,
+      `expected_acceptance`,
+      `actual_acceptance`,
+      `shape_similarity`,
+      ...([30, 45, 60, 75, 90] as const).flatMap((thresholdDegrees) =>
+        ([0.05, 0.1, 0.15, 0.2] as const).flatMap((minimumLength) => {
+          const key =
+            minimumLength === 0.05
+              ? `0.05`
+              : minimumLength === 0.1
+                ? `0.1`
+                : minimumLength === 0.15
+                  ? `0.15`
+                  : `0.2`;
+          const prefix = `sustained_${thresholdDegrees}_${key}`;
+          return [
+            `${prefix}_max_length`,
+            `${prefix}_max_total_fraction`,
+            `${prefix}_stroke_count`,
+            `${prefix}_worst_pair`,
+          ];
+        }),
+      ),
+    ].join(`,`);
+    const sustainedFixtureRows = handwritingEvaluationRecords.map((record) =>
+      [
+        record.id,
+        record.character,
+        record.expectedAcceptance,
+        record.actualAcceptance,
+        record.shapeSimilarity,
+        ...([30, 45, 60, 75, 90] as const).flatMap((thresholdDegrees) =>
+          ([0.05, 0.1, 0.15, 0.2] as const).flatMap((minimumLength) => {
+            const minimumKey =
+              minimumLength === 0.05
+                ? `0.05`
+                : minimumLength === 0.1
+                  ? `0.1`
+                  : minimumLength === 0.15
+                    ? `0.15`
+                    : `0.2`;
+            const thresholdKey = String(thresholdDegrees) as
+              | `30`
+              | `45`
+              | `60`
+              | `75`
+              | `90`;
+            const metric =
+              record.trajectory.sustainedMismatch[thresholdKey][minimumKey];
+            const worstPair =
+              metric.worstHandwritingStrokeIndex == null ||
+              metric.worstReferenceStrokeIndex == null
+                ? ``
+                : `H${metric.worstHandwritingStrokeIndex + 1}/R${metric.worstReferenceStrokeIndex + 1}`;
+            return [
+              metric.maximumSustainedMismatchLengthFraction,
+              metric.maximumTotalMismatchFraction,
+              metric.strokeCountWithSustainedMismatch,
+              worstPair,
+            ];
+          }),
+        ),
+      ]
+        .map(csvEscape)
+        .join(`,`),
+    );
+    await writeFile(
+      path.join(handwritingReviewDirectory, `sustained-evaluation.csv`),
+      [sustainedFixtureHeader, ...sustainedFixtureRows].join(`\n`),
+    );
+    const sustainedStrokeHeader = [
+      `fixture_id`,
+      `character`,
+      `handwriting_stroke_index`,
+      `reference_stroke_index`,
+      `direction`,
+      ...([30, 45, 60, 75, 90] as const).flatMap((thresholdDegrees) =>
+        ([0.05, 0.1, 0.15, 0.2] as const).flatMap((minimumLength) => {
+          const minimumKey =
+            minimumLength === 0.05
+              ? `0.05`
+              : minimumLength === 0.1
+                ? `0.1`
+                : minimumLength === 0.15
+                  ? `0.15`
+                  : `0.2`;
+          const prefix = `sustained_${thresholdDegrees}_${minimumKey}`;
+          return [
+            `${prefix}_longest`,
+            `${prefix}_total`,
+            `${prefix}_region_count`,
+            `${prefix}_regions`,
+          ];
+        }),
+      ),
+    ].join(`,`);
+    const sustainedStrokeRows = handwritingEvaluationRecords.flatMap((record) =>
+      record.trajectory.individualStrokes.map((stroke) =>
+        [
+          record.id,
+          record.character,
+          stroke.handwritingStrokeIndex,
+          stroke.referenceStrokeIndex,
+          stroke.direction,
+          ...([30, 45, 60, 75, 90] as const).flatMap((thresholdDegrees) =>
+            ([0.05, 0.1, 0.15, 0.2] as const).flatMap((minimumLength) => {
+              const thresholdKey = String(thresholdDegrees) as
+                | `30`
+                | `45`
+                | `60`
+                | `75`
+                | `90`;
+              const minimumKey =
+                minimumLength === 0.05
+                  ? `0.05`
+                  : minimumLength === 0.1
+                    ? `0.1`
+                    : minimumLength === 0.15
+                      ? `0.15`
+                      : `0.2`;
+              const threshold = stroke.sustainedMismatch[thresholdKey];
+              const metric =
+                threshold.sustainedRegionsByMinimumLength[minimumKey];
+              const regions = metric.regions
+                .map(
+                  (region) =>
+                    `${region.startFraction.toFixed(4)}-${region.endFraction.toFixed(4)}`,
+                )
+                .join(`|`);
+              return [
+                metric.longestRegionLengthFraction,
+                metric.totalMismatchFraction,
+                metric.regionCount,
+                regions,
+              ];
+            }),
+          ),
+        ]
+          .map(csvEscape)
+          .join(`,`),
+      ),
+    );
+    await writeFile(
+      path.join(handwritingReviewDirectory, `sustained-strokes.csv`),
+      [sustainedStrokeHeader, ...sustainedStrokeRows].join(`\n`),
+    );
+    await writeTerminalHookFixtureCsv({
+      reviewDirectory: handwritingReviewDirectory,
+      records: handwritingEvaluationRecords,
+    });
+    console.warn(`PYLY_HANDWRITING_EVALUATION_CSV ${csvHeader}`);
+    for (const row of csvRows) {
+      console.warn(`PYLY_HANDWRITING_EVALUATION_CSV_ROW ${row}`);
+    }
+
+    const positiveRecords = handwritingEvaluationRecords.filter(
+      ({ expectedAcceptance }) => expectedAcceptance,
+    );
+    const negativeRecords = handwritingEvaluationRecords.filter(
+      ({ expectedAcceptance }) => !expectedAcceptance,
+    );
+    const average = (
+      records: readonly (typeof handwritingEvaluationRecords)[number][],
+      metric: (record: (typeof handwritingEvaluationRecords)[number]) => number,
+    ): number => {
+      if (records.length === 0) {
+        return 0;
+      }
+      let total = 0;
+      for (const record of records) {
+        total += metric(record);
+      }
+      return total / records.length;
+    };
+    const thresholdSummary = ([0.1, 0.15, 0.2, 0.25, 0.3] as const).map(
+      (threshold) => ({
+        threshold,
+        falsePositivesRejected: negativeRecords.filter(
+          (record) =>
+            record.strokeGeometry.meanStrokeError > threshold &&
+            record.actualAcceptance,
+        ).length,
+        positiveFixturesRejected: positiveRecords.filter(
+          (record) => record.strokeGeometry.meanStrokeError > threshold,
+        ).length,
+      }),
+    );
+    const metricSummary = (
+      records: readonly (typeof handwritingEvaluationRecords)[number][],
+    ) => ({
+      count: records.length,
+      meanStrokeError: average(
+        records,
+        (record) => record.strokeGeometry.meanStrokeError,
+      ),
+      maximumStrokeError: average(
+        records,
+        (record) => record.strokeGeometry.maximumStrokeError,
+      ),
+      p90StrokeError: average(
+        records,
+        (record) => record.strokeGeometry.p90StrokeError,
+      ),
+      maximumIndividualPointDistance: average(
+        records,
+        (record) => record.strokeGeometry.maximumIndividualPointDistance,
+      ),
+      arcLengthWeightedMeanStrokeError: average(
+        records,
+        (record) => record.strokeGeometry.arcLengthWeightedMeanStrokeError,
+      ),
+      meanStrokeTangentMismatchDegrees: average(
+        records,
+        (record) => record.trajectory.meanStrokeTangentMismatchDegrees,
+      ),
+      p90StrokeTangentMismatchDegrees: average(
+        records,
+        (record) => record.trajectory.p90StrokeTangentMismatchDegrees,
+      ),
+      maximumStrokeTangentMismatchDegrees: average(
+        records,
+        (record) => record.trajectory.maximumStrokeTangentMismatchDegrees,
+      ),
+      unmatchedHandwritingBendCount: average(
+        records,
+        (record) => record.trajectory.unmatchedHandwritingBendCount,
+      ),
+      unmatchedReferenceBendCount: average(
+        records,
+        (record) => record.trajectory.unmatchedReferenceBendCount,
+      ),
+    });
+    const falsePositiveIds = new Set([
+      `师-1792978725612`,
+      `停-1793117596216`,
+      `短-1792983292286`,
+      `图-1792983175327`,
+    ]);
+    const acceptedNegativeRecords = negativeRecords.filter(
+      ({ actualAcceptance }) => actualAcceptance,
+    );
+    const metricSweep = (
+      metric: string,
+      getValue: (
+        record: (typeof handwritingEvaluationRecords)[number],
+      ) => number,
+      direction: `higher-is-bad` | `lower-is-bad`,
+    ) => {
+      const values = [
+        ...new Set([0, 1, ...handwritingEvaluationRecords.map(getValue)]),
+      ].sort((left, right) =>
+        direction === `higher-is-bad` ? left - right : right - left,
+      );
+      const constraints = [0, 1, 2, 5] as const;
+      return Object.fromEntries(
+        constraints.map((constraint) => {
+          let best:
+            | {
+                threshold: number;
+                falsePositivesRejected: number;
+                legitimatePositivesRejected: number;
+                falsePositiveIds: string[];
+                legitimatePositiveIds: string[];
+              }
+            | undefined;
+          for (const threshold of values) {
+            const rejectedFalsePositives =
+              direction === `higher-is-bad`
+                ? acceptedNegativeRecords.filter(
+                    (record) => getValue(record) > threshold,
+                  )
+                : acceptedNegativeRecords.filter(
+                    (record) => getValue(record) < threshold,
+                  );
+            const rejectedPositives =
+              direction === `higher-is-bad`
+                ? positiveRecords.filter(
+                    (record) => getValue(record) > threshold,
+                  )
+                : positiveRecords.filter(
+                    (record) => getValue(record) < threshold,
+                  );
+            if (
+              rejectedPositives.length <= constraint &&
+              (best == null ||
+                rejectedFalsePositives.length > best.falsePositivesRejected ||
+                (rejectedFalsePositives.length ===
+                  best.falsePositivesRejected &&
+                  rejectedPositives.length < best.legitimatePositivesRejected))
+            ) {
+              best = {
+                threshold,
+                falsePositivesRejected: rejectedFalsePositives.length,
+                legitimatePositivesRejected: rejectedPositives.length,
+                falsePositiveIds: rejectedFalsePositives.map(({ id }) => id),
+                legitimatePositiveIds: rejectedPositives.map(({ id }) => id),
+              };
+            }
+          }
+          return [
+            `<=${constraint}`,
+            {
+              metric,
+              ...best,
+            },
+          ];
+        }),
+      );
+    };
+    const thresholdSweeps = {
+      shapeSimilarity: metricSweep(
+        `shape_similarity`,
+        (record) => record.shapeSimilarity,
+        `lower-is-bad`,
+      ),
+      originalMeanPointDistance: metricSweep(
+        `original_mean_point_distance`,
+        (record) => record.originalStrokeGeometry.meanStrokeError,
+        `higher-is-bad`,
+      ),
+      issueAwareMeanPointDistance: metricSweep(
+        `issue_aware_mean_point_distance`,
+        (record) => record.strokeGeometry.meanStrokeError,
+        `higher-is-bad`,
+      ),
+      originalMaxPointDistance: metricSweep(
+        `original_max_point_distance`,
+        (record) => record.originalStrokeGeometry.maximumStrokeError,
+        `higher-is-bad`,
+      ),
+      issueAwareMaxPointDistance: metricSweep(
+        `issue_aware_max_point_distance`,
+        (record) => record.strokeGeometry.maximumStrokeError,
+        `higher-is-bad`,
+      ),
+      originalMaxTangentMismatch: metricSweep(
+        `original_max_tangent_mismatch`,
+        (record) =>
+          record.originalTrajectory.maximumStrokeTangentMismatchDegrees,
+        `higher-is-bad`,
+      ),
+      issueAwareMaxTangentMismatch: metricSweep(
+        `issue_aware_max_tangent_mismatch`,
+        (record) => record.trajectory.maximumStrokeTangentMismatchDegrees,
+        `higher-is-bad`,
+      ),
+      originalUnmatchedHandwritingBends: metricSweep(
+        `original_unmatched_handwriting_bends`,
+        (record) => record.originalTrajectory.unmatchedHandwritingBendCount,
+        `higher-is-bad`,
+      ),
+      issueAwareUnmatchedHandwritingBends: metricSweep(
+        `issue_aware_unmatched_handwriting_bends`,
+        (record) => record.trajectory.unmatchedHandwritingBendCount,
+        `higher-is-bad`,
+      ),
+      originalUnmatchedReferenceBends: metricSweep(
+        `original_unmatched_reference_bends`,
+        (record) => record.originalTrajectory.unmatchedReferenceBendCount,
+        `higher-is-bad`,
+      ),
+      issueAwareUnmatchedReferenceBends: metricSweep(
+        `issue_aware_unmatched_reference_bends`,
+        (record) => record.trajectory.unmatchedReferenceBendCount,
+        `higher-is-bad`,
+      ),
+    };
+    const sustainedSweep = Object.fromEntries(
+      ([30, 45, 60, 75, 90] as const).flatMap((thresholdDegrees) =>
+        ([0.05, 0.1, 0.15, 0.2] as const).map((minimumLength) => {
+          const thresholdKey = String(thresholdDegrees) as
+            | `30`
+            | `45`
+            | `60`
+            | `75`
+            | `90`;
+          const minimumKey =
+            minimumLength === 0.05
+              ? `0.05`
+              : minimumLength === 0.1
+                ? `0.1`
+                : minimumLength === 0.15
+                  ? `0.15`
+                  : `0.2`;
+          const getLongest = (
+            record: (typeof handwritingEvaluationRecords)[number],
+          ) =>
+            record.trajectory.sustainedMismatch[thresholdKey][minimumKey]
+              .maximumSustainedMismatchLengthFraction;
+          return [
+            `${thresholdDegrees}deg_${minimumKey}`,
+            metricSweep(
+              `sustained_${thresholdDegrees}deg_min_${minimumKey}_max_length`,
+              getLongest,
+              `higher-is-bad`,
+            ),
+          ];
+        }),
+      ),
+    );
+    console.warn(
+      `PYLY_HANDWRITING_STROKE_GEOMETRY_SUMMARY ${JSON.stringify({
+        positive: metricSummary(positiveRecords),
+        negative: metricSummary(negativeRecords),
+        meanStrokeErrorThresholds: thresholdSummary,
+        thresholdSweeps,
+        sustainedSweep,
+        falsePositives: handwritingEvaluationRecords
+          .filter((record) => falsePositiveIds.has(record.id))
+          .map((record) => ({
+            id: record.id,
+            character: record.character,
+            shapeSimilarity: record.shapeSimilarity,
+            actualAcceptance: record.actualAcceptance,
+            ...record.strokeGeometry,
+            trajectory: record.trajectory,
+          })),
+      })}`,
+    );
     const durations = handwritingEvaluationRecords
       .map(({ durationMs }) => durationMs)
       .sort((a, b) => a - b);
     const issueCounts = Object.fromEntries(
-      [`missing-stroke`, `extra-stroke`, `reversed-stroke`].map((kind) => [
+      [
+        `missing-stroke`,
+        `extra-stroke`,
+        `reversed-stroke`,
+        `wrong-stroke-order`,
+      ].map((kind) => [
         kind,
         Object.fromEntries(
           [`accepted`, `rejected`].map((expectedDecision) => [
@@ -349,6 +1216,14 @@ afterAll(async () => {
         2,
       ),
     );
+    const terminalHookManualReview = await generateTerminalHookManualReview(
+      handwritingEvaluationRecords,
+    );
+    console.warn(
+      `PYLY_TERMINAL_HOOK_MANUAL_REVIEW ${JSON.stringify(
+        terminalHookManualReview,
+      )}`,
+    );
     console.warn(
       `PYLY_HANDWRITING_REVIEW_ARTIFACTS ${JSON.stringify({
         reportPath,
@@ -452,10 +1327,15 @@ async function annotateShapeContextGraderExample({
   }
 
   const overviewPng = await renderSvgPng(diagnosticBrowser, overviewSvg);
-  if (geometry.issues.length > 0) {
+  if (
+    geometry.issues.length > 0 ||
+    sustainedMismatchReportIds.has(example.id)
+  ) {
     const pngPath = diagnosticPngPath(example.id);
+    const svgPath = pngPath.replace(/\.png$/u, `.svg`);
     await mkdir(path.dirname(pngPath), { recursive: true });
     await writeFile(pngPath, overviewPng);
+    await writeFile(svgPath, overviewSvg);
   }
   await context.annotate(`${example.id}: diagnostics.json`, {
     body: JSON.stringify(diagnostic),
@@ -503,6 +1383,37 @@ function recordHandwritingEvaluation({
     return;
   }
   const strokePresence = diagnoseShapeContextStrokePresence(geometry);
+  const strokeGeometry = calculateShapeContextStrokeGeometryDiagnostics(
+    geometry,
+    example.expectedIssues?.flatMap((expectation) =>
+      expectation.kind === `reversed-stroke` && expectation.handwriting != null
+        ? [expectation.handwriting.strokeIndex]
+        : [],
+    ) ?? [],
+  );
+  const originalStrokeGeometry =
+    calculateShapeContextStrokeGeometryDiagnostics(geometry);
+  const originalTrajectory =
+    calculateShapeContextTrajectoryDiagnostics(geometry);
+  const excludedReversedStrokeCount =
+    example.expectedIssues?.filter(({ kind }) => kind === `reversed-stroke`)
+      .length ?? 0;
+  const trajectory = calculateShapeContextTrajectoryDiagnostics(
+    geometry,
+    example.expectedIssues?.flatMap((expectation) =>
+      expectation.kind === `reversed-stroke` && expectation.handwriting != null
+        ? [expectation.handwriting.strokeIndex]
+        : [],
+    ) ?? [],
+  );
+  const terminalHooks = calculateShapeContextTerminalHookDiagnostics(
+    geometry,
+    example.expectedIssues?.flatMap((expectation) =>
+      expectation.kind === `reversed-stroke` && expectation.handwriting != null
+        ? [expectation.handwriting.strokeIndex]
+        : [],
+    ) ?? [],
+  );
   handwritingEvaluationRecords.push({
     id: example.id,
     character,
@@ -561,6 +1472,15 @@ function recordHandwritingEvaluation({
         };
       },
     ),
+    strokeGeometry,
+    originalStrokeGeometry,
+    originalTrajectory,
+    terminalHooks,
+    matchedStrokeCount: strokeGeometry.matchedStrokeCount,
+    originalMatchedStrokeCount: originalStrokeGeometry.matchedStrokeCount,
+    issueAwareMatchedStrokeCount: strokeGeometry.matchedStrokeCount,
+    excludedReversedStrokeCount,
+    trajectory,
   });
 }
 
@@ -650,6 +1570,68 @@ function expectTransformJacobianBounds(
 
 const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   {
+    id: `一-1792834279781`,
+    drawnStrokes: `173,505.6;189.7,505.6;215.1,505.6;223.1,505.6;247.7,505.6;282.6,505.6;320.7,505.6;362,505.6;408.8,505.6;458,505.6;510.4,506.4;566,507.2;618.4,507.2;663.6,507.2;698.5,506.4;723.2,501.7;742.2,499.3;758.9,497.7;774.7,496.1;781.1,496.1`,
+  },
+  {
+    id: `地-1792834155743`,
+    drawnStrokes: `174.6,483.4;185,481.8;219.1,476.3;226.2,472.3;246.1,461.2;275.4,445.3;303.2,431.8;322.3,423.1;323.1,422.3;322.3,422.3|273.1,215.1;270.7,230.2;272.3,255.6;273.1,263.5;274.7,290.5;278.6,330.2;285,381;287.4,427.9;288.9,474.7;288.1,522.3;288.1,572.3;288.1,620.8;288.1,661.2;288.1,689.8;288.1,704.9;288.1,711.2;288.1,716;288.1,720;288.1,723.9;288.1,724.7|124.6,804.9;147.6,785.9;159.6,782.7;166.7,780.3;173.8,777.1;191.3,770;217.5,754.9;255.6,727.9;298.5,700.1;333.4,681.9;358,676.3;369.9,675.5;374.7,675.5;377.1,675.5;379.4,675.5;380.2,675.5|354,523.1;374.7,520.7;393.7,520.7;405.6,518.4;418.3,514.4;448.5,503.3;481,490.6;512.8,477.9;539.8,468.3;562,462.8;581.9,459.6;601.7,456.4;623.1,451.7;645.4,446.1;666,441.4;685.8,435.8;704.1,431;720,426.3;732.7,423.1;743,420.7;750.1,418.3;758.1,416.7;765.2,416;774,415.2;781.9,415.2;789,415.2;796.2,415.2;801.7,415.2;806.5,415.2;808.1,415.2;809.7,415.2;810.5,415.2;811.3,415.2;813.6,415.2;815.2,415.2;816.8,415.2;818.4,418.3;818.4,423.1;818.4,429.4;818.4,439.8;818.4,454.8;815.2,476.3;806.5,504.1;797,537.4;785.9,569.9;774,602.5;763.6,630.3;757.3,651.7;754.9,666.8;754.1,679.5;754.1,688.2;754.1,693.8|753.3,697;752.5,698.5;750.9,700.1;748.6,702.5;742.2,702.5;733.5,702.5;723.2,702.5;710.4,702.5;698.5,701.7;689,694.6;681.9,685.8;676.3,677.9;673.1,667.6;671.6,658.9;669.2,650.1;667.6,643;665.2,634.2;662,626.3;661.2,623.1|615.2,161.1;616,195.3;616,200;616,222.3;608.8,257.2;597.7,299.3;584.2,346.9;574.7,395.3;570.7,441.4;569.9,485;569.9,524.7;569.9,560.4;569.9,589;567.6,608.8;566.8,623.1;565.2,633.5;565.2,642.2;564.4,649.3;564.4,656.5;564.4,663.6;564.4,670.8;564.4,677.1;564.4,681.9;564.4,684.3;564.4,685;562,685;558.8,682.7|485.8,314.3;483.4,362;483.4,365.1;483.4,387.4;483.4,419.1;483.4,455.6;477.1,496.9;469.1,541.4;462.8,585.8;458,628.7;454.8,669.2;452.5,707.3;450.9,740.6;450.9,766.8;450.9,784.3;450.9,799.4;452.5,813.6;462,826.3;473.9,838.3;489,848.6;507.2,858.1;527.1,865.2;547.7,870;567.6,873.2;587.4,875.6;609.6,876.4;634.2,876.4;658.9,876.4;683.5,876.4;704.9,876.4;723.9,876.4;739,876.4;751.7,874.8;762.8,873.2;772.4,870.8;781.1,866;787.4,861.3;793,854.1;796.2,846.2;799.4,835.9;803.3,823.2;808.1,808.1;813.6,791.4;821.6,770.8;824,764.4`,
+  },
+  {
+    id: `也-1792843113487`,
+    drawnStrokes: `203.2,486.6;208,488.2;228.6,489.8;232.6,489.8;249.3,489;280.2,479.5;315.9,467.5;356.4,453.3;398.5,439;442.9,423.9;486.6,408.8;528.7,393.7;569.2,378.6;605.7,364.4;635.8,350.9;658.1,338.2;675.5,323.1;690.6,310.4;706.5,300.1;721.6,290.5;735.1,285;745.4,282.6;750.9,282.6;754.9,282.6;756.5,282.6;758.1,285;758.9,289.7;759.7,294.5;760.5,300.1;762,305.6;763.6,312.8;766.8,321.5;770,329.4;771.6,339;771.6,346.9;771.6,358;771.6,373.9;771.6,400.9;767.6,446.1;761.3,504.9;756.5,562.8;751.7,608.8;746.2,639;740.6,655.7;734.3,664.4;730.3,669.2;727.9,669.2;726.3,669.2;725.5,669.2;723.9,669.2;721.6,669.2;714.4,669.2;698.5,669.2;669.2,666.8;629.5,635.8;603.3,600.9|533.4,170.7;535,173;539.8,194.5;542.2,202.4;546.9,231;549.3,281;549.3,344.5;544.5,418.3;528.7,495.3;511.2,571.5;496.1,639;489,677.1|353.2,247.7;351.7,304;351.7,310.4;351.7,342.9;351.7,385.8;352.4,427.1;354.8,469.1;358.8,514.4;365.1,564.4;378.6,619.2;399.3,674.7;427.1,726.3;460.4,768.4;503.3,799.4;552.5,819.2;604.9,830.3;656.5,839;706.5,845.4;753.3,851.7;793.8,856.5;822.4,860.5;842.2,862.1;855.7,862.1;866,862.1;872.4,862.1;875.6,862.1;878.7,862.1;881.9,862.1;884.3,862.1;886.7,862.1;887.5,862.1;887.5,859.7;887.5,855.7;887.5,846.2;887.5,820.8;889.8,760.5;907.3,664.4;912.1,639`,
+  },
+  {
+    id: `商-1792834869972`,
+    drawnStrokes: `453.3,60.3;456.4,65.1;465.2,83.3;477.1,104.8;480.2,111.9;491.4,134.9;504.9,161.1|262.7,193.7;286.6,191.3;299.3,191.3;312,191.3;344.5,191.3;384.2,188.1;430.2,186.5;481,186.5;535,186.5;589.8,186.5;642.2,186.5;689.8,188.9;733.5,196.1|386.6,253.2;404.8,274.7;424.7,297.7;434.2,312;445.3,327;468.3,353.2;493.7,378.6;521.5,389.8|702.5,254.8;670,281.8;666,286.6;647.7,306.4;623.9,335;602.5,363.6;587.4,390.5;581.9,408|267.5,382.6;266.7,404;277,435;281.8,458;285.8,481.8;291.3,538.2;293.7,601.7;293.7,668.4;292.1,734.3;283.4,789;279.4,824;279.4,838.3|299.3,362.8;339,369.1;353.2,373.9;367.5,379.4;396.9,388.2;430.2,395.3;468.3,400.9;512,406.4;561.2,413.6;613.6,420.7;664.4,424.7;710.4,426.3;748.6,427.1;777.1,427.9;793.8,432.6;802.5,440.6;807.3,452.5;808.1,471.5;808.1,499.3;802.5,541.4;792.2,589.8;782.7,640.6;777.1,689.8;774.7,735.1;774,774;774,804.9;774,828.7;774,847.8;774,862.1;774,870.8;774,875.6;771.6,876.4;766.8,876.4;760.5,876.4;748.6,874.8;730.3,859.7;711.2,836.7;693,812.1;676.3,798.6;657.3,796.2|516,470.7;490.6,477.1;486.6,477.1;477.9,480.2;457.2,492.9;435,510.4;412.8,527.9;395.3,539;387.4,540.6|671.6,473.9;666.8,488.2;686.6,509.6;708.1,536.6;730.3,561.2;749.3,585.8|413.6,680.3;406.4,695.4;404,713.6;404,720.8;404,746.2;404,777.9;404,807.3;404,831.9;404,853.3;404,866.8|420.7,660.4;439,658.1;463.6,658.1;470.7,658.1;493.7,658.1;523.9,655.7;558,650.9;588.2,647.7;615.2,646.2;633.5,646.2;637.4,652.5;637.4,674.7;630.3,707.3;618.4,745.4;610.4,777.9;605.7,808.9;604.1,832.7;604.1,851;604.1,854.1|430.2,866.8;434.2,868.4;453.3,868.4;481.8,868.4;489.8,868.4;516,868.4;553.3,868.4;591.4,868.4;620.8,868.4`,
+  },
+  {
+    id: `冫-1792834655201`,
+    drawnStrokes: `292.9,97.6;306.4,131.8;309.6,138.1;322.3,160.3;340.5,192.1;358,227;374.7,267.5;383.4,304.8|200,807.3;206.4,801.7;234.2,771.6;239.7,762.8;256.4,733.5;278.6,685;302.4,630.3;328.6,568.4;352.4,521.5`,
+  },
+  {
+    id: `做-1792834604697`,
+    fails: true,
+    drawnStrokes: `310.4,87.3;303.2,123.8;303.2,127.8;300.1,149.2;287.4,178.6;270.7,214.3;248.5,254.8;221.5,297.7;192.1,338.2;162.7,372.3;140.5,395.3|265.9,239.7;273.9,268.3;275.4,274.7;281.8,302.4;285,349.3;285,404;281,469.9;269.1,543.8;261.2,620.8;256.4,690.6;256.4,744.6;256.4,777.9;256.4,783.5|375.5,349.3;381,350.1;403.2,351.7;408,351.7;421.5,351.7;439.8,351.7;459.6,351.7;481,353.2;487.4,354|489,151.6;474.7,176.2;473.9,192.9;470.7,210.4;465.2,250;458.8,299.3;452.5,358.8;446.9,417.5;440.6,470.7;431.8,511.2|333.4,539.8;328.6,571.5;328.6,577.9;328.6,604.9;328.6,640.6;328.6,677.1;328.6,714.4;328.6,750.1;326.3,774.7|340.5,540.6;353.2,543;370.7,543;381,543;392.9,542.2;418.3,538.2;446.1,533.4;516,523.1;523.9,528.7;523.9,556.5;518.4,596.1;505.6,640.6;493.7,685;484.2,726.3;476.3,763.6;469.9,794.6;467.5,804.1|368.3,800.9;385,787.4;396.9,785.9;404,785.1;413.6,784.3;435,784.3;449.3,784.3|757.3,183.4;754.9,188.1;744.6,213.5;739.8,221.5;726.3,243.7;707.3,277;683.5,312.8;655.7,352.4;627.9,390.5;598.5,426.3;573.1,455.6;550.1,481.8;538.2,494.5|707.3,334.2;708.1,343.7;727.9,345.3;743,346.9;758.9,348.5;793.8,350.1;827.9,352.4;857.3,355.6;883.5,358;903.3,360.4;915.2,364.4;923.2,369.9;926.4,377.8;927.2,385.8;927.2,398.5;922.4,416;907.3,440.6;885.9,471.5;855.7,507.2;819.2,548.5;772.4,597.7;720,652.5;662.8,705.7;608.8,754.9;563.6,798.6;531.1,834.3;512.8,854.9;507.2,862.9;506.4,863.7|645.4,462;640.6,473.9;644.6,500.1;648.5,508;661.2,537.4;686.6,581.1;719.2,632.7;761.3,690.6;805.7,745.4;849.4,787.4;888.3,814.4;919.2,827.1;926.4,829.5`,
+  },
+  {
+    id: `做-1792834563385`,
+    fails: true,
+    drawnStrokes: `325.5,115.9;316.7,145.3;315.1,154;313.6,169.9;298.5,205.6;273.1,248.5;242.9,293.7;207.2,339;172.3,381;138.1,416.7;112.7,446.9;92.1,470.7;77.8,484.2|273.1,319.1;266.7,334.2;264.3,360.4;264.3,366.7;264.3,387.4;263.5,419.9;259.6,458.8;253.2,507.2;248.5,564.4;244.5,620.8;242.9,673.1;241.3,720.8;238.9,760.5;234.2,790.6;228.6,811.3;226.2,818.4|410.4,314.3;419.9,314.3;440.6,314.3;446.9,314.3;466.8,314.3;493.7,314.3;520.7,314.3;546.9,314.3;566,317.5|534.2,180.2;531.1,183.4;524.7,208.8;524.7,215.9;524.7,240.5;523.1,281.8;518.4,329.4;511.2,377.8;504.9,421.5;497.7,462;496.1,470.7|394.5,508.8;386.6,549.3;387.4,555.7;387.4,581.9;389.8,620;391.3,654.9;392.9,689.8;392.9,721.6;391.3,747;385.8,758.9|412.8,507.2;416,507.2;432.6,507.2;450.9,507.2;456.4,507.2;476.3,506.4;504.9,503.3;529.5,500.9;550.1,499.3;561.2,500.1;562,508.8;561.2,532.6;547.7,562.8;536.6,600.9;527.1,638.2;522.3,672.3;520.7,697;520.7,717.6;520.7,721.6|411.2,788.2;415.2,776.3;424.7,776.3;435.8,775.5;464.4,774;498.5,772.4|736.6,258;727.9,258.8;722.4,276.2;712,300.8;705.7,318.3;697.7,339;677.1,382.6;654.9,421.5;636.6,450.1;623.1,470.7;613.6,484.2;610.4,486.6|697,396.9;703.3,394.5;723.9,394.5;739,394.5;756.5,394.5;797,391.3;837.5,383.4;874,377.1;899.4,372.3;914.5,371.5;920,371.5;920,373.1;917.6,387.4;904.9,406.4;889.1,427.1;869.2,450.1;845.4,478.7;818.4,509.6;784.3,549.3;747.8,595.3;708.1,644.6;663.6,693;620.8,735.9;583.4,771.6;556.5,799.4;539,818.4;531.1,825.6;529.5,826.3|681.1,470.7;677.1,481;686.6,508.8;694.6,528.7;704.1,553.3;734.3,611.2;777.9,680.3;827.1,749.3;875.6,807.3;920.8,846.2;939.9,858.9`,
+  },
+  {
+    id: `男-1792851554902`,
+    drawnStrokes: `363.6,129.4;374.7,152.4;373.1,172.3;373.1,178.6;373.9,198.4;374.7,227;374.7,263.5;376.3,304.8;379.4,343.7;384.2,372.3;385,377.8|385.8,131;392.1,133.4;416.7,136.5;422.3,136.5;439,138.1;466,139.7;498.5,141.3;535.8,142.1;575.5,142.1;611.2,142.1;643.8,142.1;670,142.1;688.2,147.6;693,163.5;692.2,196.9;689.8,239.7;683.5,285.8;680.3,331.8;680.3,373.9;680.3,409.6;680.3,434.2;680.3,442.9|412,309.6;424.7,304.8;446.1,304.8;458,304.8;473.9,304.8;508,304.8;550.1,304.8;591.4,304.8;630.3,304.8;663.6,304.8;675.5,304.8|528.7,142.9;527.1,160.3;527.9,186.5;530.3,196.9;534.2,226.2;540.6,276.2;545.3,333.4;551.7,387.4;556.5,424.7;558.8,443.7;559.6,446.1|374.7,397.7;399.3,400.1;414.4,400.1;430.2,400.1;462,400.1;497.7,400.1;535.8,400.1;576.3,400.1;617.6,400.1;637.4,399.3|341.3,650.9;379.4,643;382.6,644.6;403.2,639;433.4,629.5;468.3,621.5;505.6,614.4;546.1,609.6;588.2,604.9;630.3,598.5;667.6,593;702.5,589.8;728.7,588.2;748.6,588.2;759.7,589;762.8,595.3;762,606.5;762,618.4;760.5,633.5;754.1,654.9;747,685;740.6,725.5;735.9,768.4;733.5,810.5;733.5,848.6;733.5,884.3;735.9,913.7;740.6,935.9;743,948.6;743,952.6;740.6,952.6;735.9,952.6;731.1,952.6;727.1,952.6;723.9,952.6;721.6,952.6;720,952.6;718.4,952.6;717.6,952.6;716.8,953.4;716,953.4;714.4,953.4;711.2,953.4;704.9,953.4;689.8,951.8;661.2,934.3;635.8,920.8;616,913.7;607.3,908.9|483.4,492.9;485,499.3;487.4,527.9;487.4,534.2;491.4,553.3;495.3,588.2;496.9,635.8;496.9,697;489.8,762;473.1,823.2;451.7,875.6;426.3,915.2;398.5,943.8;377.1,962.1;364.4,972.4;361.2,974`,
+  },
+  {
+    id: `女-1792848116181`,
+    drawnStrokes: `502.5,197.7;496.1,203.2;476.3,227.8;471.5,234.2;458.8,254.8;437.4,289.7;410.4,333.4;380.2,381.8;352.4,427.9;327,469.1;306.4,501.7;291.3,525.5;282.6,538.2;280.2,539.8;282.6,539.8;296.1,539.8;312.8,540.6;336.6,552.5;367.5,573.9;403.2,602.5;445.3,635;489.8,673.1;539,711.2;592.2,747;643.8,781.1;689.8,812.1;726.3,838.3;753.3,856.5;766.8,862.1;768.4,861.3|683.5,406.4;655.7,425.5;650.1,435.8;642.2,450.9;622.3,489;592.2,538.2;550.1,596.1;500.9,652.5;442.9,695.4;381,725.5;323.9,749.3;277,767.6;242.9,781.9;223.1,793;211.9,799.4;202.4,803.3|113.5,447.7;156.4,442.1;160.3,442.1;186.5,442.1;231.8,442.1;285,442.1;344.5,442.1;409.6,440.6;476.3,440.6;547.7,440.6;621.5,440.6;693.8,440.6;762,440.6;820.8,437.4;865.2,427.9;893,418.3;904.1,413.6`,
+  },
+  {
+    id: `去-1792847997436`,
+    drawnStrokes: `309.6,216.7;317.5,215.9;356.4,214.3;365.1,214.3;394.5,214.3;435.8,214.3;480.2,214.3;524.7,213.5;568.4,208;605.7,198.4;612,196.1|525.5,59.5;518.4,105.6;518.4,114.3;517.6,155.6;513.6,207.2;507.2,266.7;500.1,331;492.2,391.3;484.2,441.4;476.3,473.1|200,508.8;225.4,503.3;238.1,502.5;251.6,498.5;286.6,494.5;331,492.2;387.4,489.8;448.5,485.8;512.8,480.2;579.5,476.3;643,469.1;697,462;739.8,457.2;769.2,454.8|622.3,466;603.3,481;589.8,492.9;581.9,500.1;573.1,508.8;546.9,531.8;509.6,562;465.2,593.8;421.5,624.7;380.2,655.7;341.3,688.2;306.4,719.2;277,744.6;256.4,761.3;246.1,772.4;242.9,779.5;242.9,784.3;242.9,786.7;254.8,786.7;277.8,786.7;309.6,779.5;350.9,771.6;397.7,763.6;450.1,757.3;505.6,754.1;563.6,749.3;619.2,743;668.4,735.1;707.3,727.9;733.5,725.5;750.1,724.7;754.1,723.9|716.8,631.9;726.3,651.7;738.2,681.9;745.4,700.9;753.3,722.4;768.4,766;781.9,802.5;795.4,832.7;806.5,862.9;818.4,887.5`,
+  },
+  {
+    id: `呢-1792843324720`,
+    drawnStrokes: `200,245.3;199.2,250;199.2,282.6;199.2,291.3;199.2,323.1;199.2,375.5;199.2,435;200.8,496.9;204.8,550.9;205.6,561.2|204,231;208,229.4;222.3,226.2;235.8,226.2;239.7,226.2;252.4,226.2;276.2,226.2;305.6,226.2;339.7,226.2;373.1,226.2;401.7,226.2;424.7,230.2;435,240.5;435.8,260.4;431.8,293.7;419.9,339;413.6,388.2;410.4,438.2;408,481.8;407.2,516.8;405.6,544.5;402.5,564.4;398.5,581.9;396.9,585|187.3,612;211.9,606.5;219.1,607.3;249.3,599.3;296.9,581.9;347.7,566.8;400.1,554.9;435.8,550.9|523.9,141.3;548.5,135.7;558,134.9;582.6,135.7;624.7,135.7;665.2,135.7;704.9,135.7;741.4,133.4;771.6,132.6;788.2,132.6;794.6,142.1;797,157.2;798.6,176.2;798.6,205.6;798.6,241.3;792.2,281.8;786.7,319.1;783.5,351.7;781.9,364.4|555.7,368.3;560.4,368.3;585.8,369.1;594.6,369.1;623.1,369.1;668.4,366.7;717.6,365.1;769.2,365.9;812.1,365.9;820.8,365.9|565.2,155.6;569.9,163.5;577.1,204;577.1,215.1;577.9,253.2;577.9,316.7;577.1,386.6;565.2,459.6;547.7,537.4;523.9,619.2;495.3,699.3;461.2,767.6;428.7,822.4;396.1,861.3;370.7,885.1;364.4,888.3|813.6,515.2;777.9,535.8;770.8,542.2;747,565.2;710.4,600.9;671.6,637.4;634.2,673.1;602.5,706.5|620,451.7;625.5,467.5;627.9,499.3;627.9,521.5;627.9,546.9;612,603.3;593,660.4;578.7,712.8;566.8,758.9;563.6,793.8;563.6,820;570.7,838.3;588.2,851.7;612,862.9;638.2,872.4;666,880.3;695.4,885.9;726.3,889.1;758.1,890.6;785.9,891.4;811.3,891.4;831.1,891.4;842.2,891.4;846.2,891.4;846.2,889.1;846.2,884.3;846.2,871.6;851.7,830.3;864.4,738.2`,
+  },
+  {
+    id: `门-1792852179135`,
+    drawnStrokes: `314.3,191.3;327,191.3;344.5,197.7;354.8,208.8;365.1,222.3;387.4,258.8;406.4,296.9|266.7,315.1;266.7,328.6;266.7,381.8;267.5,395.3;272.3,439;279.4,510.4;285,594.6;290.5,679.5;298.5,750.1;302.4,799.4;302.4,823.2;302.4,828.7|554.1,205.6;566.8,205.6;578.7,208;581.9,209.6;593,213.5;610.4,218.3;631.1,221.5;657.3,221.5;689,221.5;721.6,221.5;751.7,219.9;777.9,217.5;797.8,217.5;810.5,217.5;818.4,217.5;822.4,224.6;825.6,246.1;826.3,281.8;826.3,332.6;826.3,394.5;823.2,464.4;816.8,536.6;811.3,603.3;808.1,655.7;807.3,691.4;807.3,715.2;807.3,734.3;807.3,750.9;807.3,766.8;807.3,781.1;807.3,791.4;807.3,794.6;806.5,793;799.4,786.7;784.3,774.7;763.6,758.1;736.6,731.9;702.5,689.8;670.8,653.3`,
+  },
+  {
+    id: `还-1792851886857`,
+    drawnStrokes: `273.1,185;287.4,181;295.3,181;304.8,181;331.8,181;368.3,181.8;410.4,188.1;456.4,195.3;505.6,200;558.8,203.2;613.6,204.8;667.6,204.8;713.6,204.8;748.6,202.4;769.2,192.9;781.9,185.7;792.2,181.8;804.9,179.4;812.1,177|638.2,197.7;620.8,200;615.2,208;595.3,231.8;565.2,263.5;528.7,295.3;487.4,327.8;443.7,356.4;401.7,378.6;366.7,395.3;346.1,402.5|504.1,312;505.6,318.3;508,349.3;509.6,356.4;513.6,383.4;516.8,423.1;517.6,469.9;516.8,523.9;511.2,576.3;505.6,618.4;501.7,654.1;501.7,660.4|510.4,329.4;523.9,340.5;546.1,358.8;575.5,385;609.6,416.7;648.5,451.7;666,467.5|90.5,157.2;93.7,157.2;108.8,172.3;130.2,202.4;136.5,209.6;156.4,235.8;184.2,268.3;211.9,293.7;218.3,299.3|103.2,385.8;111.1,383.4;121.5,384.2;134.9,384.2;149.2,383.4;163.5,381;176.2,378.6;188.1,377.1;196.9,375.5;206.4,375.5;215.1,375.5;223.9,375.5;230.2,375.5;235.8,375.5;240.5,375.5;243.7,377.8;246.9,379.4;247.7,379.4;247.7,380.2;247.7,381;247.7,382.6;247.7,384.2;243.7,388.2;237.3,394.5;230.2,402.5;223.9,412;215.9,423.9;211.2,439;206.4,458;204.8,479.5;205.6,502.5;210.4,525.5;219.9,544.5;230.2,558;241.3,569.2;250,578.7;256.4,591.4;259.6,608;259.6,627.1;259.6,647.7;251.6,667.6;237.3,684.3;220.7,699.3;204,708.9;189.7,715.2;185.7,716|101.6,777.9;111.9,759.7;117.5,757.3;123.8,754.9;139.7,747;161.1,739;187.3,730.3;221.5,719.2;265.9,708.9;315.1,700.1;366.7,694.6;415.2,690.6;458.8,689.8;496.1,689.8;530.3,697;562.8,707.3;596.1,718.4;627.9,728.7;658.9,737.4;692.2,745.4;728.7,747.8;774.7,743.8;797.8,734.3`,
+  },
+  {
+    id: `百-1792851609147`,
+    drawnStrokes: `258.8,114.3;303.2,102.4;319.9,102.4;336.6,102.4;371.5,101.6;408,98.4;449.3,94.5;497.7,92.1;554.1,90.5;616,90.5;678.7,88.9;739,86.5;793.8,81.8;816.8,80.2|532.6,93.7;503.3,127;495.3,141.3;486.6,155.6;467.5,186.5;447.7,219.1;427.9,248.5;408.8,276.2;388.2,301.6;366.7,331;355.6,344.5|245.3,298.5;240.5,306.4;238.9,339.7;242.9,348.5;252.4,375.5;265.1,419.1;274.7,466;282.6,518.4;288.1,583.4;291.3,661.2;291.3,736.6;291.3,793.8;292.1,830.3;292.1,847.8;292.1,852.5;288.9,852.5|227.8,346.1;268.3,349.3;283.4,350.9;300.1,351.7;339.7,352.4;385.8,352.4;435.8,352.4;487.4,343.7;539,331.8;589.8,316.7;635.8,304.8;670.8,298.5;689.8,297.7;699.3,297.7;705.7,301.6;711.2,307.2;717.6,313.6;723.2,318.3;727.9,323.1;731.9,327.8;735.1,333.4;735.9,342.1;735.9,355.6;735.9,377.1;735.9,408;735.9,450.1;735.9,510.4;735.9,585.8;735.9,665.2;735.9,737.4;738.2,793.8;738.2,828.7;738.2,847.8;735.9,851|319.9,589.8;357.2,581.1;368.3,581.1;400.9,579.5;451.7,575.5;515.2,573.1;586.6,571.5;655.7,569.9;715.2,563.6;753.3,558|324.7,905.7;356.4,904.1;376.3,903.3;398.5,899.4;450.1,885.1;505.6,871.6;567.6,865.2;634.2,863.7;700.9,863.7;769.2,863.7;800.1,863.7`,
+  },
+  {
+    id: `鸡-1793159299525`,
+    drawnStrokes: `152.4,250;154.8,250;162.7,250;173,250;196.1,249.3;224.6,246.1;257.2,244.5;292.1,244.5;326.3,244.5;359.6,245.3;391.3,247.7;416.7,248.5;436.6,248.5;448.5,248.5;451.7,248.5;451.7,249.3;449.3,258;440.6,271.5;425.5,292.9;397.7,330.2;359.6,372.3;312,421.5;254,466.8;200,503.3;157.2,530.3;131.8,541.4|272.3,345.3;287.4,365.9;315.9,404.8;335,423.1;358.8,441.4;407.2,473.1|653.3,49.2;608,73;598.5,81;589.8,92.1;565.2,120.7;550.9,134.9|511.2,150;533.4,146.9;561.2,146.9;575.5,146.9;591.4,146.9;626.3,146.9;660.4,146.9;691.4,146.9;717.6,146.9;739.8,146.9;760.5,146.9;777.1,146.9;786.7,148.4;789,149.2;789,154;788.2,160.3;784.3,171.5;781.9,190.5;780.3,214.3;778.7,241.3;777.9,272.3;777.1,302.4;777.1,334.2;777.1,364.4;777.1,391.3;777.1,414.4;774,427.9;770,431.8;767.6,431.8;765.2,431.8;765.2,431;765.2,429.4;764.4,426.3;763.6,424.7;759.7,421.5;748.6,416.7;729.5,408;708.1,396.1;693.8,382.6|605.7,221.5;611.2,223.1;625.5,236.6;642.2,255.6;650.9,266.7;659.6,277;677.1,297.7;685.8,310.4|539,163.5;535,184.2;535,209.6;535,223.1;535,238.9;535,273.1;535,310.4;534.2,350.9;532.6,392.9;530.3,431.8;528.7,469.1;527.1,500.9;525.5,527.1;523.9,545.3;523.9,554.9;523.1,558.8;523.1,559.6;523.9,559.6;531.8,559.6;550.9,559.6;580.3,559.6;616.8,558.8;656.5,556.5;695.4,554.1;732.7,553.3;767.6,553.3;795.4,553.3;811.3,553.3;813.6,553.3;813.6,554.1;812.8,555.7;810.5,556.5;808.9,558;807.3,559.6;806.5,563.6;806.5,572.3;805.7,589.8;805.7,612.8;805.7,642.2;805.7,673.9;804.9,706.5;804.1,737.4;803.3,767.6;801.7,793.8;800.1,817.6;797.8,839;796.2,856.5;794.6,869.2;793,879.5;791.4,885.1;790.6,888.3;790.6,889.1;789.8,889.1;789,886.7;787.4,884.3;781.9,881.1;769.2,876.4;745.4,866;722.4,843.8|212.7,745.4;226.2,736.6;265.1,736.6;275.4,736.6;312,736.6;367.5,736.6;429.4,736.6;495.3,736.6;566,736.6;636.6,736.6;699.3,736.6;747.8,734.3`,
+  },
+  {
     id: `一-1792714139002`,
     drawnStrokes: `254.8,506.5;265.9,505.7;304.8,504.9;313.6,504.9;342.1,504.9;390.5,504.9;444.5,501.7;502.5,495.3;561.2,492.2;615.2,489;664.4,485.8;706.5,483.4;739.8,481.9;763.6,479.5;775.5,476.3`,
   },
@@ -663,6 +1645,13 @@ const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   },
   {
     id: `发-1792657992672`,
+    expectedIssues: [
+      {
+        kind: `wrong-stroke-order`,
+        handwriting: { strokeIndex: 2 },
+        reference: { strokeIndex: 4 },
+      },
+    ],
     drawnStrokes: `338.2,165.1;312.8,212.8;306.4,224.7;297.7,248.5;282.6,285.8;267.5,321.5;258.8,353.3;257.2,377.1;265.9,388.2;296.9,392.2;341.3,392.2;396.9,392.2;457.2,381.8;519.1,369.1;579.5,357.2;637.4,348.5;689.8,339.8|485,121.5;483.4,125.4;481,163.5;481,176.2;481,217.5;481,282.6;471.5,356.4;450.1,437.4;416.7,516;377.1,590.6;336.6,660.5;300.1,723.2;267.5,772.4;246.1,808.1;231.8,824|637.4,188.9;656.5,202.4;676.3,227.8;694.6,256.4;715.2,289.8|393.7,532.7;396.1,533.5;421.5,533.5;429.4,532.7;469.1,527.1;519.9,518.4;571.5,511.2;623.1,503.3;673.9,497.7;718.4,495.3;746.2,495.3;754.9,499.3;753.3,512;736.6,533.5;704.9,571.6;661.2,619.2;617.6,668.4;577.9,713.6;544.5,754.9;517.6,789.1;498.5,808.9;495.3,810.5|446.1,507.3;437.4,514.4;456.4,535.8;489,570;531.1,611.2;578.7,654.9;628.7,694.6;678.7,732.7;727.9,768.4;777.1,793.8;818.4,811.3`,
   },
   {
@@ -803,6 +1792,18 @@ const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   },
   {
     id: `请-1793667896558`,
+    expectedIssues: [
+      {
+        kind: `wrong-stroke-order`,
+        handwriting: { strokeIndex: 4 },
+        reference: { strokeIndex: 4 },
+      },
+      {
+        kind: `wrong-stroke-order`,
+        handwriting: { strokeIndex: 5 },
+        reference: { strokeIndex: 5 },
+      },
+    ],
     drawnStrokes: `293.7,69.1;296.9,78.6;296.9,108;296.9,127.8;298.5,146.9;308.8,186.5;322.3,219.9;331,231.8|187.3,431.8;219.9,423.1;226.2,420.7;246.1,410.4;271.5,396.9;298.5,384.2;322.3,372.3;341.3,365.9;353.2,364.4;356.4,369.1;356.4,395.3;352.4,435;342.9,491.4;335.8,557.2;329.4,630.3;325.5,707.3;322.3,781.9;321.5,841.4;321.5,878.7;321.5,892.2;329.4,893;339.7,893;354.8,893;377.1,881.9;404.8,846.2;436.6,792.2;466,731.9;478.7,702.5|528.7,117.5;539.8,105.6;548.5,105.6;559.6,105.6;581.9,105.6;606.5,109.5;632.7,113.5;659.6,116.7;689,118.3;716,119.9;743,121.5;766,123;782.7,127|558.8,251.6;571.5,238.9;578.7,238.9;586.6,238.9;609.6,237.3;637.4,236.6;666,235.8;693.8,233.4;721.6,228.6;734.3,225.4|473.9,366.7;479.5,368.3;501.7,361.2;516,356.4;531.8,351.7;569.2,342.1;608,335;649.3,330.2;690.6,326.3;732.7,322.3;773.2,320.7;808.9,320.7;821.6,320.7|652.5,29.4;631.9,17.5;631.9,45.2;631.9,89.7;631.9,142.1;631.9,192.1;631.9,238.1;637.4,277;645.4,308;647.7,321.5|579.5,469.1;583.4,494.5;583.4,514.4;583.4,538.2;584.2,592.2;585,643.8;585,690.6;585,736.6;584.2,780.3;578.7,823.2;573.9,859.7;572.3,873.2|579.5,460.4;584.2,451.7;607.3,445.3;635,438.2;662,431.8;685.8,428.7;706.5,426.3;723.9,425.5;738.2,425.5;748.6,447.7;753.3,487.4;756.5,537.4;759.7,589;763.6,645.4;771.6,708.1;779.5,771.6;784.3,825.6;786.7,858.1;787.4,872.4;788.2,878.7;784.3,878.7;773.2,874;760.5,870;748.6,866;735.9,854.9;729.5,843.8|597.7,599.3;606.5,604.1;616.8,597.7;623.9,593;631.9,589.8;650.9,582.6;671.6,579.5;695.4,578.7;716,578.7;733.5,585.8;739.8,592.2|623.1,717.6;636.6,707.3;655.7,707.3;669.2,707.3;683.5,707.3;712.8,707.3;729.5,707.3`,
   },
   {
@@ -811,6 +1812,13 @@ const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
   },
   {
     id: `我-1793338521366`,
+    expectedIssues: [
+      {
+        kind: `reversed-stroke`,
+        handwriting: { strokeIndex: 0 },
+        reference: { strokeIndex: 0 },
+      },
+    ],
     drawnStrokes: `353.2,272.3;370.7,281;380.2,277.8;385.8,277;404,269.9;435,258.8;467.5,248.5;502.5,239.7;540.6,230.2;581.1,221.5;611.2,215.9|335,484.2;342.1,480.2;374.7,468.3;381.8,463.6;411.2,450.9;457.2,431;510.4,409.6;568.4,390.5;621.5,375.5;666.8,362.8;697,354;708.9,353.2|484.2,387.4;486.6,414.4;486.6,422.3;487.4,447.7;489,486.6;490.6,523.9;490.6,562;490.6,604.1;490.6,647.7;490.6,688.2;490.6,722.4;490.6,747;490.6,758.1;490.6,762;481,759.7;462,750.1;437.4,729.5;422.3,681.9|321.5,593.8;353.2,587.4;366.7,580.3;381.8,571.5;424.7,544.5;479.5,504.9;532.6,466.8;558.8,454.1|569.2,271.5;580.3,311.2;580.3,325.5;581.1,341.3;584.2,377.1;588.2,424.7;593,481.8;600.1,535;614.4,577.9;629.5,611.2;647.7,639.8;667.6,669.2;688.2,697.7;708.1,721.6;724.7,741.4;739,755.7;751.7,764.4;762.8,767.6;768.4,767.6;770,765.2;770,755.7;770,743;779.5,718.4;791.4,681.1;801.7,639.8|757.3,484.2;745.4,525.5;743,531.1;725.5,561.2;690.6,617.6;650.1,672.3;608.8,719.2;566,758.9;540.6,781.9|796.2,192.1;801.7,191.3;824.8,190.5;828.7,191.3;843,196.1;871.6,196.9;907.3,196.9`,
   },
   {
@@ -820,6 +1828,63 @@ const positiveHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
 ];
 
 const negativeHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
+  {
+    id: `热-1792983399289`,
+    drawnStrokes: `168.3,296.9;175.4,298.5;199.2,298.5;206.4,297.7;231,295.3;268.3,293.7;306.4,292.1;345.3,291.3;387.4,286.6;418.3,279.4|331,137.3;335,146.1;340.5,178.6;340.5,185.7;340.5,215.1;340.5,264.3;339,319.1;339,378.6;339,439.8;339,499.3;339,555.7;340.5,604.1;344.5,637.4;346.1,655.7;345.3,662;345.3,662.8;345.3,660.4;336.6,645.4;313.6,621.5;277,596.1;242.9,580.3;215.1,572.3;210.4,571.5|211.2,493.7;232.6,478.7;273.9,449.3;285,442.1;318.3,416;363.6,379.4;395.3,351.7|579.5,142.1;580.3,156.4;581.1,209.6;581.1,221.5;579.5,258;568.4,313.6;554.9,375.5;538.2,439;519.9,497.7;500.9,547.7;482.6,585.8;471.5,603.3|504.1,315.1;524.7,298.5;554.9,299.3;562.8,297.7;589,294.5;628.7,288.1;667.6,282.6;701.7,277;730.3,274.7;749.3,274.7;757.3,276.2;757.3,292.1;755.7,321.5;747,359.6;739.8,402.5;734.3,442.1;730.3,478.7;727.1,507.2;727.1,531.1;726.3,550.1;726.3,562.8;726.3,572.3;726.3,578.7;726.3,584.2;726.3,589;726.3,593;726.3,594.6;726.3,595.3;728.7,595.3;731.9,596.1;738.2,598.5;745.4,600.1;754.9,602.5;764.4,604.1;774.7,605.7;785.1,604.9;794.6,604.9;802.5,604.9;811.3,604.9;819.2,604.9;827.9,604.9;836.7,604.9;843.8,604.9;851.7,604.9;857.3,602.5;861.3,596.1;862.1,587.4;862.1,572.3;862.1,546.1;862.1,499.3;862.1,458.8|635,394.5;617.6,408;594.6,420.7;587.4,424.7;563.6,440.6;526.3,460.4;487.4,478.7;452.5,491.4;444.5,493.7|296.9,747.8;269.1,777.9;266.7,781.9;254.8,799.4;234.2,825.6;211.2,849.4;192.9,863.7|417.5,735.1;419.9,741.4;433.4,771.6;438.2,778.7;453.3,801.7;477.1,828.7;502.5,854.9;519.9,870.8|572.3,754.1;576.3,759.7;593.8,789.8;597.7,797;614.4,818.4;635.8,849.4;655.7,874;667.6,884.3|712.8,758.1;735.1,777.1;758.9,806.5;764.4,813.6;781.9,838.3;822.4,899.4`,
+  },
+  {
+    id: `热-1792983385587`,
+    drawnStrokes: `157.2,280.2;170.7,288.1;198.4,286.6;208.8,286.6;239.7,281;283.4,273.1;324.7,266.7;362,263.5;392.9,262;398.5,262|303.2,98.4;292.1,115.1;293.7,149.2;293.7,159.6;294.5,195.3;294.5,254;294.5,321.5;294.5,396.1;294.5,467.5;294.5,532.6;294.5,585.8;294.5,623.1;294.5,645.4;296.1,660.4;296.9,665.2;294.5,663.6;280.2,638.2;262,600.1;243.7,567.6;231,548.5|161.1,539.8;168.3,522.3;191.3,504.1;198.4,498.5;227.8,480.2;268.3,451.7;311.2,418.3;343.7,389|570.7,141.3;572.3,190.5;572.3,196.1;569.2,223.1;558.8,265.9;546.1,313.6;531.1,366.7;516.8,421.5;505.6,470.7;498.5,510.4;489,538.2;473.1,558.8;468.3,563.6|467.5,286.6;471.5,281;496.1,280.2;504.1,279.4;527.1,275.4;561.2,269.9;594.6,263.5;624.7,258;653.3,251.6;680.3,247.7;703.3,246.1;720.8,246.1;731.9,254;735.1,269.1;735.1,288.1;729.5,312.8;716.8,343.7;708.1,377.1;701.7,414.4;697,450.9;693.8,485;691.4,512.8;689.8,530.3;689.8,539.8;689.8,543.8;689.8,545.3|690.6,546.9;693.8,548.5;698.5,550.1;704.1,552.5;708.9,554.1;715.2,557.2;723.2,561.2;731.9,564.4;743,567.6;754.9,569.9;768.4,571.5;781.9,573.9;797,576.3;811.3,578.7;824,580.3;835.9,581.9;845.4,583.4;852.5,582.6;855.7,582.6;858.1,582.6;859.7,582.6;859.7,578.7;860.5,569.2;862.1,550.1;862.9,506.4;862.9,447.7|420.7,485;447.7,469.1;454.1,464.4;485,445.3;530.3,416;579.5,382.6;589.8,372.3|252.4,762;229.4,795.4;227.8,800.1;213.5,818.4;196.9,843.8;180.2,868.4;168.3,885.1|398.5,738.2;396.1,754.1;412.8,784.3;416.7,793.8;432.6,824.8;452.5,862.9;472.3,885.1;477.1,888.3|517.6,737.4;522.3,746.2;543,782.7;547.7,792.2;564.4,819.2;586.6,858.1;603.3,884.3|676.3,750.9;681.1,756.5;708.1,784.3;714.4,792.2;735.1,814.4;763.6,851;781.9,878.7`,
+  },
+  {
+    id: `热-1792983368601`,
+    drawnStrokes: `158.8,269.1;161.9,270.7;187.3,272.3;195.3,272.3;227.8,271.5;277.8,263.5;324.7,256.4;362,253.2;384.2,252.4;387.4,251.6|332.6,96;332.6,101.6;333.4,134.2;333.4,142.9;333.4,174.6;333.4,233.4;333.4,298.5;333.4,369.1;332.6,438.2;332.6,498.5;332.6,550.1;332.6,593;332.6,627.1;332.6,648.5;332.6,654.9;329.4,650.9;322.3,631.9;308.8,603.3;285.8,568.4;263.5,544.5;258,542.2|197.7,539.8;215.9,531.1;247.7,508.8;256.4,502.5;285,481.8;322.3,454.8;359.6,424.7;385.8,404|522.3,159.6;522.3,171.5;523.1,217.5;523.1,226.2;523.1,262.7;522.3,321.5;513.6,384.2;502.5,442.9;487.4,492.2;469.1,531.8;464.4,539|516.8,158.8;519.9,159.6;541.4,161.1;546.9,161.1;565.2,161.1;593,159.6;619.2,155.6;643,152.4;663.6,149.2;681.1,148.4;693.8,148.4;703.3,153.2;706.5,175.4;706.5,211.2;704.9,254;697.7,297.7;693.8,342.1;693,385.8;693,429.4;693,469.1;697.7,497.7;723.9,517.6;730.3,520.7;737.4,524.7;743.8,528.7;750.1,531.8;756.5,535;761.3,535.8;763.6,537.4;766,539;768.4,539;770.8,539.8;773.2,541.4;777.1,542.2;780.3,543;783.5,543.8;787.4,543.8;791.4,544.5;796.2,544.5;800.1,544.5;804.1,544.5;808.9,544.5;813.6,544.5;818.4,544.5;822.4,544.5;826.3,544.5;831.1,544.5;835.1,544.5;838.3,543.8;842.2,540.6;845.4,534.2;847.8,522.3;849.4,503.3;849.4,470.7;849.4,419.1|441.4,400.1;454.1,396.1;491.4,369.1;503.3,362;539.8,337.4;589,304;598.5,295.3|280.2,742.2;273.9,753.3;258.8,796.2;254.8,805.7;242.9,831.9;222.3,870;199.2,904.1;192.9,911.3|413.6,734.3;421.5,753.3;433.4,783.5;444.5,812.1;454.1,836.7;474.7,878.7;492.2,904.1;496.9,908.1|561.2,763.6;579.5,782.7;590.6,808.1;595.3,814.4;611.2,836.7;631.9,865.2;636.6,870.8|689,772.4;697,784.3;726.3,823.2;731.9,829.5;752.5,854.1;778.7,885.9;783.5,894.6`,
+  },
+  {
+    id: `热-1792983355047`,
+    drawnStrokes: `151.6,243.7;162.7,238.9;184.2,238.1;190.5,236.6;213.5,231;247.7,224.6;277.8,222.3;303.2,220.7;317.5,219.9|292.9,82.6;291.3,90.5;288.1,122.2;288.1,130.2;288.1,156.4;288.1,198.4;288.1,252.4;288.1,316.7;288.1,387.4;291.3,458;293.7,519.9;295.3,567.6;294.5,596.1;294.5,604.1;291.3,604.1;289.7,604.1;289.7,603.3;287.4,596.9;281,585;267.5,566;251.6,548.5;234.2,537.4;217.5,531.8;212.7,531.1|187.3,498.5;190.5,491.4;208.8,466.8;215.1,461.2;236.6,444.5;268.3,421.5;304,396.1;331.8,376.3|487.4,127;485,134.2;481.8,169.1;481.8,178.6;481.8,209.6;478.7,254.8;469.9,307.2;457.2,366.7;443.7,422.3;427.1,464.4;411.2,480.2|396.9,243.7;423.9,230.2;431,231.8;454.8,231.8;492.9,231;534.2,228.6;576.3,225.4;613.6,220.7;645.4,213.5;668.4,207.2;681.1,205.6;685,206.4;685.8,223.1;685,250.8;681.1,285.8;677.1,323.9;674.7,361.2;673.1,396.9;673.1,428.7;673.1,454.8;673.9,473.1;683.5,481;698.5,482.6;714.4,482.6;731.1,482.6;750.9,482.6;770.8,482.6;791.4,482.6;810.5,479.5;826.3,476.3;836.7,472.3;842.2,469.9;842.2,469.1;841.4,469.1;841.4,467.5;841.4,466;841.4,460.4;841.4,447.7;835.9,414.4;831.1,400.1|284.2,705.7;262,727.9;249.3,754.9;246.1,762;231.8,785.9;211.9,813.6;192.9,834.3;188.1,837.5|407.2,697.7;411.2,709.7;430.2,755.7;435,766.8;454.1,800.1;480.2,839.8;505.6,871.6;521.5,885.1|523.1,713.6;541.4,720;561.2,743.8;566.8,750.9;583.4,774;604.9,804.9;623.9,832.7;628.7,839|680.3,718.4;704.1,745.4;708.1,753.3;727.1,782.7;758.1,826.3;785.9,865.2;806.5,887.5`,
+  },
+  {
+    id: `短-1792983292286`,
+    drawnStrokes: `282.6,98.4;275.4,113.5;255.6,163.5;250.8,172.3;235.8,205.6;209.6,251.6;176.2,299.3;139.7,344.5;108,377.8;88.9,389.8|185,273.9;191.3,273.9;220.7,274.7;229.4,274.7;254,274.7;288.9,272.3;322.3,270.7;350.9,268.3;377.1,265.9;393.7,264.3|181,521.5;214.3,520.7;218.3,520.7;242.9,520.7;284.2,519.9;327,514.4;370.7,506.4;396.1,498.5|308.8,296.9;306.4,332.6;307.2,339;307.2,365.1;304.8,409.6;296.1,461.2;281.8,516.8;263.5,578.7;240.5,647.7;214.3,718.4;190.5,777.1;173,813.6;161.1,827.1;159.6,827.1|305.6,535.8;308,543;319.1,577.9;322.3,588.2;333.4,617.6;352.4,664.4;376.3,716;399.3,763.6;418.3,800.1;427.1,813.6|693,123.8;700.9,139.7;704.9,151.6;706.5,155.6;712.8,168.3;723.9,188.9;726.3,194.5|566.8,256.4;566,265.9;566,304.8;566,314.3;571.5,346.1;579.5,390.5;588.2,439;596.1,483.4;600.1,517.6;600.1,521.5|592.2,250;613.6,249.3;639,250;646.9,250.8;673.1,251.6;714.4,252.4;756.5,252.4;789.8,248.5;812.8,245.3;824.8,245.3;830.3,247.7;831.1,265.9;831.1,296.1;830.3,341.3;824.8,389.8;821.6,434.2;818.4,470.7;812.1,493.7;798.6,515.2;794.6,518.4|612.8,539.8;631.1,548.5;659.6,547.7;669.2,547.7;697.7,547.7;738.2,543;776.3,534.2;808.9,527.1;816,525.5|618.4,609.6;623.1,614.4;640.6,642.2;645.4,650.1;659.6,676.3;681.9,712.8;703.3,740.6;722.4,759.7;725.5,762|855.7,627.9;851.7,634.2;840.6,663.6;837.5,670;830.3,692.2;818.4,726.3;804.9,763.6;800.9,773.2|580.3,805.7;585,804.9;610.4,801.7;618.4,800.9;644.6,795.4;685,789;730.3,783.5;779.5,781.1;826.3,778.7;871.6,775.5;910.5,774.7;918.4,774.7`,
+  },
+  {
+    id: `图-1792983175327`,
+    drawnStrokes: `248.5,165.9;242.1,203.2;242.9,210.4;242.9,238.1;242.9,284.2;242.9,344.5;242.1,426.3;240.5,518.4;240.5,606.5;240.5,682.7;240.5,744.6;240.5,792.2;240.5,800.9|239.7,175.4;288.1,144.5;292.9,147.6;321.5,142.9;364.4,136.5;413.6,133.4;462.8,133.4;513.6,133.4;564.4,134.2;615.2,138.9;658.9,146.1;690.6,154.8;708.1,168.3;717.6,185;720.8,205.6;722.4,230.2;722.4,263.5;722.4,308;722.4,359.6;722.4,419.1;722.4,488.2;722.4,565.2;722.4,640.6;722.4,702.5;725.5,743.8;725.5,770;725.5,790.6;725.5,808.9;722.4,820.8;720.8,823.2;720,822.4;715.2,821.6;707.3,812.1;693.8,803.3;677.9,797.8;658.1,793;640.6,786.7|386.6,238.1;391.3,242.9;407.2,271.5;412,277.8;425.5,300.1;445.3,330.2;458.8,348.5|353.2,357.2;357.2,363.6;372.3,385.8;377.1,389;392.9,401.7;416,418.3;441.4,437.4;458,450.1|317.5,561.2;339.7,562;377.1,561.2;388.2,559.6;420.7,554.9;466.8,549.3;511.2,543;554.9,538.2;563.6,538.2|497.7,250.8;500.1,262.7;505.6,305.6;505.6,315.1;507.2,346.1;513.6,393.7;518.4,450.9;522.3,513.6;524.7,573.9;529.5,628.7;531.8,674.7;533.4,708.1;533.4,726.3;533.4,734.3;533.4,735.1;533.4,734.3;533.4,733.5|502.5,546.9;494.5,560.4;484.2,585;480.2,593;467.5,616;444.5,646.9;416,678.7;386.6,704.9;361.2,724.7;346.9,734.3;344.5,733.5|535.8,580.3;542.2,583.4;554.1,588.2;565.2,592.2;569.9,596.1;584.2,609.6;609.6,635.8;635,663.6;660.4,688.2;673.1,707.3`,
+  },
+  {
+    id: `请-1792983162689`,
+    fails: true,
+    expectedIssues: [
+      {
+        kind: `wrong-stroke-order`,
+        handwriting: { strokeIndex: 8 },
+        reference: { strokeIndex: 0 },
+      },
+      {
+        kind: `wrong-stroke-order`,
+        handwriting: { strokeIndex: 9 },
+        reference: { strokeIndex: 1 },
+      },
+    ],
+    drawnStrokes: `523.9,200.8;542.2,205.6;573.9,204;581.9,203.2;612,198.4;650.9,193.7;689,192.1;725.5,192.1;762.8,192.1;786.7,192.1|590.6,314.3;595.3,313.6;616.8,313.6;622.3,313.6;639,313.6;665.2,313.6;692.2,312.8;712.8,312.8|500.9,414.4;492.9,436.6;523.9,434.2;534.2,434.2;565.2,433.4;611.2,430.2;657.3,425.5;702.5,420.7;745.4,413.6;780.3,408.8;785.9,408.8|678.7,97.6;674.7,107.2;670,146.1;670,154.8;670,188.9;670,246.9;670,313.6;670,379.4;670,435.8;670,470.7|528.7,537.4;529.5,558;535,586.6;537.4,595.3;543.8,626.3;553.3,677.9;561.2,734.3;568.4,785.1;573.9,815.2;573.9,818.4|538.2,551.7;541.4,551.7;561.2,551.7;594.6,551.7;604.1,551.7;639,549.3;688.2,543;732.7,535.8;768.4,533.4;789,533.4;794.6,543.8;794.6,580.3;788.2,639.8;781.9,703.3;780.3,752.5;780.3,787.4;780.3,804.1;776.3,807.3;774,806.5|585,707.3;594.6,693.8;625.5,685.8;634.2,683.5;660.4,676.3;697.7,666.8;733.5,661.2;751.7,658.9|621.5,809.7;624.7,812.8;655.7,816;666.8,812.8;696.2,804.1;732.7,796.2;755.7,793.8|221.5,148.4;227,158.8;253.2,201.6;260.4,210.4;281.8,237.3;307.2,271.5;313.6,279.4|162.7,402.5;168.3,402.5;195.3,404;204,404;229.4,400.1;262.7,394.5;293.7,391.3;318.3,391.3;329.4,396.9;330.2,424.7;327,469.1;314.3,525.5;303.2,584.2;292.9,642.2;285,697.7;277.8,750.9;273.1,795.4;271.5,823.2;269.9,831.9;270.7,831.1;285,822.4;315.1,806.5;354,790.6;392.1,781.1;422.3,774;428.7,771.6`,
+  },
+  {
+    id: `师-1792978725612`,
+    drawnStrokes: `386.6,160.3;351.7,194.5;345.3,200.8;325.5,219.9;296.9,244.5;266.7,264.3;238.1,279.4;212.7,290.5;194.5,298.5;188.9,302.4|339,210.4;327,261.2;327,277.8;327,297.7;327,350.1;325.5,413.6;324.7,484.2;323.9,558;323.9,631.1;323.9,699.3;323.1,757.3;323.1,794.6;323.1,808.1|483.4,145.3;497.7,138.1;519.9,136.5;537.4,132.6;557.2,128.6;600.1,119.9;648.5,115.1;697,114.3;746.2,114.3;787.4,116.7|461.2,258.8;452.5,287.4;452.5,303.2;452.5,323.1;452.5,363.6;457.2,405.6;462,442.9;466.8,477.1;469.9,496.1|462.8,295.3;467.5,286.6;493.7,285;511.2,280.2;532.6,274.7;579.5,262.7;625.5,256.4;665.2,255.6;703.3,255.6;737.4,262;768.4,273.1;789,284.2;800.1,295.3;805.7,304;806.5,313.6;806.5,328.6;806.5,350.1;808.9,379.4;812.8,416.7;819.2,455.6;825.6,487.4;831.1,511.2;834.3,527.9;835.9,539.8;835.9,544.5;834.3,544.5;821.6,543;801.7,538.2;780.3,533.4;762.8,527.9;747.8,523.1;733.5,516.8|658.1,117.5;641.4,134.9;641.4,148.4;641.4,167.5;641.4,221.5;640.6,292.1;640.6,373.9;640.6,455.6;643,527.1;643,587.4;643,633.5;643,667.6;641.4,693.8;641.4,716;641.4,737.4;641.4,746.2`,
+  },
+  {
+    id: `周-1792977960113`,
+    drawnStrokes: `346.1,183.4;346.9,206.4;346.1,241.3;342.9,267.5;339,293.7;331.8,349.3;325.5,406.4;320.7,464.4;317.5,519.9;315.1,573.9;315.1,626.3;315.1,681.9;314.3,735.9|340.5,209.6;342.1,214.3;362,213.5;375.5,210.4;389,207.2;424.7,202.4;465.2,200;510.4,200;560.4,200;612,200;660.4,200.8;704.9,203.2;739,205.6;762.8,210.4;774.7,215.1;778.7,219.1;780.3,224.6;780.3,238.1;780.3,261.2;780.3,290.5;780.3,331.8;778.7,379.4;777.1,435;776.3,489;776.3,535;775.5,569.9;774.7,597.7;773.2,623.9;770,649.3;766,677.1;762,704.9;756.5,735.9;750.9,762.8;745.4,781.1;743,786.7;741.4,786.7;741.4,784.3;741.4,782.7;741.4,781.9;741.4,781.1;741.4,781.9;734.3,781.9;711.2,778.7;680.3,762.8;666,748.6|399.3,354;416,350.9;442.1,350.9;449.3,350.9;473.9,350.1;509.6,348.5;548.5,347.7;586.6,347.7;624.7,347.7;642.2,347.7|529.5,261.2;518.4,283.4;518.4,300.8;518.4,312;518.4,323.1;518.4,349.3;518.4,379.4;519.1,394.5|437.4,442.1;434.2,467.5;434.2,482.6;434.2,502.5;432.6,550.1;431,599.3;429.4,643;426.3,677.9;422.3,700.9;419.9,706.5|436.6,454.1;449.3,440.6;475.5,440.6;490.6,440.6;504.9,442.9;535,450.1;566.8,459.6;594.6,467.5;620,477.1;640.6,487.4;653.3,501.7;654.9,528.7;654.9,562;650.9,600.1;644.6,630.3;640.6,656.5;637.4,678.7;635,698.5;633.5,708.1|439,736.6;445.3,729.5;473.9,726.3;492.2,722.4;511.2,718.4;554.1,713.6;593,713.6;627.1,719.2`,
+  },
+  {
+    id: `和-1793118079580`,
+    drawnStrokes: `227.8,263.5;291.3,259.6;296.9,260.4;327.8,260.4;377.1,260.4;429.4,260.4;539,261.2;577.1,262|411.2,57.2;406.4,61.9;412,87.3;413.6,95.3;417.5,129.4;421.5,191.3;423.1,273.9;423.1,367.5;421.5,466;413.6,558;407.2,635;404,689.8;404.8,729.5;404.8,746.2|430.2,264.3;400.1,295.3;400.1,301.6;392.1,329.4;377.8,371.5;358.8,418.3;331.8,463.6;304,503.3;280.2,535;266.7,548.5|445.3,295.3;446.9,296.9;458,318.3;474.7,352.4;480.2,362.8;495.3,399.3;514.4,453.3;530.3,500.1;544.5,543;547.7,551.7|651.7,361.2;648.5,388.2;649.3,394.5;653.3,416.7;663.6,446.9;673.1,477.1;679.5,497.7|644.6,340.5;647.7,337.4;664.4,332.6;683.5,332.6;688.2,332.6;704.9,332.6;726.3,332.6;747,332.6;763.6,332.6;774.7,332.6;781.1,332.6;782.7,333.4;783.5,344.5;783.5,369.1;784.3,401.7;786.7,435;789.8,465.2;793.8,492.2;795.4,519.9;795.4,541.4;795.4,545.3|684.3,525.5;684.3,522.3;695.4,516;714.4,512.8;720,512.8;739,512.8;763.6,512.8;781.9,512.8`,
+  },
+  {
+    id: `停-1793117596216`,
+    drawnStrokes: `339,136.5;323.1,172.3;320.7,180.2;307.2,204.8;286.6,242.1;263.5,285.8;236.6,333.4;208.8,381.8;177.8,423.1;150,453.3|269.9,277.8;281.8,315.9;284.2,333.4;288.1,354.8;294.5,410.4;298.5,485.8;304.8,569.2;313.6,645.4;323.9,715.2;333.4,772.4;339.7,813.6|645.4,86.5;647.7,108;648.5,127.8;651.7,136.5;654.1,146.1;658.9,162.7|439.8,231.8;469.9,222.3;481,222.3;492.9,219.9;522.3,213.5;558.8,207.2;601.7,202.4;649.3,198.4;696.2,193.7;741.4,188.9;781.9,182.6|545.3,288.9;554.1,302.4;558.8,327;561.2,340.5;564.4,356.4;570.7,389;573.1,404|551.7,274.7;561.2,271.5;577.9,271.5;587.4,271.5;600.1,270.7;630.3,265.1;658.9,260.4;685.8,258;708.1,257.2;726.3,257.2;734.3,257.2;743.8,269.9;745.4,288.1;745.4,308.8;745.4,328.6;745.4,345.3;745.4,351.7;745.4,358.8;745.4,365.9|558,430.2;592.2,419.1;598.5,417.5;630.3,409.6;662.8,402.5;693.8,394.5;716.8,389.8|467.5,542.2;462,548.5;465.2,559.6;474.7,588.2;477.9,595.3;485.8,620.8;493.7,653.3;500.1,671.6|479.5,530.3;483.4,523.9;501.7,524.7;527.1,519.9;535.8,518.4;562,516;602.5,514.4;644.6,512.8;685,511.2;722.4,506.4;741.4,503.3;774.7,495.3;801.7,485.8;821.6,477.9;831.9,474.7;835.1,474.7;835.1,486.6;835.1,513.6;835.1,544.5;835.1,577.1;835.1,591.4;835.1,603.3;835.1,612.8;834.3,622.3;834.3,630.3;832.7,638.2;831.1,641.4|587.4,599.3;596.1,612;596.9,630.3;596.9,647.7;596.9,654.1;595.3,684.3;582.6,718.4;568.4,750.1;553.3,779.5;539,802.5;529.5,816;525.5,819.2|589.8,593.8;603.3,596.9;618.4,596.9;627.9,596.9;636.6,596.9;658.1,596.1;679.5,591.4;697.7,589.8;710.4,589;716.8,589;718.4,593.8;718.4,609.6;718.4,637.4;718.4,677.1;717.6,718.4;717.6,752.5;717.6,777.1;717.6,793.8;719.2,802.5;726.3,808.1;735.1,810.5;745.4,812.1;758.9,812.1;774.7,812.1;793.8,812.1;812.8,811.3;829.5,805.7;844.6,800.1;858.9,795.4;872.4,792.2;883.5,788.2`,
+  },
   {
     id: `牛-20261019230837`,
     drawnStrokes: `327.7,193;327.5,193;327.2,193.4;327.2,194.7;327.2,197.7;327.2,202.5;327.2,208.5;327.2,214.3;327.2,219;326.8,225;325.5,232.6;323.5,240;320.6,247.1;316.5,254.4;312.4,261.6;307.7,269.4;303.4,276.2;298.2,283.2;291.3,294.2;283.8,306.3;274.8,319;265.7,332.2;256.2,346.4;248,359.1;242.7,367.4;237.5,375.4;232.6,383;229.3,388.6;226.1,394.1;223,398.8;221.2,401.9;219.3,404.7;217.1,407.8;214.7,411.3;212.7,414.4;210.7,417.3;208.4,419.8;207,421.3;206,422.5;205.2,423.4;204.6,424|272.2,317.9;272.4,317.9;273.8,317.9;276.4,317.9;281,317.9;287.5,317.9;294.3,317.9;303.5,317.9;320.7,317.9;341.1,317.9;356.8,317.9;376,317.9;403,317.9;435.2,317.9;471.5,317.9;507.8,317.9;547.1,317.9;586.6,317.9;613.7,317.9;636.5,317.9;661.9,317.9;683.9,317.9;696.1,317.9;703.3,317.9;713.3,317.9;721.6,317.9;728.3,317.9;733.2,317.9;735.7,317.9;737.1,317.9;738.3,317.9;739.2,317.9|165.9,556;165.9,556.2;165.7,556.4;166.4,556.4;169,556.4;174.3,556.4;183.8,556.4;197,555.8;213.5,553.1;234.1,548.8;258.3,543.3;299.5,534.4;333.3,527.9;356.6,524.5;394.1,519.1;437.6,513.8;482.8,511;524.6,509.5;567.3,508.3;606.4,508.1;630.4,508.1;650.4,508.1;673.5,508.1;692.6,508.1;706.2,508.1;714.5,508.1;723.4,508.1;732.4,508.1;739.2,508.1;744.3,508.4;747.7,509.1;749.6,509.4;750.9,509.7;751.8,510;752.3,510.3;752.8,510.5;753.6,510.8;754.7,511.1;755.8,511.3;757.4,511.8;759.7,512.4;762.5,513.2;765.3,513.9;768.2,514.6;771.2,515.4;774.9,516.2;778.4,517;781.8,517.3;785.7,517.7;789.1,518.4;791.7,518.8;794.4,519.1;797.5,519.4;800,519.4;802.1,519.7;804.2,520;805.6,520.1;806.3,520.3;806.9,520.6;807.4,520.6;807.9,520.6;808.4,520.6`,
@@ -835,6 +1900,11 @@ const negativeHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
       extraHandwritingStrokePenaltyWeight: 0.5,
       maxRotationDegrees: 12,
       rotationSteps: 1,
+      sustainedTangentMismatchEnabled: false,
+      sustainedTangentMismatchThresholdDegrees: 45,
+      sustainedTangentMismatchMinimumLengthFraction: 0.5625,
+      sustainedTangentMismatchNoiseLengthFraction: 0.05,
+      sustainedTangentMismatchTangentWindowFraction: 0.1,
     },
   },
   {
@@ -863,7 +1933,6 @@ const negativeHandwritingExamples: readonly ShapeContextGraderTestExample[] = [
     drawnStrokes: `366.4,107.6;366.4,107.8;366.4,108.7;366.1,111.1;364.6,115.6;360.1,124.8;353.6,137.3;339.1,161.4;321.4,188.3;307.7,208.1;291.9,230.6;275.5,252.7;263.2,268.6;252.4,282.1;242.7,294.5;233.5,305.8;223.4,317.6;216.7,325.3;211.4,331.3;206,337.3;201.5,341.9;198.9,344.3;197.4,345.5;196.5,346.4;195.9,346.9;195.4,347.2|298.4,238;298.6,238;299.9,238;303.2,238;308.6,238;316.4,238;330.9,238;350.1,238;370.9,238;394.5,238;419.5,238;439.1,238;458.2,238;477.3,238;495.7,239.2;516.8,241.1;535.2,242.6;548.6,243.8;558.9,245;570.2,246.1;579.9,246.8;587.6,247.3;593.6,247.7;598.1,247.7;601.5,247.7;603.4,247.7;604.6,247.7;605.9,247.7;606.8,247.7;607.5,247.7;608,247.7|151.7,514.9;152.8,514.9;158.8,514.9;170.3,514.9;181.7,514.9;198.2,514.9;233.3,513.1;284.6,509.9;322.2,508.5;354.5,507.5;399.9,506.5;448.4,506.5;495,506.4;534.9,506.4;572.9,506.4;595.8,506.4;611,506.4;633.1,506.4;652.6,506.4;669.9,506.4;685.6,506.4;698.9,506.4;709.1,506.4;718.1,506.4;725.1,506.4;730.9,506.4;737,506.4;741.6,506.4;749,506.4;755.3,505.9;759,505.2;764.6,504.9;770,504.5;774.6,504.1;779.5,504;783.7,504;787.8,504;791.3,504;794,503.7;795.8,503.3;796.9,503.3;797.7,503.3;798.2,503.3;798.6,503.3;799,503.3;799.5,503.3;800,503.3;800.5,503.3;801,503.3;801.5,503.3|459.5,128.2;459.5,129.3;459.5,134.4;459.5,144.2;459.5,154.6;459.5,174.1;459.5,206.8;459.5,279.5;459.5,364.7;459.5,436.5;459.5,518.4;459.5,596.4;459.5,647.9;461.7,688.3;463.9,723.4;464.5,743.4;465.9,771.5;467.6,800.9;469.1,823.8;470,838.9;470.8,850.4;471.4,861.5;471.9,869.5;472.4,875.4;472.4,879.4;472.4,882.1;472.4,884.2;472.4,885.4;472.4,885.9;472.4,886.3;472.4,886.7;472.4,887.1;472.4,887.6`,
   },
   {
-    fails: true,
     id: `图-1794469501757`,
     drawnStrokes: `269.1,121.5;256.4,135.7;258,165.1;258,174.6;258,203.2;258,242.9;258,287.4;258,336.6;258,397.7;258,466.8;258,534.2;258,585.8;257.2,609.6;255.6,616;253.2,625.5;250.8,635.8;249.3,646.9;249.3,658.1;249.3,666.8;249.3,673.1;250.8,677.9;250.8,681.1|256.4,130.2;265.1,127;292.1,120.7;298.5,120.7;319.1,124.6;357.2,131.8;399.3,138.1;442.9,143.7;482.6,147.6;519.1,148.4;553.3,148.4;585,148.4;616,147.6;647.7,144.5;677.9,144.5;706.5,144.5;727.9,144.5;749.3,148.4;768.4,150.8;786.7,152.4;804.1,154;823.2,156.4;841.4,160.3;859.7,163.5;876.4,166.7;889.1,166.7;892.2,166.7;892.2,169.1;889.1,174.6;883.5,190.5;873.2,234.2;854.9,309.6;834.3,394.5;820.8,468.3;816,526.3;815.2,578.7;815.2,620.8;814.4,662;814.4,682.7;814.4,705.7;814.4,720.8;814.4,726.3;812.1,726.3;797.8,726.3;772.4,718.4;748.6,710.4;727.1,697;721.6,690.6|442.1,235.8;446.9,240.5;469.1,259.6;473.9,265.1;489,281;504.9,306.4;506.4,313.6|385,318.3;408,334.2;434.2,360.4;439.8,367.5;457.2,389;463.6,396.9|362,469.9;383.4,468.3;427.9,461.2;439.8,459.6;479.5,455.6;531.8,454.8;583.4,454.8;631.1,455.6;674.7,458.8;716,460.4;750.9,460.4;758.1,460.4|594.6,227;596.1,231;597.7,268.3;597.7,282.6;596.9,337.4;587.4,412.8;571.5,482.6;546.1,541.4;514.4,584.2;484.2,612;459.6,631.9;447.7,648.5;441.4,659.6|596.9,460.4;602.5,475.5;627.1,504.1;634.2,514.4;655.7,545.3;687.4,588.2;711.2,611.2;726.3,623.1;729.5,626.3|294.5,743.8;315.9,741.4;358,738.2;370.7,737.4;412,736.6;473.1,735.9;539.8,736.6;607.3,743;671.6,747.8;729.5,748.6;743,748.6`,
   },
@@ -1253,7 +2322,7 @@ describe(`gradeCharacterShape`, () => {
         },
       ],
     });
-    expect(missingStrokeDiagnostic.schemaVersion).toBe(20);
+    expect(missingStrokeDiagnostic.schemaVersion).toBe(24);
     expect(missingStrokeDiagnostic.issueExpectations).toMatchObject({
       declared: true,
       expected: [{ satisfied: true }],
@@ -1567,6 +2636,74 @@ describe(`gradeCharacterShape`, () => {
     const result = gradeCharacterShape(gapStrokes, paths);
 
     expect(isHanziCharacterWritingAccepted(result, [])).toBe(true);
+  });
+
+  test(`configures sustained tangent mismatch rejection independently`, () => {
+    const referencePaths = [`M 0 0 L 100 0`];
+    const straight = gradeCharacterShape(
+      pointsForPaths([`M 0 0 L 100 0`]),
+      referencePaths,
+    );
+    expect(straight.sustainedTangentMismatchRejection.passed).toBe(true);
+    const degenerate = gradeCharacterShape([[]], referencePaths);
+    expect(degenerate.sustainedTangentMismatchRejection.passed).toBe(true);
+    const malformed = pointsForPaths([`M 0 0 L 20 0 L 20 20 L 20 100`]);
+    const briefMismatch = pointsForPaths([`M 0 0 L 30 0 L 31 1 L 100 0`]);
+    const reversed = pointsForPaths([`M 100 0 L 0 0`]);
+
+    const enabledMalformed = gradeCharacterShape(malformed, referencePaths);
+    expect(enabledMalformed.sustainedTangentMismatchRejection.passed).toBe(
+      false,
+    );
+    expect(
+      enabledMalformed.sustainedTangentMismatchRejection.offendingStrokes
+        .length,
+    ).toBeGreaterThan(0);
+
+    const disabledMalformed = gradeCharacterShape(malformed, referencePaths, {
+      sustainedTangentMismatchEnabled: false,
+    });
+    expect(disabledMalformed.sustainedTangentMismatchRejection.passed).toBe(
+      true,
+    );
+
+    const brief = gradeCharacterShape(briefMismatch, referencePaths);
+    expect(brief.sustainedTangentMismatchRejection.passed).toBe(true);
+
+    const reversedResult = gradeCharacterShape(reversed, referencePaths);
+    expect(reversedResult.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ kind: `reversed-stroke` }),
+      ]),
+    );
+    expect(
+      reversedResult.sustainedTangentMismatchRejection.offendingStrokes,
+    ).toEqual([]);
+  });
+
+  test(`uses sustained-region boundaries and filters isolated noise`, () => {
+    const exactBoundary = calculateShapeContextSustainedTangentRegions(
+      Array.from({ length: 33 }, (_, index) => (index <= 18 ? 45 : 0)),
+      45,
+      0.05,
+    );
+    expect(exactBoundary).toHaveLength(1);
+    expect(exactBoundary[0]?.lengthFraction).toBeCloseTo(18 / 32);
+
+    const isolatedNoise = calculateShapeContextSustainedTangentRegions(
+      [0, 0, 90, 0, 0],
+      45,
+      0.05,
+      5,
+    );
+    expect(isolatedNoise).toEqual([]);
+
+    const exactDegenerate = calculateShapeContextSustainedTangentRegions(
+      [],
+      45,
+      0.05,
+    );
+    expect(exactDegenerate).toEqual([]);
   });
 
   test(`is invariant to translation and uniform scale`, () => {
@@ -2050,120 +3187,136 @@ describe(`gradeCharacterShape`, () => {
     ({ expectedIssues, unexpectedIssues }) =>
       (expectedIssues?.length ?? 0) > 0 || (unexpectedIssues?.length ?? 0) > 0,
   )) {
-    test(`${example.id} independently checks declared writing issues`, async () => {
-      const character = shapeContextGraderExampleCharacter(example);
-      const referencePaths = await characterPathsFor(character);
-      const geometry = gradeCharacterShape(
-        decodeShapeContextStrokes(example.drawnStrokes),
-        referencePaths,
-        example.options,
-      );
-      const expectationStatus = evaluateWritingIssueExpectations(
-        geometry.issues,
-        example.expectedIssues,
-        example.unexpectedIssues,
-      );
+    test(
+      `${example.id} independently checks declared writing issues`,
+      {
+        fails: handwritingDiagnoseMode
+          ? false
+          : (example.expectedIssues?.some(
+              ({ kind }) => kind === `wrong-stroke-order`,
+            ) ?? false),
+      },
+      async () => {
+        const character = shapeContextGraderExampleCharacter(example);
+        const referencePaths = await characterPathsFor(character);
+        const geometry = gradeCharacterShape(
+          decodeShapeContextStrokes(example.drawnStrokes),
+          referencePaths,
+          example.options,
+        );
+        const expectationStatus = evaluateWritingIssueExpectations(
+          geometry.issues,
+          example.expectedIssues,
+          example.unexpectedIssues,
+        );
 
-      expect(
-        expectationStatus.allSatisfied,
-        `${example.id}: expected issue assertions ${JSON.stringify(
-          expectationStatus,
-        )}; actual issues ${JSON.stringify(geometry.issues)}`,
-      ).toBe(true);
-    });
+        expect(
+          expectationStatus.allSatisfied,
+          `${example.id}: expected issue assertions ${JSON.stringify(
+            expectationStatus,
+          )}; actual issues ${JSON.stringify(geometry.issues)}`,
+        ).toBe(true);
+      },
+    );
   }
 
   for (const example of positiveHandwritingExamples) {
-    test(`${example.id} (example) applies acceptance criteria`, async (context) => {
-      const character = shapeContextGraderExampleCharacter(example);
-      const [referencePaths, similarReferences] = await Promise.all([
-        characterPathsFor(character),
-        visuallySimilarReferencesFor(character),
-      ]);
-      expect(referencePaths.length).toBeGreaterThan(0);
-      const drawnStrokes = decodeShapeContextStrokes(example.drawnStrokes);
-      const gradingStartedAt = performance.now();
-      const result = gradeCharacterShape(
-        drawnStrokes,
-        referencePaths,
-        example.options,
-      );
-      const similarCharacterGrades = gradeSimilarCharacters(
-        drawnStrokes,
-        similarReferences,
-        result.options,
-        result.sampleCount,
-      );
-      const acceptance = evaluateHanziCharacterWritingAcceptance(
-        result,
-        similarCharacterGrades,
-      );
-      const accepted = acceptance.finalAccepted;
-      if (example.id === `人-1794543326583`) {
-        expect(acceptance.primaryShapeThreshold.observedValue).toBeCloseTo(
-          0.787,
-          4,
+    test(
+      `${example.id} (example) applies acceptance criteria`,
+      { fails: handwritingDiagnoseMode ? false : example.fails },
+      async (context) => {
+        const character = shapeContextGraderExampleCharacter(example);
+        const [referencePaths, similarReferences] = await Promise.all([
+          characterPathsFor(character),
+          visuallySimilarReferencesFor(character),
+        ]);
+        expect(referencePaths.length).toBeGreaterThan(0);
+        const drawnStrokes = decodeShapeContextStrokes(example.drawnStrokes);
+        const gradingStartedAt = performance.now();
+        const result = gradeCharacterShape(
+          drawnStrokes,
+          referencePaths,
+          example.options,
         );
-        expect(acceptance.primaryShapeThreshold.passed).toBe(true);
-        expect(acceptance.contrastiveCheck.ran).toBe(true);
-        expect(acceptance.contrastiveCheck.metric).toBe(`shapeSimilarity`);
-        expect(acceptance.contrastiveCheck.passed).toBe(true);
-        expect(
-          acceptance.contrastiveCheck.rejectingCandidateCharacter,
-        ).toBeNull();
-        const ruComparison = acceptance.contrastiveCheck.candidates.find(
-          ({ character: candidate }) => candidate === `入`,
+        const similarCharacterGrades = gradeSimilarCharacters(
+          drawnStrokes,
+          similarReferences,
+          result.options,
+          result.sampleCount,
         );
-        expect(ruComparison).toEqual(
-          expect.objectContaining({
-            evaluated: true,
-            passed: true,
-            observedMargin: expect.any(Number),
-          }),
+        const acceptance = evaluateHanziCharacterWritingAcceptance(
+          result,
+          similarCharacterGrades,
         );
-        expect(ruComparison?.observedMargin).toBeCloseTo(0.0700205, 6);
-      }
-      recordHandwritingEvaluation({
-        example,
-        character,
-        drawnStrokes,
-        referencePaths,
-        expectedAcceptance: true,
-        actualAcceptance: accepted,
-        acceptance,
-        geometry: result,
-        similarCharacterGrades,
-        durationMs: performance.now() - gradingStartedAt,
-      });
-      if (handwritingDiagnoseMode) {
-        await annotateShapeContextGraderExample({
-          context,
+        const accepted = acceptance.finalAccepted;
+        if (example.id === `人-1794543326583`) {
+          expect(acceptance.primaryShapeThreshold.observedValue).toBeCloseTo(
+            0.787,
+            4,
+          );
+          expect(acceptance.primaryShapeThreshold.passed).toBe(true);
+          expect(acceptance.contrastiveCheck.ran).toBe(true);
+          expect(acceptance.contrastiveCheck.metric).toBe(`shapeSimilarity`);
+          expect(acceptance.contrastiveCheck.passed).toBe(true);
+          expect(
+            acceptance.contrastiveCheck.rejectingCandidateCharacter,
+          ).toBeNull();
+          const ruComparison = acceptance.contrastiveCheck.candidates.find(
+            ({ character: candidate }) => candidate === `入`,
+          );
+          expect(ruComparison).toEqual(
+            expect.objectContaining({
+              evaluated: true,
+              passed: true,
+              observedMargin: expect.any(Number),
+            }),
+          );
+          expect(ruComparison?.observedMargin).toBeCloseTo(0.0700205, 6);
+        }
+        recordHandwritingEvaluation({
           example,
           character,
           drawnStrokes,
           referencePaths,
+          expectedAcceptance: true,
+          actualAcceptance: accepted,
+          acceptance,
           geometry: result,
           similarCharacterGrades,
-          acceptance,
-          expectedAcceptance: true,
-          gradingDurationMs: performance.now() - gradingStartedAt,
+          durationMs: performance.now() - gradingStartedAt,
         });
-      }
-      expect(
-        similarCharacterGrades.every(
-          ({ geometry }) => geometry.sampleCount === result.sampleCount,
-        ),
-      ).toBe(true);
-      expect(accepted).toBe(
-        acceptance.strokeCompleteness.passed &&
-          result.shapeSimilarity >= hanziCharacterWritingSimilarityThreshold &&
+        if (handwritingDiagnoseMode) {
+          await annotateShapeContextGraderExample({
+            context,
+            example,
+            character,
+            drawnStrokes,
+            referencePaths,
+            geometry: result,
+            similarCharacterGrades,
+            acceptance,
+            expectedAcceptance: true,
+            gradingDurationMs: performance.now() - gradingStartedAt,
+          });
+        }
+        expect(
           similarCharacterGrades.every(
-            ({ geometry }) => result.shapeSimilarity > geometry.shapeSimilarity,
+            ({ geometry }) => geometry.sampleCount === result.sampleCount,
           ),
-      );
-      expect(acceptance.strokeCompleteness.passed).toBe(true);
-      expect(accepted).toBe(true);
-    });
+        ).toBe(true);
+        expect(accepted).toBe(
+          acceptance.strokeCompleteness.passed &&
+            result.shapeSimilarity >=
+              hanziCharacterWritingSimilarityThreshold &&
+            similarCharacterGrades.every(
+              ({ geometry }) =>
+                result.shapeSimilarity > geometry.shapeSimilarity,
+            ),
+        );
+        expect(acceptance.strokeCompleteness.passed).toBe(true);
+        expect(accepted).toBe(true);
+      },
+    );
   }
 
   test(`rejects 牛 with its central vertical stroke omitted`, async () => {

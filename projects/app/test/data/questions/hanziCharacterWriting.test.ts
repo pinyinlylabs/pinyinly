@@ -272,6 +272,10 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
     );
     expect(noCandidates).toMatchObject({
       primaryShapeThreshold: { passed: true },
+      sustainedTangentMismatchCheck: {
+        enabled: expect.any(Boolean),
+        passed: true,
+      },
       contrastiveCheck: {
         ran: true,
         passed: true,
@@ -349,6 +353,50 @@ describe(`gradeHanziCharacterWritingQuestion`, () => {
       },
       finalAccepted: false,
       rejectionCondition: `primaryShapeThresholdFailed`,
+    });
+
+    const sustainedMismatch = {
+      ...targetGeometry,
+      sustainedTangentMismatchRejection: {
+        enabled: true,
+        passed: false,
+        thresholdDegrees: 45,
+        minimumLengthFraction: 0.5625,
+        noiseLengthFraction: 0.05,
+        tangentWindowFraction: 0.1,
+        offendingStrokes: [
+          {
+            handwritingStrokeIndex: 0,
+            referenceStrokeIndex: 0,
+            direction: `forward` as const,
+            longestSustainedMismatchFraction: 0.5625,
+            regions: [
+              {
+                startFraction: 0,
+                endFraction: 0.5625,
+                lengthFraction: 0.5625,
+                mismatchSampleCount: 19,
+                isolatedSpike: false,
+              },
+            ],
+          },
+        ],
+      },
+    };
+    const sustainedDecision = evaluateHanziCharacterWritingAcceptance(
+      sustainedMismatch,
+      [],
+    );
+    expect(sustainedDecision).toMatchObject({
+      sustainedTangentMismatchCheck: {
+        enabled: true,
+        passed: false,
+        thresholdDegrees: 45,
+        minimumLengthFraction: 0.5625,
+        tangentWindowFraction: 0.1,
+      },
+      finalAccepted: false,
+      rejectionCondition: `sustainedTangentMismatch`,
     });
   });
 });

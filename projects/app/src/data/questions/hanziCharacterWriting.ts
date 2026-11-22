@@ -22,6 +22,7 @@ import {
 import type {
   ShapeContextGrade,
   ShapeContextOptions,
+  ShapeContextSustainedTangentStrokeResult,
   WritingStrokePoint,
 } from "@/util/shapeContextGrader";
 import type { Rating } from "@/util/fsrs";
@@ -70,11 +71,20 @@ export interface HanziCharacterWritingAcceptanceDecision {
       passed: boolean | null;
     }>;
   };
+  sustainedTangentMismatchCheck?: {
+    enabled: boolean;
+    passed: boolean;
+    thresholdDegrees: number;
+    minimumLengthFraction: number;
+    tangentWindowFraction: number;
+    offendingStrokes: ShapeContextSustainedTangentStrokeResult[];
+  };
   finalAccepted: boolean;
   rejectionCondition:
     | `missingReferenceStroke`
     | `primaryShapeThresholdFailed`
     | `candidateShapeSimilarityNotLower`
+    | `sustainedTangentMismatch`
     | null;
 }
 
@@ -127,13 +137,30 @@ export function evaluateHanziCharacterWritingAcceptance(
     }
   }
 
-  const rejectionCondition = referenceStrokesComplete
-    ? primaryPassed
-      ? contrastivePassed === false
-        ? `candidateShapeSimilarityNotLower`
-        : null
-      : `primaryShapeThresholdFailed`
-    : `missingReferenceStroke`;
+  const sustainedTangentMismatch = geometry.sustainedTangentMismatchRejection;
+  const sustainedTangentMismatchCheck = {
+    enabled: sustainedTangentMismatch.enabled,
+    passed: sustainedTangentMismatch.passed,
+    thresholdDegrees: sustainedTangentMismatch.thresholdDegrees,
+    minimumLengthFraction: sustainedTangentMismatch.minimumLengthFraction,
+    tangentWindowFraction: sustainedTangentMismatch.tangentWindowFraction,
+    offendingStrokes: sustainedTangentMismatch.offendingStrokes,
+  };
+  let rejectionCondition:
+    | `missingReferenceStroke`
+    | `primaryShapeThresholdFailed`
+    | `candidateShapeSimilarityNotLower`
+    | `sustainedTangentMismatch`
+    | null = null;
+  if (!referenceStrokesComplete) {
+    rejectionCondition = `missingReferenceStroke`;
+  } else if (!primaryPassed) {
+    rejectionCondition = `primaryShapeThresholdFailed`;
+  } else if (contrastivePassed === false) {
+    rejectionCondition = `candidateShapeSimilarityNotLower`;
+  } else if (!sustainedTangentMismatch.passed) {
+    rejectionCondition = `sustainedTangentMismatch`;
+  }
 
   return {
     primaryShapeThreshold: {
@@ -162,8 +189,12 @@ export function evaluateHanziCharacterWritingAcceptance(
       skippedReason: primaryPassed ? null : `primaryShapeThresholdFailed`,
       candidates,
     },
+    sustainedTangentMismatchCheck,
     finalAccepted:
-      referenceStrokesComplete && primaryPassed && contrastivePassed === true,
+      referenceStrokesComplete &&
+      primaryPassed &&
+      contrastivePassed === true &&
+      sustainedTangentMismatch.passed,
     rejectionCondition,
   };
 }
@@ -191,6 +222,7 @@ export function gradeSimilarCharacters(
       medianPaths,
       options,
       sampleCount,
+      false,
       false,
     ),
   }));

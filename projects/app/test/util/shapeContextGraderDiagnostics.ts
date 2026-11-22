@@ -11,8 +11,11 @@ import type {
   WritingStrokePoint,
 } from "#util/shapeContextGrader.ts";
 import {
+  calculateShapeContextSustainedTangentRegions,
   extractReferenceStrokeSegment,
   extractWritingStrokeSegment,
+  resampleShapeContextStrokeByArcLength,
+  shapeContextSampledTangentDirections,
 } from "#util/shapeContextGrader.ts";
 
 /** Serialized points use [x, y]; point indices flatten strokes in stroke and point order. */
@@ -20,7 +23,7 @@ export type ShapeContextDiagnosticPoint = [x: number, y: number];
 
 export interface ShapeContextGraderDiagnostic {
   /** Bump when changing this generated report format. */
-  schemaVersion: 20;
+  schemaVersion: 24;
   fixtureId: string;
   targetCharacter: string;
   expectedAcceptance: boolean;
@@ -42,6 +45,9 @@ export interface ShapeContextGraderDiagnostic {
     extraHandwritingStrokePenalty: number;
     acceptanceThreshold: number;
   };
+  strokeGeometry: ShapeContextStrokeGeometryDiagnostics;
+  trajectory: ShapeContextTrajectoryDiagnostics;
+  terminalHooks: ShapeContextTerminalHookDiagnostics;
   issues: WritingIssue[];
   issueExpectations: WritingIssueExpectationDiagnostics;
   contrastiveCandidates: Array<{
@@ -70,6 +76,8 @@ export interface ShapeContextGraderDiagnostic {
       | `correspondences`
       | `sourceStrokes`
       | `targetStrokes`
+      | `originalSourceStrokes`
+      | `originalTargetStrokes`
     > & {
       sourceStrokes: ShapeContextDiagnosticPoint[][];
       targetStrokes: ShapeContextDiagnosticPoint[][];
@@ -210,6 +218,1053 @@ function strokeArcLength(stroke: readonly WritingStrokePoint[]): number {
     }
   }
   return length;
+}
+
+export interface ShapeContextStrokeGeometryMetric {
+  handwritingStrokeIndex: number;
+  referenceStrokeIndex: number;
+  meanPointDistance: number;
+  maximumPointDistance: number;
+  p90PointDistance: number;
+  handwritingArcLength: number;
+  referenceArcLength: number;
+  relativeArcLength: number;
+  dtwCost: number;
+  pairCost: number;
+}
+
+export interface ShapeContextStrokeGeometryDiagnostics {
+  matchedStrokeCount: number;
+  meanStrokeError: number;
+  maximumStrokeError: number;
+  p90StrokeError: number;
+  maximumIndividualPointDistance: number;
+  arcLengthWeightedMeanStrokeError: number;
+  strokeFractionsExceedingThreshold: Record<
+    `0.1` | `0.15` | `0.2` | `0.25` | `0.3`,
+    number
+  >;
+  individualStrokes: ShapeContextStrokeGeometryMetric[];
+}
+
+export interface ShapeContextTrajectoryBend {
+  fraction: number;
+  signedAngleDegrees: number;
+  scale: number;
+}
+
+export interface ShapeContextSustainedMismatchRegion {
+  startFraction: number;
+  endFraction: number;
+  lengthFraction: number;
+  mismatchSampleCount: number;
+  isolatedSpike: boolean;
+}
+
+export interface ShapeContextSustainedMismatchThreshold {
+  thresholdDegrees: number;
+  totalMismatchFraction: number;
+  longestRawRegionLengthFraction: number;
+  rawRegions: ShapeContextSustainedMismatchRegion[];
+  sustainedRegionsByMinimumLength: Record<
+    `0.05` | `0.1` | `0.15` | `0.2`,
+    {
+      minimumLengthFraction: number;
+      longestRegionLengthFraction: number;
+      totalMismatchFraction: number;
+      regionCount: number;
+      regions: ShapeContextSustainedMismatchRegion[];
+    }
+  >;
+}
+
+export interface ShapeContextTrajectoryStrokeMetric {
+  handwritingStrokeIndex: number;
+  referenceStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  meanTangentMismatchDegrees: number;
+  p90TangentMismatchDegrees: number;
+  maximumTangentMismatchDegrees: number;
+  sustainedMismatch: Record<
+    `30` | `45` | `60` | `75` | `90`,
+    ShapeContextSustainedMismatchThreshold
+  >;
+  turning: Record<
+    `0.05` | `0.1` | `0.2`,
+    {
+      handwritingTotalAbsoluteTurningDegrees: number;
+      referenceTotalAbsoluteTurningDegrees: number;
+      handwritingNetTurningDegrees: number;
+      referenceNetTurningDegrees: number;
+      totalAbsoluteTurningDifferenceDegrees: number;
+      netTurningDifferenceDegrees: number;
+    }
+  >;
+  handwritingBends: ShapeContextTrajectoryBend[];
+  referenceBends: ShapeContextTrajectoryBend[];
+  unmatchedHandwritingBends: ShapeContextTrajectoryBend[];
+  unmatchedReferenceBends: ShapeContextTrajectoryBend[];
+  sampledFractions: number[];
+  handwritingSampledTangentsDegrees: number[];
+  referenceSampledTangentsDegrees: number[];
+  tangentMismatchDegrees: number[];
+}
+
+export interface ShapeContextTerminalHookMeasurement {
+  terminalTurnDegrees: number;
+  terminalSegmentLengthFraction: number;
+  terminalSegmentStartFraction: number;
+  confidence: number;
+  classification: `present` | `ambiguous` | `absent`;
+  simplifiedPointCount: number;
+}
+
+export interface ShapeContextTerminalHookPair {
+  handwritingStrokeIndex: number;
+  referenceStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  reference: ShapeContextTerminalHookMeasurement;
+  handwriting: ShapeContextTerminalHookMeasurement;
+  observation:
+    | `reference-hook-present-handwriting-hook-present`
+    | `reference-hook-present-handwriting-hook-missing`
+    | `reference-hook-present-handwriting-hook-malformed`
+    | `reference-hook-ambiguous`
+    | `reference-hook-not-detected`;
+  terminalTurnDifferenceDegrees: number;
+  terminalLengthRatioDifference: number;
+}
+
+export interface ShapeContextTerminalHookDiagnostics {
+  matchedStrokeCount: number;
+  pairs: ShapeContextTerminalHookPair[];
+}
+
+export interface ShapeContextTrajectoryDiagnostics {
+  matchedStrokeCount: number;
+  meanStrokeTangentMismatchDegrees: number;
+  p90StrokeTangentMismatchDegrees: number;
+  maximumStrokeTangentMismatchDegrees: number;
+  unmatchedHandwritingBendCount: number;
+  unmatchedReferenceBendCount: number;
+  individualStrokes: ShapeContextTrajectoryStrokeMetric[];
+  sustainedMismatch: Record<
+    `30` | `45` | `60` | `75` | `90`,
+    Record<
+      `0.05` | `0.1` | `0.15` | `0.2`,
+      {
+        minimumLengthFraction: number;
+        maximumSustainedMismatchLengthFraction: number;
+        maximumTotalMismatchFraction: number;
+        strokeCountWithSustainedMismatch: number;
+        worstHandwritingStrokeIndex: number | null;
+        worstReferenceStrokeIndex: number | null;
+      }
+    >
+  >;
+}
+
+function percentile(values: readonly number[], fraction: number): number {
+  if (values.length === 0) {
+    return 0;
+  }
+  const sorted = [...values].sort((left, right) => left - right);
+  const position = fraction * (sorted.length - 1);
+  const lowerIndex = Math.floor(position);
+  const upperIndex = Math.ceil(position);
+  const lower = sorted[lowerIndex] ?? 0;
+  const upper = sorted[upperIndex] ?? lower;
+  return lower + (upper - lower) * (position - lowerIndex);
+}
+
+function calculateSustainedMismatch(
+  tangentMismatchDegrees: readonly number[],
+  thresholdDegrees: number,
+): ShapeContextSustainedMismatchThreshold {
+  const rawRegions = calculateShapeContextSustainedTangentRegions(
+    tangentMismatchDegrees,
+    thresholdDegrees,
+    0,
+  );
+  const mismatchedSampleCount = tangentMismatchDegrees.filter(
+    (mismatch) => mismatch >= thresholdDegrees,
+  ).length;
+  const sustainedRegionsByMinimumLength = Object.fromEntries(
+    ([0.05, 0.1, 0.15, 0.2] as const).map((minimumLengthFraction) => {
+      const regions = rawRegions.filter(
+        (region) => region.lengthFraction >= minimumLengthFraction,
+      );
+      let longestRegionLengthFraction = 0;
+      for (const region of regions) {
+        longestRegionLengthFraction = Math.max(
+          longestRegionLengthFraction,
+          region.lengthFraction,
+        );
+      }
+      return [
+        String(minimumLengthFraction),
+        {
+          minimumLengthFraction,
+          longestRegionLengthFraction,
+          totalMismatchFraction: tangentsMismatchFraction(
+            tangentMismatchDegrees,
+            thresholdDegrees,
+          ),
+          regionCount: regions.length,
+          regions,
+        },
+      ];
+    }),
+  ) as ShapeContextSustainedMismatchThreshold[`sustainedRegionsByMinimumLength`];
+  let longestRawRegionLengthFraction = 0;
+  for (const region of rawRegions) {
+    longestRawRegionLengthFraction = Math.max(
+      longestRawRegionLengthFraction,
+      region.lengthFraction,
+    );
+  }
+
+  return {
+    thresholdDegrees,
+    totalMismatchFraction:
+      tangentMismatchDegrees.length === 0
+        ? 0
+        : mismatchedSampleCount / tangentMismatchDegrees.length,
+    longestRawRegionLengthFraction,
+    rawRegions,
+    sustainedRegionsByMinimumLength,
+  };
+}
+
+function tangentsMismatchFraction(
+  tangentMismatchDegrees: readonly number[],
+  thresholdDegrees: number,
+): number {
+  if (tangentMismatchDegrees.length === 0) {
+    return 0;
+  }
+  return (
+    tangentMismatchDegrees.filter((mismatch) => mismatch >= thresholdDegrees)
+      .length / tangentMismatchDegrees.length
+  );
+}
+
+function resampleStrokeByArcLength(
+  stroke: readonly WritingStrokePoint[],
+  pointCount = 33,
+): WritingStrokePoint[] {
+  return resampleShapeContextStrokeByArcLength(stroke, pointCount);
+}
+
+function normalizedAngleDegrees(radians: number): number {
+  let degrees = (radians * 180) / Math.PI;
+  while (degrees > 180) {
+    degrees -= 360;
+  }
+  while (degrees < -180) {
+    degrees += 360;
+  }
+  return degrees;
+}
+
+function absoluteAngleDifferenceDegrees(left: number, right: number): number {
+  const difference = normalizedAngleDegrees(((left - right) * Math.PI) / 180);
+  return Math.abs(difference);
+}
+
+function sampledTangentDirections(
+  sampledStroke: readonly WritingStrokePoint[],
+  windowFraction = 0.1,
+): number[] {
+  return shapeContextSampledTangentDirections(sampledStroke, windowFraction);
+}
+
+function strokePointDistanceToLine(
+  point: WritingStrokePoint,
+  start: WritingStrokePoint,
+  end: WritingStrokePoint,
+): number {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (lengthSquared === 0) {
+    return Math.hypot(point.x - start.x, point.y - start.y);
+  }
+  const fraction =
+    ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
+  const closestX = start.x + fraction * dx;
+  const closestY = start.y + fraction * dy;
+  return Math.hypot(point.x - closestX, point.y - closestY);
+}
+
+function simplifyPolyline(
+  stroke: readonly WritingStrokePoint[],
+  epsilonFraction: number,
+): WritingStrokePoint[] {
+  if (stroke.length <= 2) {
+    return [...stroke];
+  }
+  const totalLength = strokeArcLength(stroke);
+  const epsilon = totalLength * epsilonFraction;
+  const keep = new Uint8Array(stroke.length);
+  keep[0] = 1;
+  keep[stroke.length - 1] = 1;
+  const pending: Array<{ start: number; end: number }> = [
+    { start: 0, end: stroke.length - 1 },
+  ];
+  while (pending.length > 0) {
+    const range = pending.pop();
+    if (range == null) {
+      break;
+    }
+    const start = stroke[range.start];
+    const end = stroke[range.end];
+    if (start == null || end == null) {
+      continue;
+    }
+    let maximumDistance = 0;
+    let maximumIndex = -1;
+    for (let index = range.start + 1; index < range.end; index++) {
+      const point = stroke[index];
+      if (point == null) {
+        continue;
+      }
+      const distance = strokePointDistanceToLine(point, start, end);
+      if (distance > maximumDistance) {
+        maximumDistance = distance;
+        maximumIndex = index;
+      }
+    }
+    if (maximumIndex >= 0 && maximumDistance > epsilon) {
+      keep[maximumIndex] = 1;
+      pending.push(
+        { start: range.start, end: maximumIndex },
+        { start: maximumIndex, end: range.end },
+      );
+    }
+  }
+  const result: WritingStrokePoint[] = [];
+  for (let index = 0; index < stroke.length; index++) {
+    if (keep[index] === 1) {
+      const point = stroke[index];
+      if (point != null) {
+        result.push(point);
+      }
+    }
+  }
+  return result;
+}
+
+function terminalHookMeasurement(
+  stroke: readonly WritingStrokePoint[],
+): ShapeContextTerminalHookMeasurement {
+  if (stroke.length < 2) {
+    return {
+      terminalTurnDegrees: 0,
+      terminalSegmentLengthFraction: 0,
+      terminalSegmentStartFraction: 1,
+      confidence: 0,
+      classification: `absent`,
+      simplifiedPointCount: stroke.length,
+    };
+  }
+  const sampled = resampleStrokeByArcLength([...stroke]);
+  const totalLength = strokeArcLength(sampled);
+  let bestTurn = 0;
+  let bestStartFraction = 1;
+  let bestLengthRatio = 0;
+  let bestConfidence = 0;
+  for (let splitIndex = 21; splitIndex <= 29; splitIndex++) {
+    const splitFraction = splitIndex / 32;
+    const mainStartIndex = Math.max(0, splitIndex - Math.round(0.1 * 32));
+    const mainStart = sampled[mainStartIndex];
+    const split = sampled[splitIndex];
+    const endpoint = sampled.at(-1);
+    if (mainStart == null || split == null || endpoint == null) {
+      continue;
+    }
+    const mainDirection =
+      (Math.atan2(split.y - mainStart.y, split.x - mainStart.x) * 180) /
+      Math.PI;
+    const terminalDirection =
+      (Math.atan2(endpoint.y - split.y, endpoint.x - split.x) * 180) / Math.PI;
+    const signedTurn = normalizedAngleDegrees(
+      ((terminalDirection - mainDirection) * Math.PI) / 180,
+    );
+    const absoluteTurn = Math.abs(signedTurn);
+    const terminalLength =
+      splitIndex >= 32 ? 0 : strokeArcLength(sampled.slice(splitIndex));
+    const terminalLengthRatio =
+      totalLength > 0 ? terminalLength / totalLength : 0;
+    if (terminalLengthRatio < 0.05 || terminalLengthRatio > 0.35) {
+      continue;
+    }
+    const turnConfidence = Math.min(1, Math.max(0, (absoluteTurn - 20) / 40));
+    const lengthConfidence =
+      terminalLengthRatio >= 0.08 && terminalLengthRatio <= 0.25 ? 1 : 0.65;
+    const confidence = turnConfidence * lengthConfidence;
+    if (
+      absoluteTurn > bestTurn ||
+      (absoluteTurn === bestTurn && confidence > bestConfidence)
+    ) {
+      bestTurn = absoluteTurn;
+      bestStartFraction = splitFraction;
+      bestLengthRatio = terminalLengthRatio;
+      bestConfidence = confidence;
+    }
+  }
+  const simplified = simplifyPolyline(stroke, 0.02);
+  const classification =
+    bestTurn >= 35 ? `present` : bestTurn >= 20 ? `ambiguous` : `absent`;
+  return {
+    terminalTurnDegrees: bestTurn,
+    terminalSegmentLengthFraction: bestLengthRatio,
+    terminalSegmentStartFraction: bestStartFraction,
+    confidence: bestConfidence,
+    classification,
+    simplifiedPointCount: simplified.length,
+  };
+}
+
+function cumulativeTurning(
+  tangents: readonly number[],
+  windowFraction: number,
+): {
+  totalAbsoluteTurningDegrees: number;
+  netTurningDegrees: number;
+} {
+  let totalAbsoluteTurningDegrees = 0;
+  let netTurningDegrees = 0;
+  for (let index = 1; index < tangents.length; index++) {
+    const previous = tangents[index - 1];
+    const current = tangents[index];
+    if (previous == null || current == null) {
+      continue;
+    }
+    const signedTurn = normalizedAngleDegrees(
+      ((current - previous) * Math.PI) / 180,
+    );
+    totalAbsoluteTurningDegrees += Math.abs(signedTurn);
+    netTurningDegrees += signedTurn;
+  }
+  void windowFraction;
+  return { totalAbsoluteTurningDegrees, netTurningDegrees };
+}
+
+function detectTrajectoryBends(
+  tangents: readonly number[],
+  scale: number,
+): ShapeContextTrajectoryBend[] {
+  const bendIndices: number[] = [];
+  for (let index = 1; index < tangents.length - 1; index++) {
+    const previous = tangents[index - 1];
+    const current = tangents[index];
+    const next = tangents[index + 1];
+    if (previous == null || current == null || next == null) {
+      continue;
+    }
+    const before = normalizedAngleDegrees(
+      ((current - previous) * Math.PI) / 180,
+    );
+    const after = normalizedAngleDegrees(((next - current) * Math.PI) / 180);
+    const signedAngle = before + after;
+    if (Math.abs(signedAngle) >= 45) {
+      bendIndices.push(index);
+    }
+  }
+  const clusters: number[][] = [];
+  for (const index of bendIndices) {
+    const previousCluster = clusters.at(-1);
+    if (previousCluster != null && index <= previousCluster.at(-1)! + 1) {
+      previousCluster.push(index);
+    } else {
+      clusters.push([index]);
+    }
+  }
+  return clusters.flatMap((cluster) => {
+    let strongestIndex = cluster[0] ?? 0;
+    let strongestMagnitude = 0;
+    for (const index of cluster) {
+      const previous = tangents[index - 1];
+      const current = tangents[index];
+      const next = tangents[index + 1];
+      if (previous == null || current == null || next == null) {
+        continue;
+      }
+      const before = normalizedAngleDegrees(
+        ((current - previous) * Math.PI) / 180,
+      );
+      const after = normalizedAngleDegrees(((next - current) * Math.PI) / 180);
+      const magnitude = Math.abs(before + after);
+      if (magnitude > strongestMagnitude) {
+        strongestMagnitude = magnitude;
+        strongestIndex = index;
+      }
+    }
+    const previous = tangents[strongestIndex - 1];
+    const current = tangents[strongestIndex];
+    const next = tangents[strongestIndex + 1];
+    if (previous == null || current == null || next == null) {
+      return [];
+    }
+    const signedAngle =
+      normalizedAngleDegrees(((current - previous) * Math.PI) / 180) +
+      normalizedAngleDegrees(((next - current) * Math.PI) / 180);
+    return [
+      {
+        fraction: strongestIndex / 32,
+        signedAngleDegrees: signedAngle,
+        scale,
+      },
+    ];
+  });
+}
+
+export function calculateShapeContextTerminalHookDiagnostics(
+  geometry: ShapeContextGrade,
+  excludedHandwritingOriginalStrokeIndices: readonly number[] = [],
+): ShapeContextTerminalHookDiagnostics {
+  const pairs: ShapeContextTerminalHookPair[] = [];
+  const cosine = Math.cos(geometry.transform.rotationRadians);
+  const sine = Math.sin(geometry.transform.rotationRadians);
+  for (const assignment of geometry.strokeAssignments) {
+    const handwritingOriginalIndex =
+      geometry.sourceStrokeOriginalIndices[assignment.sourceStrokeIndex] ??
+      assignment.sourceStrokeIndex;
+    const referenceOriginalIndex =
+      geometry.targetStrokeOriginalIndices[assignment.targetStrokeIndex] ??
+      assignment.targetStrokeIndex;
+    if (
+      excludedHandwritingOriginalStrokeIndices.includes(
+        handwritingOriginalIndex,
+      )
+    ) {
+      continue;
+    }
+    const handwritingCompact =
+      geometry.originalSourceStrokes[handwritingOriginalIndex];
+    const referenceCompact =
+      geometry.originalTargetStrokes[referenceOriginalIndex];
+    if (handwritingCompact == null || referenceCompact == null) {
+      continue;
+    }
+    const rotatedHandwriting = handwritingCompact.map((point) => ({
+      x: cosine * point.x - sine * point.y,
+      y: sine * point.x + cosine * point.y,
+    }));
+    const handwritingStroke =
+      assignment.direction === `reverse`
+        ? [...rotatedHandwriting].reverse()
+        : rotatedHandwriting;
+    const referenceStroke = [...referenceCompact];
+    const handwriting = terminalHookMeasurement(handwritingStroke);
+    const reference = terminalHookMeasurement(referenceStroke);
+    let observation: ShapeContextTerminalHookPair[`observation`];
+    if (reference.classification === `ambiguous`) {
+      observation = `reference-hook-ambiguous`;
+    } else if (reference.classification === `absent`) {
+      observation = `reference-hook-not-detected`;
+    } else if (handwriting.classification === `present`) {
+      observation = `reference-hook-present-handwriting-hook-present`;
+    } else if (handwriting.classification === `ambiguous`) {
+      observation = `reference-hook-present-handwriting-hook-malformed`;
+    } else {
+      observation = `reference-hook-present-handwriting-hook-missing`;
+    }
+    pairs.push({
+      handwritingStrokeIndex: handwritingOriginalIndex,
+      referenceStrokeIndex: referenceOriginalIndex,
+      direction: assignment.direction,
+      reference,
+      handwriting,
+      observation,
+      terminalTurnDifferenceDegrees: Math.abs(
+        handwriting.terminalTurnDegrees - reference.terminalTurnDegrees,
+      ),
+      terminalLengthRatioDifference: Math.abs(
+        handwriting.terminalSegmentLengthFraction -
+          reference.terminalSegmentLengthFraction,
+      ),
+    });
+  }
+  pairs.sort(
+    (left, right) => right.reference.confidence - left.reference.confidence,
+  );
+  return {
+    matchedStrokeCount: pairs.length,
+    pairs,
+  };
+}
+
+export function calculateShapeContextTrajectoryDiagnostics(
+  geometry: ShapeContextGrade,
+  excludedHandwritingOriginalStrokeIndices: readonly number[] = [],
+): ShapeContextTrajectoryDiagnostics {
+  const scales = [0.05, 0.1, 0.2] as const;
+  const individualStrokes = geometry.strokeAssignments
+    .flatMap((assignment) => {
+      const handwritingOriginalIndex =
+        geometry.sourceStrokeOriginalIndices[assignment.sourceStrokeIndex] ??
+        assignment.sourceStrokeIndex;
+      const referenceOriginalIndex =
+        geometry.targetStrokeOriginalIndices[assignment.targetStrokeIndex] ??
+        assignment.targetStrokeIndex;
+      if (
+        excludedHandwritingOriginalStrokeIndices.includes(
+          handwritingOriginalIndex,
+        )
+      ) {
+        return [];
+      }
+      const handwritingCompact =
+        geometry.originalSourceStrokes[handwritingOriginalIndex];
+      const referenceCompact =
+        geometry.originalTargetStrokes[referenceOriginalIndex];
+      if (handwritingCompact == null || referenceCompact == null) {
+        return [];
+      }
+      const cosine = Math.cos(geometry.transform.rotationRadians);
+      const sine = Math.sin(geometry.transform.rotationRadians);
+      const rotatedHandwriting = handwritingCompact.map((point) => ({
+        x: cosine * point.x - sine * point.y,
+        y: sine * point.x + cosine * point.y,
+      }));
+      const handwritingStroke =
+        assignment.direction === `reverse`
+          ? [...rotatedHandwriting].reverse()
+          : rotatedHandwriting;
+      const referenceStroke = [...referenceCompact];
+      if (handwritingStroke.length === 0 || referenceStroke.length === 0) {
+        return [];
+      }
+      const handwritingSampled = resampleStrokeByArcLength(handwritingStroke);
+      const referenceSampled = resampleStrokeByArcLength(referenceStroke);
+      const handwritingTangents = sampledTangentDirections(
+        handwritingSampled,
+        0.1,
+      );
+      const referenceTangents = sampledTangentDirections(referenceSampled, 0.1);
+      const tangentMismatchDegrees = handwritingTangents.map(
+        (tangent, index) => {
+          const reference = referenceTangents[index];
+          return reference == null
+            ? 0
+            : absoluteAngleDifferenceDegrees(tangent, reference);
+        },
+      );
+      const turning: ShapeContextTrajectoryStrokeMetric[`turning`] = {
+        "0.05": {
+          handwritingTotalAbsoluteTurningDegrees: 0,
+          referenceTotalAbsoluteTurningDegrees: 0,
+          handwritingNetTurningDegrees: 0,
+          referenceNetTurningDegrees: 0,
+          totalAbsoluteTurningDifferenceDegrees: 0,
+          netTurningDifferenceDegrees: 0,
+        },
+        "0.1": {
+          handwritingTotalAbsoluteTurningDegrees: 0,
+          referenceTotalAbsoluteTurningDegrees: 0,
+          handwritingNetTurningDegrees: 0,
+          referenceNetTurningDegrees: 0,
+          totalAbsoluteTurningDifferenceDegrees: 0,
+          netTurningDifferenceDegrees: 0,
+        },
+        "0.2": {
+          handwritingTotalAbsoluteTurningDegrees: 0,
+          referenceTotalAbsoluteTurningDegrees: 0,
+          handwritingNetTurningDegrees: 0,
+          referenceNetTurningDegrees: 0,
+          totalAbsoluteTurningDifferenceDegrees: 0,
+          netTurningDifferenceDegrees: 0,
+        },
+      };
+      for (const scale of scales) {
+        const handwritingTangentsAtScale = sampledTangentDirections(
+          handwritingSampled,
+          scale / 2,
+        );
+        const referenceTangentsAtScale = sampledTangentDirections(
+          referenceSampled,
+          scale / 2,
+        );
+        const handwritingTurning = cumulativeTurning(
+          handwritingTangentsAtScale,
+          scale,
+        );
+        const referenceTurning = cumulativeTurning(
+          referenceTangentsAtScale,
+          scale,
+        );
+        const key = scale === 0.05 ? `0.05` : scale === 0.1 ? `0.1` : `0.2`;
+        turning[key] = {
+          handwritingTotalAbsoluteTurningDegrees:
+            handwritingTurning.totalAbsoluteTurningDegrees,
+          referenceTotalAbsoluteTurningDegrees:
+            referenceTurning.totalAbsoluteTurningDegrees,
+          handwritingNetTurningDegrees: handwritingTurning.netTurningDegrees,
+          referenceNetTurningDegrees: referenceTurning.netTurningDegrees,
+          totalAbsoluteTurningDifferenceDegrees: Math.abs(
+            handwritingTurning.totalAbsoluteTurningDegrees -
+              referenceTurning.totalAbsoluteTurningDegrees,
+          ),
+          netTurningDifferenceDegrees:
+            handwritingTurning.netTurningDegrees -
+            referenceTurning.netTurningDegrees,
+        };
+      }
+      const handwritingBends: ShapeContextTrajectoryBend[] = [];
+      const referenceBends: ShapeContextTrajectoryBend[] = [];
+      for (const scale of scales) {
+        const handwritingTangentsAtScale = sampledTangentDirections(
+          handwritingSampled,
+          scale / 2,
+        );
+        const referenceTangentsAtScale = sampledTangentDirections(
+          referenceSampled,
+          scale / 2,
+        );
+        handwritingBends.push(
+          ...detectTrajectoryBends(handwritingTangentsAtScale, scale),
+        );
+        referenceBends.push(
+          ...detectTrajectoryBends(referenceTangentsAtScale, scale),
+        );
+      }
+      const unmatchedHandwritingBends = handwritingBends.filter(
+        (handwritingBend) =>
+          !referenceBends.some(
+            (referenceBend) =>
+              referenceBend.scale === handwritingBend.scale &&
+              Math.abs(referenceBend.fraction - handwritingBend.fraction) <=
+                0.08 &&
+              Math.sign(referenceBend.signedAngleDegrees) ===
+                Math.sign(handwritingBend.signedAngleDegrees),
+          ),
+      );
+      const unmatchedReferenceBends = referenceBends.filter(
+        (referenceBend) =>
+          !handwritingBends.some(
+            (handwritingBend) =>
+              handwritingBend.scale === referenceBend.scale &&
+              Math.abs(handwritingBend.fraction - referenceBend.fraction) <=
+                0.08 &&
+              Math.sign(handwritingBend.signedAngleDegrees) ===
+                Math.sign(referenceBend.signedAngleDegrees),
+          ),
+      );
+      let tangentMismatchTotal = 0;
+      for (const mismatch of tangentMismatchDegrees) {
+        tangentMismatchTotal += mismatch;
+      }
+      const meanTangentMismatchDegrees =
+        tangentMismatchDegrees.length === 0
+          ? 0
+          : tangentMismatchTotal / tangentMismatchDegrees.length;
+      const sustainedMismatch = {
+        "30": calculateSustainedMismatch(tangentMismatchDegrees, 30),
+        "45": calculateSustainedMismatch(tangentMismatchDegrees, 45),
+        "60": calculateSustainedMismatch(tangentMismatchDegrees, 60),
+        "75": calculateSustainedMismatch(tangentMismatchDegrees, 75),
+        "90": calculateSustainedMismatch(tangentMismatchDegrees, 90),
+      };
+      return [
+        {
+          handwritingStrokeIndex:
+            geometry.sourceStrokeOriginalIndices[
+              assignment.sourceStrokeIndex
+            ] ?? assignment.sourceStrokeIndex,
+          referenceStrokeIndex:
+            geometry.targetStrokeOriginalIndices[
+              assignment.targetStrokeIndex
+            ] ?? assignment.targetStrokeIndex,
+          direction: assignment.direction,
+          meanTangentMismatchDegrees,
+          p90TangentMismatchDegrees: percentile(tangentMismatchDegrees, 0.9),
+          maximumTangentMismatchDegrees:
+            tangentMismatchDegrees.length === 0
+              ? 0
+              : Math.max(...tangentMismatchDegrees),
+          sustainedMismatch,
+          turning,
+          handwritingBends,
+          referenceBends,
+          unmatchedHandwritingBends,
+          unmatchedReferenceBends,
+          sampledFractions: Array.from(
+            { length: 33 },
+            (_, index) => index / 32,
+          ),
+          handwritingSampledTangentsDegrees: handwritingTangents,
+          referenceSampledTangentsDegrees: referenceTangents,
+          tangentMismatchDegrees,
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        right.maximumTangentMismatchDegrees -
+        left.maximumTangentMismatchDegrees,
+    );
+  let unmatchedHandwritingBendCount = 0;
+  let unmatchedReferenceBendCount = 0;
+  let meanStrokeTangentMismatchDegrees = 0;
+  let maximumStrokeTangentMismatchDegrees = 0;
+  const strokeMaximumMismatchValues: number[] = [];
+  const strokeMeanMismatchValues: number[] = [];
+  for (const stroke of individualStrokes) {
+    unmatchedHandwritingBendCount += stroke.unmatchedHandwritingBends.length;
+    unmatchedReferenceBendCount += stroke.unmatchedReferenceBends.length;
+    strokeMaximumMismatchValues.push(stroke.maximumTangentMismatchDegrees);
+    strokeMeanMismatchValues.push(stroke.meanTangentMismatchDegrees);
+    maximumStrokeTangentMismatchDegrees = Math.max(
+      maximumStrokeTangentMismatchDegrees,
+      stroke.maximumTangentMismatchDegrees,
+    );
+  }
+  if (strokeMeanMismatchValues.length > 0) {
+    for (const value of strokeMeanMismatchValues) {
+      meanStrokeTangentMismatchDegrees += value;
+    }
+    meanStrokeTangentMismatchDegrees /= strokeMeanMismatchValues.length;
+  }
+  const sustainedMismatch = Object.fromEntries(
+    ([30, 45, 60, 75, 90] as const).map((thresholdDegrees) => [
+      String(thresholdDegrees),
+      Object.fromEntries(
+        ([0.05, 0.1, 0.15, 0.2] as const).map((minimumLengthFraction) => {
+          const minimumKey =
+            minimumLengthFraction === 0.05
+              ? `0.05`
+              : minimumLengthFraction === 0.1
+                ? `0.1`
+                : minimumLengthFraction === 0.15
+                  ? `0.15`
+                  : `0.2`;
+          const strokeMetrics = individualStrokes.map((stroke) => {
+            const threshold =
+              stroke.sustainedMismatch[
+                String(thresholdDegrees) as `30` | `45` | `60` | `75` | `90`
+              ];
+            const minimum =
+              threshold.sustainedRegionsByMinimumLength[minimumKey];
+            return { stroke, minimum, threshold };
+          });
+          let worst:
+            | {
+                stroke: (typeof strokeMetrics)[number][`stroke`];
+                longest: number;
+                total: number;
+              }
+            | undefined;
+          for (const metric of strokeMetrics) {
+            const longest = metric.minimum.longestRegionLengthFraction;
+            const total = metric.threshold.totalMismatchFraction;
+            if (
+              worst == null ||
+              longest > worst.longest ||
+              (longest === worst.longest && total > worst.total)
+            ) {
+              worst = { stroke: metric.stroke, longest, total };
+            }
+          }
+          const maximumSustainedMismatchLengthFraction = worst?.longest ?? 0;
+          let maximumTotalMismatchFraction = 0;
+          for (const metric of strokeMetrics) {
+            maximumTotalMismatchFraction = Math.max(
+              maximumTotalMismatchFraction,
+              metric.threshold.totalMismatchFraction,
+            );
+          }
+          return [
+            minimumKey,
+            {
+              minimumLengthFraction,
+              maximumSustainedMismatchLengthFraction,
+              maximumTotalMismatchFraction,
+              strokeCountWithSustainedMismatch: strokeMetrics.filter(
+                ({ minimum }) => minimum.regionCount > 0,
+              ).length,
+              worstHandwritingStrokeIndex:
+                worst?.stroke.handwritingStrokeIndex ?? null,
+              worstReferenceStrokeIndex:
+                worst?.stroke.referenceStrokeIndex ?? null,
+            },
+          ];
+        }),
+      ),
+    ]),
+  ) as ShapeContextTrajectoryDiagnostics[`sustainedMismatch`];
+  return {
+    matchedStrokeCount: individualStrokes.length,
+    meanStrokeTangentMismatchDegrees,
+    p90StrokeTangentMismatchDegrees: percentile(
+      strokeMaximumMismatchValues,
+      0.9,
+    ),
+    maximumStrokeTangentMismatchDegrees,
+    unmatchedHandwritingBendCount,
+    unmatchedReferenceBendCount,
+    individualStrokes,
+    sustainedMismatch,
+  };
+}
+
+export function calculateShapeContextStrokeGeometryDiagnostics(
+  geometry: ShapeContextGrade,
+  excludedHandwritingOriginalStrokeIndices: readonly number[] = [],
+): ShapeContextStrokeGeometryDiagnostics {
+  const individualStrokes = geometry.strokeAssignments
+    .flatMap((assignment) => {
+      const handwritingStroke =
+        geometry.sourceStrokes[assignment.sourceStrokeIndex];
+      const referenceStroke =
+        geometry.targetStrokes[assignment.targetStrokeIndex];
+      if (handwritingStroke == null || referenceStroke == null) {
+        return [];
+      }
+      const handwritingOriginalIndex =
+        geometry.sourceStrokeOriginalIndices[assignment.sourceStrokeIndex] ??
+        assignment.sourceStrokeIndex;
+      if (
+        excludedHandwritingOriginalStrokeIndices.includes(
+          handwritingOriginalIndex,
+        )
+      ) {
+        return [];
+      }
+      const pointDistances: number[] = [];
+      const cosine = Math.cos(geometry.transform.rotationRadians);
+      const sine = Math.sin(geometry.transform.rotationRadians);
+      for (const correspondence of geometry.correspondences) {
+        const sourceCompactStrokeIndex =
+          geometry.sourceStrokeIndices[correspondence.sourceIndex];
+        const targetCompactStrokeIndex =
+          geometry.targetStrokeIndices[correspondence.targetIndex];
+        if (
+          sourceCompactStrokeIndex !== assignment.sourceStrokeIndex ||
+          targetCompactStrokeIndex !== assignment.targetStrokeIndex
+        ) {
+          continue;
+        }
+        const sourcePoint = geometry.sourcePoints[correspondence.sourceIndex];
+        const targetPoint = correspondence.targetPoint;
+        if (sourcePoint == null) {
+          continue;
+        }
+        const rotatedSourcePoint = {
+          x: cosine * sourcePoint.x - sine * sourcePoint.y,
+          y: sine * sourcePoint.x + cosine * sourcePoint.y,
+        };
+        pointDistances.push(
+          Math.hypot(
+            rotatedSourcePoint.x - targetPoint.x,
+            rotatedSourcePoint.y - targetPoint.y,
+          ),
+        );
+      }
+      if (pointDistances.length === 0) {
+        return [];
+      }
+      const referenceOriginalIndex =
+        geometry.targetStrokeOriginalIndices[assignment.targetStrokeIndex] ??
+        assignment.targetStrokeIndex;
+      const handwritingOriginalStroke =
+        geometry.originalSourceStrokes[handwritingOriginalIndex];
+      const referenceOriginalStroke =
+        geometry.originalTargetStrokes[referenceOriginalIndex];
+      const handwritingArcLength =
+        handwritingOriginalStroke == null
+          ? strokeArcLength(handwritingStroke)
+          : strokeArcLength(handwritingOriginalStroke);
+      const referenceArcLength =
+        referenceOriginalStroke == null
+          ? strokeArcLength(referenceStroke)
+          : strokeArcLength(referenceOriginalStroke);
+      const pairCost =
+        geometry.strokePairCosts[assignment.sourceStrokeIndex]?.[
+          assignment.targetStrokeIndex
+        ];
+      let pointDistanceTotal = 0;
+      for (const pointDistance of pointDistances) {
+        pointDistanceTotal += pointDistance;
+      }
+      const meanPointDistance = pointDistanceTotal / pointDistances.length;
+      return [
+        {
+          handwritingStrokeIndex:
+            geometry.sourceStrokeOriginalIndices[
+              assignment.sourceStrokeIndex
+            ] ?? assignment.sourceStrokeIndex,
+          referenceStrokeIndex:
+            geometry.targetStrokeOriginalIndices[
+              assignment.targetStrokeIndex
+            ] ?? assignment.targetStrokeIndex,
+          meanPointDistance,
+          maximumPointDistance: Math.max(...pointDistances),
+          p90PointDistance: percentile(pointDistances, 0.9),
+          handwritingArcLength,
+          referenceArcLength,
+          relativeArcLength:
+            referenceArcLength > 0
+              ? handwritingArcLength / referenceArcLength
+              : 0,
+          dtwCost: pairCost?.dtwCost ?? 0,
+          pairCost: pairCost?.totalCost ?? 0,
+        },
+      ];
+    })
+    .sort((left, right) => right.meanPointDistance - left.meanPointDistance);
+
+  const meanErrors = individualStrokes.map(
+    ({ meanPointDistance }) => meanPointDistance,
+  );
+  let maximumIndividualPointDistance = 0;
+  let totalHandwritingArcLength = 0;
+  let arcLengthWeightedErrorTotal = 0;
+  for (const stroke of individualStrokes) {
+    maximumIndividualPointDistance = Math.max(
+      maximumIndividualPointDistance,
+      stroke.maximumPointDistance,
+    );
+    totalHandwritingArcLength += stroke.handwritingArcLength;
+    arcLengthWeightedErrorTotal +=
+      stroke.meanPointDistance * stroke.handwritingArcLength;
+  }
+  const arcLengthWeightedMeanStrokeError =
+    totalHandwritingArcLength > 0
+      ? arcLengthWeightedErrorTotal / totalHandwritingArcLength
+      : 0;
+  const fractionExceeding = (threshold: number): number =>
+    individualStrokes.length === 0
+      ? 0
+      : individualStrokes.filter(
+          ({ meanPointDistance }) => meanPointDistance > threshold,
+        ).length / individualStrokes.length;
+
+  let meanStrokeError = 0;
+  for (const meanError of meanErrors) {
+    meanStrokeError += meanError;
+  }
+  if (meanErrors.length > 0) {
+    meanStrokeError /= meanErrors.length;
+  }
+
+  return {
+    matchedStrokeCount: individualStrokes.length,
+    meanStrokeError,
+    maximumStrokeError: meanErrors.length === 0 ? 0 : Math.max(...meanErrors),
+    p90StrokeError: percentile(meanErrors, 0.9),
+    maximumIndividualPointDistance,
+    arcLengthWeightedMeanStrokeError,
+    strokeFractionsExceedingThreshold: {
+      "0.1": fractionExceeding(0.1),
+      "0.15": fractionExceeding(0.15),
+      "0.2": fractionExceeding(0.2),
+      "0.25": fractionExceeding(0.25),
+      "0.3": fractionExceeding(0.3),
+    },
+    individualStrokes,
+  };
 }
 
 function pointsAsPairs(
@@ -369,6 +1424,8 @@ export function createShapeContextGraderDiagnostic({
     correspondences,
     sourceStrokes,
     targetStrokes,
+    originalSourceStrokes: _originalSourceStrokes,
+    originalTargetStrokes: _originalTargetStrokes,
     transformedPoints,
     ...geometryWithoutRedundantFields
   } = geometry;
@@ -384,6 +1441,24 @@ export function createShapeContextGraderDiagnostic({
     controlPoints: pointsAsPairs(controlPoints),
   };
   const strokePresence = diagnoseShapeContextStrokePresence(geometry);
+  const excludedReversedStrokeIndices =
+    expectedIssues?.flatMap((expectation) =>
+      expectation.kind === `reversed-stroke` && expectation.handwriting != null
+        ? [expectation.handwriting.strokeIndex]
+        : [],
+    ) ?? [];
+  const strokeGeometry = calculateShapeContextStrokeGeometryDiagnostics(
+    geometry,
+    excludedReversedStrokeIndices,
+  );
+  const trajectory = calculateShapeContextTrajectoryDiagnostics(
+    geometry,
+    excludedReversedStrokeIndices,
+  );
+  const terminalHooks = calculateShapeContextTerminalHookDiagnostics(
+    geometry,
+    excludedReversedStrokeIndices,
+  );
   const issueExpectations = evaluateWritingIssueExpectations(
     geometry.issues,
     expectedIssues,
@@ -408,7 +1483,7 @@ export function createShapeContextGraderDiagnostic({
     },
   );
   return {
-    schemaVersion: 20,
+    schemaVersion: 24,
     fixtureId,
     targetCharacter,
     expectedAcceptance,
@@ -432,6 +1507,9 @@ export function createShapeContextGraderDiagnostic({
         geometry.weightedScoreContributions.extraHandwritingStrokePenalty,
       acceptanceThreshold,
     },
+    strokeGeometry,
+    trajectory,
+    terminalHooks,
     issues: geometry.issues,
     issueExpectations,
     contrastiveCandidates: diagnosticCandidates,
@@ -900,7 +1978,9 @@ function renderContrastiveAcceptancePanel({
         ? `primary shape threshold not met`
         : acceptance.rejectionCondition === `candidateShapeSimilarityNotLower`
           ? `candidate shape similarity was not lower`
-          : `none`;
+          : acceptance.rejectionCondition === `sustainedTangentMismatch`
+            ? `sustained tangent mismatch`
+            : `none`;
   const marginText =
     check.observedMargin == null
       ? `no candidate margin`
@@ -1030,7 +2110,118 @@ function writingIssueLabel(kind: WritingIssue[`kind`]): string {
       return `Extra stroke`;
     case `reversed-stroke`:
       return `Reversed stroke`;
+    case `wrong-stroke-order`:
+      return `Wrong stroke order`;
   }
+}
+
+function renderTrajectoryTable({
+  geometry,
+  startY,
+}: {
+  geometry: ShapeContextGrade;
+  startY: number;
+}): { svg: string; height: number } {
+  const trajectory = calculateShapeContextTrajectoryDiagnostics(geometry);
+  const headerY = startY + 18;
+  const columnY = startY + 38;
+  const rowHeight = 18;
+  const rows = trajectory.individualStrokes
+    .map((stroke, index) => {
+      const y = columnY + 20 + index * rowHeight;
+      const bends =
+        stroke.unmatchedHandwritingBends.length +
+        stroke.unmatchedReferenceBends.length;
+      const sustained45 =
+        stroke.sustainedMismatch[`45`].sustainedRegionsByMinimumLength[`0.1`];
+      const sustainedRegions = sustained45.regions
+        .map(
+          (region) =>
+            `${(region.startFraction * 100).toFixed(0)}-${(region.endFraction * 100).toFixed(0)}%`,
+        )
+        .join(`,`);
+      return [
+        `<rect x="16" y="${y - 13}" width="992" height="${rowHeight}" fill="${index < 3 ? `#fff7ed` : `#f8fafc`}" rx="2"/>`,
+        `<text x="24" y="${y}" font-size="9">H#${stroke.handwritingStrokeIndex + 1} / R#${stroke.referenceStrokeIndex + 1} · ${stroke.direction}</text>`,
+        `<text x="180" y="${y}" font-size="9">${stroke.meanTangentMismatchDegrees.toFixed(2)}°</text>`,
+        `<text x="300" y="${y}" font-size="9">${stroke.p90TangentMismatchDegrees.toFixed(2)}°</text>`,
+        `<text x="420" y="${y}" font-size="9">${stroke.maximumTangentMismatchDegrees.toFixed(2)}°</text>`,
+        `<text x="540" y="${y}" font-size="9">${stroke.turning[`0.1`].handwritingNetTurningDegrees.toFixed(1)}° / ${stroke.turning[`0.1`].referenceNetTurningDegrees.toFixed(1)}°</text>`,
+        `<text x="690" y="${y}" font-size="9">${bends}</text>`,
+        `<text x="730" y="${y}" font-size="9">${(sustained45.longestRegionLengthFraction * 100).toFixed(1)}%</text>`,
+        `<text x="790" y="${y}" font-size="9">${(sustained45.totalMismatchFraction * 100).toFixed(1)}%</text>`,
+        `<text x="850" y="${y}" font-size="9">${escapeXml(sustainedRegions || `none`)}</text>`,
+        `<text x="970" y="${y}" font-size="9">${stroke.unmatchedHandwritingBends.length}/${stroke.unmatchedReferenceBends.length}</text>`,
+      ].join(``);
+    })
+    .join(``);
+  const tableHeight = 64 + trajectory.individualStrokes.length * rowHeight;
+  return {
+    svg: [
+      `<g data-stroke-trajectory-table="">`,
+      `<text x="24" y="${headerY}" font-size="14" font-weight="600">Stroke trajectory diagnostics (worst tangent mismatch first)</text>`,
+      `<text x="24" y="${columnY}" font-size="9" font-weight="600">Stroke pair</text>`,
+      `<text x="180" y="${columnY}" font-size="9" font-weight="600">Mean tangent</text>`,
+      `<text x="300" y="${columnY}" font-size="9" font-weight="600">P90 tangent</text>`,
+      `<text x="420" y="${columnY}" font-size="9" font-weight="600">Max tangent</text>`,
+      `<text x="540" y="${columnY}" font-size="9" font-weight="600">10% net H/R</text>`,
+      `<text x="690" y="${columnY}" font-size="9" font-weight="600">Bends</text>`,
+      `<text x="730" y="${columnY}" font-size="9" font-weight="600">45° longest 10%+</text>`,
+      `<text x="790" y="${columnY}" font-size="9" font-weight="600">45° total</text>`,
+      `<text x="850" y="${columnY}" font-size="9" font-weight="600">Regions</text>`,
+      `<text x="970" y="${columnY}" font-size="9" font-weight="600">H/R bends</text>`,
+      rows,
+      `<text x="24" y="${columnY + 38 + trajectory.individualStrokes.length * rowHeight}" font-size="9">Aggregate mean tangent mismatch ${trajectory.meanStrokeTangentMismatchDegrees.toFixed(2)}° · p90 ${trajectory.p90StrokeTangentMismatchDegrees.toFixed(2)}° · max ${trajectory.maximumStrokeTangentMismatchDegrees.toFixed(2)}° · unmatched bends H ${trajectory.unmatchedHandwritingBendCount} / R ${trajectory.unmatchedReferenceBendCount}</text>`,
+      `</g>`,
+    ].join(``),
+    height: startY + tableHeight,
+  };
+}
+
+function renderStrokeGeometryTable({
+  geometry,
+  startY,
+}: {
+  geometry: ShapeContextGrade;
+  startY: number;
+}): { svg: string; height: number } {
+  const diagnostics = calculateShapeContextStrokeGeometryDiagnostics(geometry);
+  const headerY = startY + 18;
+  const columnY = startY + 38;
+  const rowHeight = 18;
+  const rows = diagnostics.individualStrokes
+    .map((stroke, index) => {
+      const y = columnY + 20 + index * rowHeight;
+      return [
+        `<rect x="16" y="${y - 13}" width="992" height="${rowHeight}" fill="${index < 3 ? `#fff7ed` : `#f8fafc`}" rx="2"/>`,
+        `<text x="24" y="${y}" font-size="10">H#${stroke.handwritingStrokeIndex + 1} / R#${stroke.referenceStrokeIndex + 1}</text>`,
+        `<text x="180" y="${y}" font-size="10">${stroke.meanPointDistance.toFixed(4)}</text>`,
+        `<text x="300" y="${y}" font-size="10">${stroke.maximumPointDistance.toFixed(4)}</text>`,
+        `<text x="420" y="${y}" font-size="10">${stroke.p90PointDistance.toFixed(4)}</text>`,
+        `<text x="540" y="${y}" font-size="10">${stroke.handwritingArcLength.toFixed(4)} / ${stroke.referenceArcLength.toFixed(4)}</text>`,
+        `<text x="710" y="${y}" font-size="10">${stroke.relativeArcLength.toFixed(3)}</text>`,
+        `<text x="820" y="${y}" font-size="10">${stroke.dtwCost.toFixed(4)} / ${stroke.pairCost.toFixed(4)}</text>`,
+      ].join(``);
+    })
+    .join(``);
+  const tableHeight = 64 + diagnostics.individualStrokes.length * rowHeight;
+  return {
+    svg: [
+      `<g data-stroke-geometry-table="">`,
+      `<text x="24" y="${headerY}" font-size="14" font-weight="600">Matched stroke geometry diagnostics (sorted worst first)</text>`,
+      `<text x="24" y="${columnY}" font-size="10" font-weight="600">Stroke pair</text>`,
+      `<text x="180" y="${columnY}" font-size="10" font-weight="600">Mean</text>`,
+      `<text x="300" y="${columnY}" font-size="10" font-weight="600">Max point</text>`,
+      `<text x="420" y="${columnY}" font-size="10" font-weight="600">P90 point</text>`,
+      `<text x="540" y="${columnY}" font-size="10" font-weight="600">H / R arc length</text>`,
+      `<text x="710" y="${columnY}" font-size="10" font-weight="600">H/R length</text>`,
+      `<text x="820" y="${columnY}" font-size="10" font-weight="600">DTW / pair cost</text>`,
+      rows,
+      `<text x="24" y="${columnY + 38 + diagnostics.individualStrokes.length * rowHeight}" font-size="10">Aggregate mean ${diagnostics.meanStrokeError.toFixed(4)} · max mean ${diagnostics.maximumStrokeError.toFixed(4)} · p90 mean ${diagnostics.p90StrokeError.toFixed(4)} · max point ${diagnostics.maximumIndividualPointDistance.toFixed(4)} · arc-weighted mean ${diagnostics.arcLengthWeightedMeanStrokeError.toFixed(4)}</text>`,
+      `</g>`,
+    ].join(``),
+    height: startY + tableHeight,
+  };
 }
 
 function renderWritingIssuePanel({
@@ -1087,7 +2278,7 @@ function renderWritingIssuePanel({
         return ``;
       }
       const point = handwritingMapper(start);
-      return `<g data-issue-stroke-label="handwriting-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-size="10" font-weight="600">${strokeIndex + 1}</text></g>`;
+      return `<g data-issue-stroke-label="handwriting-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155" stroke-width="1"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="600" fill="#0f172a">${strokeIndex + 1}</text></g>`;
     })
     .join(``);
   const referenceLabels = referenceGeometry
@@ -1097,7 +2288,7 @@ function renderWritingIssuePanel({
         return ``;
       }
       const point = referenceMapper(start);
-      return `<g data-issue-stroke-label="reference-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-size="10" font-weight="600">${strokeIndex + 1}</text></g>`;
+      return `<g data-issue-stroke-label="reference-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155" stroke-width="1"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="600" fill="#0f172a">${strokeIndex + 1}</text></g>`;
     })
     .join(``);
   const highlights = geometry.issues
@@ -1255,6 +2446,115 @@ export function renderShapeContextGraderDiagnosticSvg({
   unexpectedIssues?: readonly WritingIssueExpectation[];
 }): string {
   const rawPoint = drawingPointMapper(drawnStrokes, 0);
+  const excludedReversedSvgStrokeIndices =
+    expectedIssues?.flatMap((expectation) =>
+      expectation.kind === `reversed-stroke` && expectation.handwriting != null
+        ? [expectation.handwriting.strokeIndex]
+        : [],
+    ) ?? [];
+  const trajectoryForSvg = calculateShapeContextTrajectoryDiagnostics(
+    geometry,
+    excludedReversedSvgStrokeIndices,
+  );
+  const terminalHooksForSvg = calculateShapeContextTerminalHookDiagnostics(
+    geometry,
+    excludedReversedSvgStrokeIndices,
+  );
+  const sustainedHighlightPaths = trajectoryForSvg.individualStrokes
+    .flatMap((stroke) => {
+      const regions =
+        stroke.sustainedMismatch[`45`].sustainedRegionsByMinimumLength[`0.1`]
+          .regions;
+      const handwritingStroke = drawnStrokes[stroke.handwritingStrokeIndex];
+      if (handwritingStroke == null || regions.length === 0) {
+        return [];
+      }
+      const selectedHandwritingStroke =
+        stroke.direction === `reverse`
+          ? [...handwritingStroke].reverse()
+          : handwritingStroke;
+      const handwritingSelectedSamples = resampleStrokeByArcLength(
+        selectedHandwritingStroke,
+      );
+      const referencePath = referencePaths[stroke.referenceStrokeIndex];
+      return regions.flatMap((region) => {
+        const startIndex = Math.max(
+          0,
+          Math.min(32, Math.round(region.startFraction * 32)),
+        );
+        const endIndex = Math.max(
+          startIndex,
+          Math.min(32, Math.round(region.endFraction * 32)),
+        );
+        const handwritingRegion = handwritingSelectedSamples.slice(
+          startIndex,
+          endIndex + 1,
+        );
+        const handwritingPath =
+          handwritingRegion.length === 0
+            ? ``
+            : `<path data-sustained-tangent-region="45deg-10pct-H${stroke.handwritingStrokeIndex + 1}-R${stroke.referenceStrokeIndex + 1}" d="${pathFromPoints(handwritingRegion, rawPoint)}" fill="none" stroke="#dc2626" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>`;
+        const referenceRegion =
+          referencePath == null
+            ? []
+            : extractReferenceStrokeSegment(
+                referencePath,
+                region.startFraction,
+                region.endFraction,
+              );
+        const referencePathSvg =
+          referenceRegion.length === 0
+            ? ``
+            : `<path data-sustained-tangent-region="45deg-10pct-H${stroke.handwritingStrokeIndex + 1}-R${stroke.referenceStrokeIndex + 1}" d="${pathFromPoints(referenceRegion, (point) => ({ x: 536 + point.x * 0.453125, y: 52 + point.y * 0.453125 }))}" fill="none" stroke="#dc2626" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>`;
+        const startLabel = handwritingSelectedSamples[startIndex];
+        const labels =
+          startLabel == null
+            ? ``
+            : `<text data-sustained-region-label="H${stroke.handwritingStrokeIndex + 1}-R${stroke.referenceStrokeIndex + 1}" x="${rawPoint(startLabel).x}" y="${rawPoint(startLabel).y - 18}" text-anchor="middle" font-size="10" fill="#dc2626">${(region.startFraction * 100).toFixed(0)}-${(region.endFraction * 100).toFixed(0)}%</text>`;
+        return [handwritingPath, referencePathSvg, labels];
+      });
+    })
+    .join(``);
+  const terminalHookHighlightPaths = terminalHooksForSvg.pairs
+    .flatMap((pair) => {
+      if (pair.reference.classification === `absent`) {
+        return [];
+      }
+      const handwritingStroke = drawnStrokes[pair.handwritingStrokeIndex];
+      const referencePath = referencePaths[pair.referenceStrokeIndex];
+      const handwritingSamples =
+        handwritingStroke == null
+          ? []
+          : resampleStrokeByArcLength(handwritingStroke);
+      const handwritingStartIndex = Math.round(
+        pair.handwriting.terminalSegmentStartFraction * 32,
+      );
+      const handwritingRegion = handwritingSamples.slice(
+        Math.max(0, Math.min(32, handwritingStartIndex)),
+      );
+      const referenceRegion =
+        referencePath == null
+          ? []
+          : extractReferenceStrokeSegment(
+              referencePath,
+              pair.reference.terminalSegmentStartFraction,
+              1,
+            );
+      const handwritingPath =
+        handwritingRegion.length === 0
+          ? ``
+          : `<path data-terminal-hook="H${pair.handwritingStrokeIndex + 1}-R${pair.referenceStrokeIndex + 1}-${pair.observation}" d="${pathFromPoints(handwritingRegion, rawPoint)}" fill="none" stroke="#7c3aed" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>`;
+      const referencePathSvg =
+        referenceRegion.length === 0
+          ? ``
+          : `<path data-terminal-hook="H${pair.handwritingStrokeIndex + 1}-R${pair.referenceStrokeIndex + 1}-${pair.observation}" d="${pathFromPoints(referenceRegion, (point) => ({ x: 536 + point.x * 0.453125, y: 52 + point.y * 0.453125 }))}" fill="none" stroke="#7c3aed" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>`;
+      const label =
+        handwritingRegion.at(-1) == null
+          ? ``
+          : `<text data-terminal-hook-label="H${pair.handwritingStrokeIndex + 1}-R${pair.referenceStrokeIndex + 1}" x="${rawPoint(handwritingRegion.at(-1)!).x}" y="${rawPoint(handwritingRegion.at(-1)!).y - 10}" text-anchor="middle" font-size="10" fill="#6d28d9">hook ${pair.handwriting.terminalTurnDegrees.toFixed(0)}deg · ${(pair.handwriting.terminalSegmentLengthFraction * 100).toFixed(0)}%</text>`;
+      return [handwritingPath, referencePathSvg, label];
+    })
+    .join(``);
   const overlayOffsetY = 576;
   const issueExtraStrokeIndices = new Set(
     geometry.issues.flatMap((issue) =>
@@ -1274,10 +2574,8 @@ export function renderShapeContextGraderDiagnosticSvg({
     kind: `handwriting` | `reference`,
     strokeIndex: number,
     point: WritingStrokePoint,
-    mapper: (point: WritingStrokePoint) => WritingStrokePoint,
   ): string => {
-    const mapped = mapper(point);
-    return `<g data-stroke-number="${kind}-${strokeIndex}"><circle cx="${mapped.x + 8}" cy="${mapped.y - 8}" r="11" fill="#fff" stroke="#334155"/><text x="${mapped.x + 8}" y="${mapped.y - 4}" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="600" fill="#0f172a">${strokeIndex + 1}</text></g>`;
+    return `<g data-stroke-number="${kind}-${strokeIndex}"><circle cx="${point.x + 8}" cy="${point.y - 8}" r="11" fill="#fff" stroke="#334155" stroke-width="1"/><text x="${point.x + 8}" y="${point.y - 4}" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="600" fill="#0f172a">${strokeIndex + 1}</text></g>`;
   };
   const sourcePaths = drawnStrokes.map((stroke, strokeIndex) => {
     const color = issueExtraStrokeIndices.has(strokeIndex)
@@ -1292,7 +2590,7 @@ export function renderShapeContextGraderDiagnosticSvg({
       );
       return start == null
         ? ``
-        : strokeLabel(`handwriting`, strokeIndex, start, rawPoint);
+        : strokeLabel(`handwriting`, strokeIndex, rawPoint(start));
     })
     .join(``);
   const referencePathsSvg = referencePaths
@@ -1308,7 +2606,10 @@ export function renderShapeContextGraderDiagnosticSvg({
       const start = extractReferenceStrokeSegment(path, 0, 0)[0];
       return start == null
         ? ``
-        : `<g transform="translate(536 52) scale(0.453125)">${strokeLabel(`reference`, strokeIndex, start, (point) => point)}</g>`;
+        : strokeLabel(`reference`, strokeIndex, {
+            x: 536 + start.x * 0.453125,
+            y: 52 + start.y * 0.453125,
+          });
     })
     .join(``);
   const registeredStrokes = geometry.sourceStrokes.map((_, strokeIndex) =>
@@ -1506,13 +2807,21 @@ export function renderShapeContextGraderDiagnosticSvg({
     strokePresence,
     dtwHeatmaps.height,
   );
+  const strokeGeometryTable = renderStrokeGeometryTable({
+    geometry,
+    startY: strokePresencePanel.height + 12,
+  });
+  const trajectoryTable = renderTrajectoryTable({
+    geometry,
+    startY: strokeGeometryTable.height + 12,
+  });
   const writingIssuePanel = renderWritingIssuePanel({
     drawnStrokes,
     referencePaths,
     geometry,
     expectedIssues,
     unexpectedIssues,
-    startY: strokePresencePanel.height + 12,
+    startY: trajectoryTable.height + 12,
   });
   const svgHeight = writingIssuePanel.height;
 
@@ -1528,6 +2837,8 @@ export function renderShapeContextGraderDiagnosticSvg({
     sourceLabels,
     `<g transform="translate(536 52) scale(0.453125)">${referencePathsSvg}</g>`,
     referenceLabels,
+    `<g data-sustained-tangent-highlights="" data-angular-threshold="45" data-minimum-length="0.1">${sustainedHighlightPaths}</g>`,
+    `<g data-terminal-hook-highlights="" data-candidate-turn="35" data-terminal-length="0.05-0.35">${terminalHookHighlightPaths}</g>`,
     `<g>${sourceGridPaths}${registeredGridPaths}${targetPaths}${normalizedSourcePaths}${registeredPaths}${correspondenceLines}${unmatchedSourcePoints}${unmatchedTargetPoints}</g>`,
     `<g font-family="sans-serif" font-size="18" fill="#0f172a">`,
     `<text x="256" y="540" text-anchor="middle">Raw handwriting · ${escapeXml(targetCharacter)}</text>`,
@@ -1535,7 +2846,7 @@ export function renderShapeContextGraderDiagnosticSvg({
     `<text x="512" y="1624" text-anchor="middle">Normalized matches and TPS registration</text>`,
     `<text x="512" y="1645" text-anchor="middle" font-size="12">Normalized source before TPS (blue) · registered source (purple) · reference (gray)</text>`,
     `<text x="24" y="1670" font-size="14">Expected ${expectedAcceptance ? `accept` : `reject`} · actual ${acceptance.finalAccepted ? `accept` : `reject`} · shape similarity ${geometry.shapeSimilarity.toFixed(4)} / threshold ${acceptanceThreshold.toFixed(2)} · rejection reason ${acceptance.rejectionCondition ?? `none`}</text>`,
-    `<text x="24" y="1692" font-size="14">TPS alpha ${geometry.deformationAlpha.toFixed(4)} · bending energy ${geometry.bendingEnergy.toFixed(4)} · affine distortion ${geometry.affineDistortion.toFixed(4)} · rotation ${geometry.rotationDegrees.toFixed(2)}° · samples ${geometry.sampleCount} · matches ${geometry.correspondences.length}</text>`,
+    `<text x="24" y="1692" font-size="14">Sustained tangent mismatch ${geometry.sustainedTangentMismatchRejection.enabled ? `enabled` : `disabled`} · passed ${geometry.sustainedTangentMismatchRejection.passed ? `true` : `false`} · threshold ${geometry.sustainedTangentMismatchRejection.thresholdDegrees}° · min ${geometry.sustainedTangentMismatchRejection.minimumLengthFraction * 100}% · offending ${geometry.sustainedTangentMismatchRejection.offendingStrokes.length}</text>`,
     `<text x="24" y="1710" font-size="12">Missing reference stroke fraction ${(geometry.missingReferenceStrokeFraction * 100).toFixed(1)}% × weight ${geometry.options.missingReferenceStrokePenaltyWeight.toFixed(2)} = ${scoreContributions.missingReferenceStrokePenalty.toFixed(3)} · extra handwriting fraction ${(geometry.extraHandwritingStrokeFraction * 100).toFixed(1)}% × weight ${geometry.options.extraHandwritingStrokePenaltyWeight.toFixed(2)} = ${scoreContributions.extraHandwritingStrokePenalty.toFixed(3)}</text>`,
     `<text x="24" y="1732" font-size="14">Weighted score contributions (share of total cost)</text>`,
     contributionTracks,
@@ -1547,6 +2858,8 @@ export function renderShapeContextGraderDiagnosticSvg({
     strokeCompletenessPanel.svg,
     dtwHeatmaps.svg,
     strokePresencePanel.svg,
+    strokeGeometryTable.svg,
+    trajectoryTable.svg,
     writingIssuePanel.svg,
     `</svg>`,
   ].join(``);
