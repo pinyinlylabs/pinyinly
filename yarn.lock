@@ -16999,14 +16999,14 @@ __metadata:
   linkType: hard
 
 "metro-cache@npm:*":
-  version: 0.87.2
-  resolution: "metro-cache@npm:0.87.2"
+  version: 0.88.0
+  resolution: "metro-cache@npm:0.88.0"
   dependencies:
     exponential-backoff: "npm:^3.1.1"
     flow-enums-runtime: "npm:^0.0.6"
     https-proxy-agent: "npm:^7.0.5"
-    metro-core: "npm:0.87.2"
-  checksum: 10c0/2125be08fd80be5b3bd34101225e3ba5d30563a0e26bd7ea9a5fedac4f81cce173a998f4d71532783a75e8e8a0f79531863294c7e8a87a935c7e629d0570dee7
+    metro-core: "npm:0.88.0"
+  checksum: 10c0/da0301473afb987ee5ac318cff53ebf0f82055c70b1351818c1abb63918407b1c5f8da037e2d4baa434b907ea3f6bc99780deeb6b4ad25fd7375e2789f0ecdb6
   languageName: node
   linkType: hard
 
@@ -17087,14 +17087,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"metro-core@npm:0.87.2":
-  version: 0.87.2
-  resolution: "metro-core@npm:0.87.2"
+"metro-core@npm:0.88.0":
+  version: 0.88.0
+  resolution: "metro-core@npm:0.88.0"
   dependencies:
     flow-enums-runtime: "npm:^0.0.6"
-    lodash.throttle: "npm:^4.1.1"
-    metro-resolver: "npm:0.87.2"
-  checksum: 10c0/032b7eec2b9dae2071e84067561b1f07c3ee2f81f2eb5ab7fd349ef8ad03127dc0a1c04d500236aeccc18f4429321fc11f5c186040623ee9e3ddec18014e39be
+    metro-resolver: "npm:0.88.0"
+  checksum: 10c0/08b05b818a3eb05be42f552a540cc042b61d18c84a968bde109f7131357ce3c83e5b0594cbdc28f5861315a3d1e8cea73870cdb0c7ddb558e40484e4d44d006a
   languageName: node
   linkType: hard
 
@@ -17169,12 +17168,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"metro-resolver@npm:0.87.2":
-  version: 0.87.2
-  resolution: "metro-resolver@npm:0.87.2"
+"metro-resolver@npm:0.88.0":
+  version: 0.88.0
+  resolution: "metro-resolver@npm:0.88.0"
   dependencies:
     flow-enums-runtime: "npm:^0.0.6"
-  checksum: 10c0/ef54518debc6cb03a500da8e369ccd7d2864eff668084629d418d6121e109b32e83e260760c0f18b1f0ec20ed77af288e75f98e1c22001af8814e2e21a03743c
+  checksum: 10c0/2358d7bf5bf9d7619855a9bc36b2b26eea1a62018812476a94e74d7436b7ac424211d348c6f332b4006261f51bd08e8ffc1a9744906e4dd27407b10822834106
   languageName: node
   linkType: hard
 
