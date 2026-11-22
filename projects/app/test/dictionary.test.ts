@@ -2334,6 +2334,8 @@ describe(`character.json files`, async () => {
     "⿰米月": { 月: 5 },
     "⿱般皿": { 皿: 1 },
     "⿰卤皿": { 皿: 3 },
+    "⿰火柬": { 柬: 5 },
+    "⿰扌昜": { 昜: 3 },
     "⿱⿰丬夕大": { 丬: 6, 夕: 3 },
     "⿰⿸尸巾刂": { 尸: 6, 巾: 2 },
     "⿻亚厂": { 亚: 6, 厂: 1 },
@@ -2368,7 +2370,7 @@ describe(`character.json files`, async () => {
   });
 
   test(`decomposition strokes match the hanzi stroke count`, async () => {
-    for (const { character, characterJson, filePath } of characterFiles) {
+    for (const { characterJson, filePath } of characterFiles) {
       if (
         characterJson.decompositions &&
         characterJson.isStructural !== true &&
