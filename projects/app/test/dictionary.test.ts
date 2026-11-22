@@ -2368,11 +2368,8 @@ describe(`character.json files`, async () => {
   });
 
   test(`decomposition strokes match the hanzi stroke count`, async () => {
-    const charactersToCheck = await buildCharactersToCheck();
-
     for (const { character, characterJson, filePath } of characterFiles) {
       if (
-        charactersToCheck.has(character) &&
         characterJson.decompositions &&
         characterJson.isStructural !== true &&
         characterJson.componentFormOf == null
@@ -2391,7 +2388,7 @@ describe(`character.json files`, async () => {
             }
             if (Array.isArray(hanziData.svg.strokes)) {
               const strokeSpecText = strokeSpecs[i];
-              if (strokeSpecText == null) {
+              if (strokeSpecText == null || strokeSpecText === ``) {
                 continue;
               }
               const strokeSpec = flattenStrokeSpecRanges(
