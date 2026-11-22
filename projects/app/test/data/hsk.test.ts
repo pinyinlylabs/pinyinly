@@ -251,10 +251,7 @@ function guessMeaningKey(meanings: readonly string[]): string {
   ]);
 
   function cleanWord(word: string): string {
-    return word
-      .toLowerCase()
-      .replaceAll(/[’']/gu, ``)
-      .trim();
+    return word.toLowerCase().replaceAll(/[’']/gu, ``).trim();
   }
 
   function isFillerWord(word: string): boolean {
