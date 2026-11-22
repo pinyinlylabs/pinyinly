@@ -33,8 +33,8 @@ Character data distinguishes two related component concepts:
 
 - `isStructural: true` marks a character used as a component in regular Hanzi but not independently
   as a full word or character in modern Mandarin.
-- `componentFormOf` maps a component-form glyph to its primary character form (for
-  example, 扌 to 手).
+- `componentFormOf` maps a component-form glyph to its primary character form (for example, 扌 to
+  手).
 
 These fields describe different properties: `isStructural` describes how a character is used, while
 `componentFormOf` identifies the primary form corresponding to a component glyph.

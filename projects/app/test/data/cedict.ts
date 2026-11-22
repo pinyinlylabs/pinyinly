@@ -3403,15 +3403,14 @@ function pronunciationSenseParserStep(
   }
 
   return {
-    startTokens: standalonePronunciation.pinyin.map(
-      (v): GlossTokenAlsoPrType =>
-        standalonePronunciation.marker === `also`
-          ? { kind: `alsoPr`, value: v }
-          : {
-              kind: `alsoPr`,
-              value: v,
-              marker: standalonePronunciation.marker,
-            },
+    startTokens: standalonePronunciation.pinyin.map((v): GlossTokenAlsoPrType =>
+      standalonePronunciation.marker === `also`
+        ? { kind: `alsoPr`, value: v }
+        : {
+            kind: `alsoPr`,
+            value: v,
+            marker: standalonePronunciation.marker,
+          },
     ),
     endTokens: [],
     unparsed: ``,

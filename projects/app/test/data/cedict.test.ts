@@ -3608,9 +3608,8 @@ describe(`buildCedictEntryMatchKeyIndex`, () => {
 
 describe(`extractDictionaryPinyinFromCedictSense`, () => {
   test(`resolves pinyin for known CE-DICT sense id`, async () => {
-    const actual = await extractDictionaryPinyinFromCedictSense(
-      `一 一 [[yi1]] KmCz3`,
-    );
+    const actual =
+      await extractDictionaryPinyinFromCedictSense(`一 一 [[yi1]] KmCz3`);
 
     expect(actual).toEqual([`yī`, `yāo`]);
   });
@@ -3633,9 +3632,8 @@ describe(`extractDictionaryPinyinFromCedictSense`, () => {
         sense: `(also pr. [yao1]); (pr. [yi2]); (Beijing pr. [yi4]); (Taiwan pr. [yi1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
       });
 
-    const actual = await extractDictionaryPinyinFromCedictSense(
-      `一 一 [[yi1]] AbCd1`,
-    );
+    const actual =
+      await extractDictionaryPinyinFromCedictSense(`一 一 [[yi1]] AbCd1`);
 
     expect(actual).toEqual([`yī`, `yāo`, `yí`, `yì`]);
     expect(findCedictSenseById).toHaveBeenCalledWith(`一 一 [[yi1]] AbCd1`);
@@ -3651,9 +3649,8 @@ describe(`extractDictionaryPinyinFromCedictSense`, () => {
       sense: `(Taiwan pr. [yao1]); (colloquial pr. [yi3]); (old pr. [yi5]); (ancient pr. [yi2]); (Tai-lo pr. [i2])`,
     });
 
-    const actual = await extractDictionaryPinyinFromCedictSense(
-      `一 一 [[yi1]] AbCd1`,
-    );
+    const actual =
+      await extractDictionaryPinyinFromCedictSense(`一 一 [[yi1]] AbCd1`);
 
     expect(actual).toEqual([`yī`]);
   });
