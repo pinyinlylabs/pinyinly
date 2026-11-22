@@ -12908,8 +12908,8 @@ __metadata:
   linkType: hard
 
 "eslint-plugin-better-tailwindcss@npm:^4.6.1":
-  version: 4.10.0
-  resolution: "eslint-plugin-better-tailwindcss@npm:4.10.0"
+  version: 4.11.0
+  resolution: "eslint-plugin-better-tailwindcss@npm:4.11.0"
   dependencies:
     "@eslint/css-tree": "npm:^4.0.4"
     "@valibot/to-json-schema": "npm:^1.7.1"
@@ -12928,7 +12928,7 @@ __metadata:
       optional: true
     oxlint:
       optional: true
-  checksum: 10c0/0f934a3799a9929fb1010d7c8e7ad9f643efc4b09876f91e436b4fa8ec6a8ac7c979ff40ab41a7c87112252e099d75072b80d4ad310d65170d56abb81170e0f3
+  checksum: 10c0/2bdb8b8344e9b75bf4e4648a248a6db2eeb349889cdbd89ed8d475befe64f3dc8c6281828798dd0c32be0bd884acc2f9fb66b22c23540ab181f37da2d7c96cbf
   languageName: node
   linkType: hard
 
