@@ -18,7 +18,8 @@ export interface WritingStrokeSegment {
 export type WritingIssueKind =
   | `missing-stroke`
   | `extra-stroke`
-  | `reversed-stroke`;
+  | `reversed-stroke`
+  | `wrong-stroke-order`;
 
 export interface WritingIssue {
   kind: WritingIssueKind;
@@ -191,6 +192,11 @@ export interface ShapeContextOptions {
   extraHandwritingStrokePenaltyWeight: number;
   maxRotationDegrees: number;
   rotationSteps: number;
+  sustainedTangentMismatchEnabled: boolean;
+  sustainedTangentMismatchThresholdDegrees: number;
+  sustainedTangentMismatchMinimumLengthFraction: number;
+  sustainedTangentMismatchNoiseLengthFraction: number;
+  sustainedTangentMismatchTangentWindowFraction: number;
 }
 
 export interface ShapeContextCorrespondence {
@@ -219,6 +225,48 @@ export interface ShapeContextStrokeAssignment {
   targetStrokeIndex: number;
   direction: `forward` | `reverse`;
   cost: number;
+}
+
+export interface ShapeContextSustainedTangentRegion {
+  startFraction: number;
+  endFraction: number;
+  lengthFraction: number;
+  mismatchSampleCount: number;
+  isolatedSpike: boolean;
+}
+
+export interface ShapeContextSustainedTangentStrokeResult {
+  handwritingStrokeIndex: number;
+  referenceStrokeIndex: number;
+  direction: `forward` | `reverse`;
+  longestSustainedMismatchFraction: number;
+  regions: ShapeContextSustainedTangentRegion[];
+}
+
+export interface ShapeContextSustainedTangentRejection {
+  enabled: boolean;
+  passed: boolean;
+  thresholdDegrees: number;
+  minimumLengthFraction: number;
+  noiseLengthFraction: number;
+  tangentWindowFraction: number;
+  offendingStrokes: ShapeContextSustainedTangentStrokeResult[];
+}
+
+export function createShapeContextSustainedTangentRejection(
+  settings: ShapeContextOptions,
+): ShapeContextSustainedTangentRejection {
+  return {
+    enabled: settings.sustainedTangentMismatchEnabled,
+    passed: true,
+    thresholdDegrees: settings.sustainedTangentMismatchThresholdDegrees,
+    minimumLengthFraction:
+      settings.sustainedTangentMismatchMinimumLengthFraction,
+    noiseLengthFraction: settings.sustainedTangentMismatchNoiseLengthFraction,
+    tangentWindowFraction:
+      settings.sustainedTangentMismatchTangentWindowFraction,
+    offendingStrokes: [],
+  };
 }
 
 export interface ShapeContextDtwAlignment {
@@ -294,12 +342,15 @@ export interface ShapeContextGrade {
   transformedPoints: WritingStrokePoint[];
   sourceStrokes: WritingStrokePoint[][];
   targetStrokes: WritingStrokePoint[][];
+  originalSourceStrokes: WritingStrokePoint[][];
+  originalTargetStrokes: WritingStrokePoint[][];
   referenceLength: number;
   sampleCount: number;
   sourceStrokeSampleCounts: number[];
   targetStrokeSampleCounts: number[];
   transform: ThinPlateSplineTransform;
   options: ShapeContextOptions;
+  sustainedTangentMismatchRejection: ShapeContextSustainedTangentRejection;
 }
 
 export const shapeContextGraderDefaults: ShapeContextOptions = {
@@ -314,6 +365,11 @@ export const shapeContextGraderDefaults: ShapeContextOptions = {
   extraHandwritingStrokePenaltyWeight: 0.5,
   maxRotationDegrees: 12,
   rotationSteps: 1,
+  sustainedTangentMismatchEnabled: true,
+  sustainedTangentMismatchThresholdDegrees: 45,
+  sustainedTangentMismatchMinimumLengthFraction: 0.5625,
+  sustainedTangentMismatchNoiseLengthFraction: 0.05,
+  sustainedTangentMismatchTangentWindowFraction: 0.1,
 };
 
 const radialMinimum = 0.125;
@@ -323,6 +379,7 @@ const defaultSampleCountLimit = 80;
 interface SampledShape {
   points: WritingStrokePoint[];
   strokes: WritingStrokePoint[][];
+  originalStrokes: WritingStrokePoint[][];
   pointStrokeIndices: number[];
   strokeOriginalIndices: number[];
   strokeSampleCounts: number[];
@@ -381,7 +438,20 @@ function validateOptions(options: ShapeContextOptions): void {
     options.maxRotationDegrees > 45 ||
     !Number.isInteger(options.rotationSteps) ||
     options.rotationSteps < 1 ||
-    options.rotationSteps > 12
+    options.rotationSteps > 12 ||
+    typeof options.sustainedTangentMismatchEnabled !== `boolean` ||
+    !Number.isFinite(options.sustainedTangentMismatchThresholdDegrees) ||
+    options.sustainedTangentMismatchThresholdDegrees < 1 ||
+    options.sustainedTangentMismatchThresholdDegrees > 180 ||
+    !Number.isFinite(options.sustainedTangentMismatchMinimumLengthFraction) ||
+    options.sustainedTangentMismatchMinimumLengthFraction <= 0 ||
+    options.sustainedTangentMismatchMinimumLengthFraction > 1 ||
+    !Number.isFinite(options.sustainedTangentMismatchNoiseLengthFraction) ||
+    options.sustainedTangentMismatchNoiseLengthFraction < 0 ||
+    options.sustainedTangentMismatchNoiseLengthFraction > 1 ||
+    !Number.isFinite(options.sustainedTangentMismatchTangentWindowFraction) ||
+    options.sustainedTangentMismatchTangentWindowFraction <= 0 ||
+    options.sustainedTangentMismatchTangentWindowFraction > 0.5
   ) {
     throw new RangeError(`Invalid shape-context grading options`);
   }
@@ -389,6 +459,172 @@ function validateOptions(options: ShapeContextOptions): void {
 
 function distance(a: WritingStrokePoint, b: WritingStrokePoint): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+export function resampleShapeContextStrokeByArcLength(
+  stroke: readonly WritingStrokePoint[],
+  pointCount = 33,
+): WritingStrokePoint[] {
+  if (stroke.length === 0) {
+    return [];
+  }
+  if (stroke.length === 1) {
+    const point = stroke[0];
+    return point == null
+      ? []
+      : Array.from({ length: pointCount }, () => ({ ...point }));
+  }
+  const segments: Array<{
+    start: WritingStrokePoint;
+    end: WritingStrokePoint;
+    startLength: number;
+    length: number;
+  }> = [];
+  let totalLength = 0;
+  for (let index = 1; index < stroke.length; index++) {
+    const start = stroke[index - 1];
+    const end = stroke[index];
+    if (start == null || end == null) {
+      continue;
+    }
+    const length = Math.hypot(end.x - start.x, end.y - start.y);
+    if (!(length > 0)) {
+      continue;
+    }
+    segments.push({ start, end, startLength: totalLength, length });
+    totalLength += length;
+  }
+  if (segments.length === 0) {
+    const point = stroke[0];
+    return point == null
+      ? []
+      : Array.from({ length: pointCount }, () => ({ ...point }));
+  }
+  return Array.from({ length: pointCount }, (_, index) => {
+    const targetLength = totalLength * (index / (pointCount - 1));
+    const segment =
+      segments.find(
+        (candidate) => targetLength <= candidate.startLength + candidate.length,
+      ) ?? segments.at(-1);
+    if (segment == null) {
+      const point = stroke[0];
+      return point == null ? { x: 0, y: 0 } : { ...point };
+    }
+    const segmentFraction =
+      (targetLength - segment.startLength) / segment.length;
+    return {
+      x:
+        segment.start.x +
+        (segment.end.x - segment.start.x) *
+          Math.max(0, Math.min(1, segmentFraction)),
+      y:
+        segment.start.y +
+        (segment.end.y - segment.start.y) *
+          Math.max(0, Math.min(1, segmentFraction)),
+    };
+  });
+}
+
+function normalizedShapeContextAngleDegrees(radians: number): number {
+  let degrees = (radians * 180) / Math.PI;
+  while (degrees > 180) {
+    degrees -= 360;
+  }
+  while (degrees < -180) {
+    degrees += 360;
+  }
+  return degrees;
+}
+
+function shapeContextTangentAtFraction(
+  sampledStroke: readonly WritingStrokePoint[],
+  fraction: number,
+  windowFraction: number,
+): number | null {
+  const lastIndex = sampledStroke.length - 1;
+  if (lastIndex <= 0) {
+    return null;
+  }
+  const index = fraction * lastIndex;
+  const halfWindow = windowFraction * lastIndex;
+  const startIndex = Math.max(
+    0,
+    Math.min(lastIndex, Math.round(index - halfWindow)),
+  );
+  const endIndex = Math.max(
+    0,
+    Math.min(lastIndex, Math.round(index + halfWindow)),
+  );
+  if (endIndex === startIndex) {
+    return null;
+  }
+  const start = sampledStroke[startIndex];
+  const end = sampledStroke[endIndex];
+  if (start == null || end == null) {
+    return null;
+  }
+  return (Math.atan2(end.y - start.y, end.x - start.x) * 180) / Math.PI;
+}
+
+export function shapeContextSampledTangentDirections(
+  sampledStroke: readonly WritingStrokePoint[],
+  windowFraction: number,
+  pointCount = 33,
+): number[] {
+  const tangents: number[] = [];
+  for (let index = 0; index < pointCount; index++) {
+    const tangent = shapeContextTangentAtFraction(
+      sampledStroke,
+      index / (pointCount - 1),
+      windowFraction,
+    );
+    if (tangent != null) {
+      tangents.push(tangent);
+    }
+  }
+  return tangents;
+}
+
+export function calculateShapeContextSustainedTangentRegions(
+  tangentMismatchDegrees: readonly number[],
+  thresholdDegrees: number,
+  noiseLengthFraction: number,
+  pointCount = 33,
+): ShapeContextSustainedTangentRegion[] {
+  const rawRuns: Array<{ startIndex: number; endIndex: number }> = [];
+  let runStart: number | null = null;
+  for (let index = 0; index < tangentMismatchDegrees.length; index++) {
+    if ((tangentMismatchDegrees[index] ?? 0) >= thresholdDegrees) {
+      runStart ??= index;
+    } else if (runStart != null) {
+      rawRuns.push({ startIndex: runStart, endIndex: index - 1 });
+      runStart = null;
+    }
+  }
+  if (runStart != null) {
+    rawRuns.push({
+      startIndex: runStart,
+      endIndex: tangentMismatchDegrees.length - 1,
+    });
+  }
+  const regions: ShapeContextSustainedTangentRegion[] = [];
+  for (const run of rawRuns) {
+    const startFraction = run.startIndex / (pointCount - 1);
+    const endFraction = run.endIndex / (pointCount - 1);
+    const lengthFraction = endFraction - startFraction;
+    if (lengthFraction < noiseLengthFraction) {
+      continue;
+    }
+    const mismatchSampleCount = run.endIndex - run.startIndex + 1;
+    regions.push({
+      startFraction,
+      endFraction,
+      lengthFraction,
+      mismatchSampleCount,
+      isolatedSpike: mismatchSampleCount === 1,
+    });
+  }
+  return regions;
 }
 
 function pathLength(path: string): number {
@@ -612,6 +848,7 @@ function normalizePoint(
 function sampleStrokes(
   strokes: readonly (readonly WritingStrokePoint[])[],
   sampleCount: number,
+  includeOriginalGeometry = true,
 ): SampledShape {
   const cleaned = strokes.map((stroke) =>
     stroke.filter(
@@ -644,6 +881,11 @@ function sampleStrokes(
   return {
     points: sampledStrokes.flat(),
     strokes: sampledStrokes,
+    originalStrokes: includeOriginalGeometry
+      ? cleaned.map((stroke) =>
+          stroke.map((point) => normalizePoint(point, metrics)),
+        )
+      : [],
     pointStrokeIndices: sampledStrokes.flatMap((stroke, strokeIndex) =>
       stroke.map(() => strokeIndex),
     ),
@@ -657,6 +899,7 @@ function sampleStrokes(
 function samplePaths(
   paths: readonly string[],
   sampleCount: number,
+  includeOriginalGeometry = true,
 ): SampledShape {
   const lengths = paths.map(pathLength);
   const metrics = geometryMetrics(paths.map((path) => samplePath(path, 256)));
@@ -674,6 +917,11 @@ function samplePaths(
   return {
     points: strokes.flat(),
     strokes,
+    originalStrokes: includeOriginalGeometry
+      ? paths.map((path) =>
+          samplePath(path, 256).map((point) => normalizePoint(point, metrics)),
+        )
+      : [],
     pointStrokeIndices: strokes.flatMap((stroke, strokeIndex) =>
       stroke.map(() => strokeIndex),
     ),
@@ -2004,6 +2252,117 @@ export function measureStrokeDirection(points: readonly WritingStrokePoint[]): {
   };
 }
 
+export function calculateShapeContextSustainedTangentRejection(
+  geometry: ShapeContextGrade,
+): ShapeContextSustainedTangentRejection {
+  const settings = geometry.options;
+  const baseResult: ShapeContextSustainedTangentRejection = {
+    enabled: settings.sustainedTangentMismatchEnabled,
+    passed: true,
+    thresholdDegrees: settings.sustainedTangentMismatchThresholdDegrees,
+    minimumLengthFraction:
+      settings.sustainedTangentMismatchMinimumLengthFraction,
+    noiseLengthFraction: settings.sustainedTangentMismatchNoiseLengthFraction,
+    tangentWindowFraction:
+      settings.sustainedTangentMismatchTangentWindowFraction,
+    offendingStrokes: [],
+  };
+  if (!settings.sustainedTangentMismatchEnabled) {
+    return baseResult;
+  }
+  const cosine = Math.cos(geometry.transform.rotationRadians);
+  const sine = Math.sin(geometry.transform.rotationRadians);
+  const offendingStrokes: ShapeContextSustainedTangentStrokeResult[] = [];
+  for (const assignment of geometry.strokeAssignments) {
+    const handwritingOriginalIndex =
+      geometry.sourceStrokeOriginalIndices[assignment.sourceStrokeIndex] ??
+      assignment.sourceStrokeIndex;
+    const referenceOriginalIndex =
+      geometry.targetStrokeOriginalIndices[assignment.targetStrokeIndex] ??
+      assignment.targetStrokeIndex;
+    const handwritingCompact =
+      geometry.originalSourceStrokes[handwritingOriginalIndex] ??
+      geometry.sourceStrokes[assignment.sourceStrokeIndex];
+    const referenceCompact =
+      geometry.originalTargetStrokes[referenceOriginalIndex] ??
+      geometry.targetStrokes[assignment.targetStrokeIndex];
+    if (handwritingCompact == null || referenceCompact == null) {
+      continue;
+    }
+    const rotatedHandwriting = handwritingCompact.map((point) => ({
+      x: cosine * point.x - sine * point.y,
+      y: sine * point.x + cosine * point.y,
+    }));
+    const handwritingStroke =
+      assignment.direction === `reverse`
+        ? [...rotatedHandwriting].reverse()
+        : rotatedHandwriting;
+    const handwritingSampled =
+      resampleShapeContextStrokeByArcLength(handwritingStroke);
+    const referenceSampled =
+      resampleShapeContextStrokeByArcLength(referenceCompact);
+    const handwritingTangents = shapeContextSampledTangentDirections(
+      handwritingSampled,
+      settings.sustainedTangentMismatchTangentWindowFraction,
+    );
+    const referenceTangents = shapeContextSampledTangentDirections(
+      referenceSampled,
+      settings.sustainedTangentMismatchTangentWindowFraction,
+    );
+    const mismatches: number[] = [];
+    for (
+      let index = 0;
+      index < Math.max(handwritingTangents.length, referenceTangents.length);
+      index++
+    ) {
+      const handwritingTangent = handwritingTangents[index];
+      const referenceTangent = referenceTangents[index];
+      if (handwritingTangent == null || referenceTangent == null) {
+        continue;
+      }
+      mismatches.push(
+        Math.abs(
+          normalizedShapeContextAngleDegrees(
+            ((handwritingTangent - referenceTangent) * Math.PI) / 180,
+          ),
+        ),
+      );
+    }
+    const regions = calculateShapeContextSustainedTangentRegions(
+      mismatches,
+      settings.sustainedTangentMismatchThresholdDegrees,
+      settings.sustainedTangentMismatchNoiseLengthFraction,
+    );
+    const qualifyingRegions = regions.filter(
+      (region) =>
+        region.lengthFraction >=
+        settings.sustainedTangentMismatchMinimumLengthFraction,
+    );
+    if (qualifyingRegions.length === 0) {
+      continue;
+    }
+    let longestSustainedMismatchFraction = 0;
+    for (const region of qualifyingRegions) {
+      longestSustainedMismatchFraction = Math.max(
+        longestSustainedMismatchFraction,
+        region.lengthFraction,
+      );
+    }
+    offendingStrokes.push({
+      handwritingStrokeIndex: handwritingOriginalIndex,
+      referenceStrokeIndex: referenceOriginalIndex,
+      direction: assignment.direction,
+      longestSustainedMismatchFraction,
+      regions: qualifyingRegions,
+    });
+  }
+  return {
+    ...baseResult,
+    passed: offendingStrokes.length === 0,
+    offendingStrokes,
+  };
+}
+
 function detectWritingIssues({
   sourceStrokes,
   targetStrokes,
@@ -2105,6 +2464,7 @@ export function gradeCharacterShape(
   options: Partial<ShapeContextOptions> = {},
   sampleCountOverride?: number,
   includeIssues = true,
+  includeOriginalStrokeGeometry = true,
 ): ShapeContextGrade {
   const settings = { ...shapeContextGraderDefaults, ...options };
   validateOptions(settings);
@@ -2124,8 +2484,13 @@ export function gradeCharacterShape(
   const source = sampleStrokes(
     limitWritingStrokes(drawnStrokes),
     sampling.count,
+    includeOriginalStrokeGeometry,
   );
-  const target = samplePaths(referencePaths, sampling.count);
+  const target = samplePaths(
+    referencePaths,
+    sampling.count,
+    includeOriginalStrokeGeometry,
+  );
   const sourcePoints = source.points;
   const targetPoints = target.points;
   if (sourcePoints.length === 0 || targetPoints.length === 0) {
@@ -2185,7 +2550,7 @@ export function gradeCharacterShape(
           unmatchedCost: settings.unmatchedCost,
         })
       : [];
-    return {
+    const grade: ShapeContextGrade = {
       shapeCost,
       shapeSimilarity: Math.exp(-shapeCost),
       deformationAlpha: 1,
@@ -2217,13 +2582,20 @@ export function gradeCharacterShape(
       ),
       sourceStrokes: source.strokes,
       targetStrokes: target.strokes,
+      originalSourceStrokes: source.originalStrokes,
+      originalTargetStrokes: target.originalStrokes,
       referenceLength: sampling.referenceLength,
       sampleCount: sampling.count,
       sourceStrokeSampleCounts: source.strokeSampleCounts,
       targetStrokeSampleCounts: target.strokeSampleCounts,
       transform,
       options: settings,
+      sustainedTangentMismatchRejection:
+        createShapeContextSustainedTangentRejection(settings),
     };
+    grade.sustainedTangentMismatchRejection =
+      calculateShapeContextSustainedTangentRejection(grade);
+    return grade;
   }
 
   let rotationRadians = 0;
@@ -2397,7 +2769,7 @@ export function gradeCharacterShape(
       })
     : [];
 
-  return {
+  const grade: ShapeContextGrade = {
     shapeCost,
     shapeSimilarity: Math.exp(-shapeCost),
     deformationAlpha,
@@ -2427,11 +2799,18 @@ export function gradeCharacterShape(
     transformedPoints,
     sourceStrokes: source.strokes,
     targetStrokes: target.strokes,
+    originalSourceStrokes: source.originalStrokes,
+    originalTargetStrokes: target.originalStrokes,
     referenceLength: sampling.referenceLength,
     sampleCount: sampling.count,
     sourceStrokeSampleCounts: source.strokeSampleCounts,
     targetStrokeSampleCounts: target.strokeSampleCounts,
     transform,
     options: settings,
+    sustainedTangentMismatchRejection:
+      createShapeContextSustainedTangentRejection(settings),
   };
+  grade.sustainedTangentMismatchRejection =
+    calculateShapeContextSustainedTangentRejection(grade);
+  return grade;
 }

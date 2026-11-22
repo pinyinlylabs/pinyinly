@@ -20,6 +20,27 @@ const shapeContextOptionsSchema = z
     extraHandwritingStrokePenaltyWeight: z.number().min(0).max(5).optional(),
     maxRotationDegrees: z.number().min(0).max(45),
     rotationSteps: z.number().int().min(1).max(12),
+    sustainedTangentMismatchEnabled: z.boolean().optional(),
+    sustainedTangentMismatchThresholdDegrees: z
+      .number()
+      .min(1)
+      .max(180)
+      .optional(),
+    sustainedTangentMismatchMinimumLengthFraction: z
+      .number()
+      .positive()
+      .max(1)
+      .optional(),
+    sustainedTangentMismatchNoiseLengthFraction: z
+      .number()
+      .min(0)
+      .max(1)
+      .optional(),
+    sustainedTangentMismatchTangentWindowFraction: z
+      .number()
+      .positive()
+      .max(0.5)
+      .optional(),
   })
   .strict()
   .transform((options) => ({ ...shapeContextGraderDefaults, ...options }));

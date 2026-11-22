@@ -7,6 +7,8 @@ import type {
   WritingIssue,
 } from "#util/shapeContextGrader.ts";
 import {
+  calculateShapeContextStrokeGeometryDiagnostics,
+  calculateShapeContextTrajectoryDiagnostics,
   createShapeContextGraderDiagnostic,
   evaluateWritingIssueExpectations,
   renderShapeContextGraderDiagnosticSvg,
@@ -114,7 +116,38 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   );
   const contributionTrackWidth = rectWidth(`data-score-contribution-track=""`);
 
-  expect(diagnostic.schemaVersion).toBe(20);
+  expect(diagnostic.schemaVersion).toBe(24);
+  expect(diagnostic.strokeGeometry).toEqual(
+    calculateShapeContextStrokeGeometryDiagnostics(geometry),
+  );
+  expect(diagnostic.trajectory).toEqual(
+    calculateShapeContextTrajectoryDiagnostics(geometry),
+  );
+  expect(
+    diagnostic.trajectory.individualStrokes[0]?.sampledFractions,
+  ).toHaveLength(33);
+  expect(
+    diagnostic.trajectory.individualStrokes[0]
+      ?.handwritingSampledTangentsDegrees,
+  ).toHaveLength(33);
+  expect(
+    diagnostic.trajectory.individualStrokes[0]?.sustainedMismatch[`45`]
+      .thresholdDegrees,
+  ).toBe(45);
+  expect(
+    diagnostic.trajectory.individualStrokes[0]?.sustainedMismatch[`45`]
+      .sustainedRegionsByMinimumLength[`0.1`].minimumLengthFraction,
+  ).toBe(0.1);
+  expect(diagnostic.terminalHooks.pairs.length).toBeGreaterThan(0);
+  expect(
+    diagnostic.strokeGeometry.individualStrokes.map(
+      ({ meanPointDistance }) => meanPointDistance,
+    ),
+  ).toEqual(
+    [...diagnostic.strokeGeometry.individualStrokes]
+      .map(({ meanPointDistance }) => meanPointDistance)
+      .sort((left, right) => right - left),
+  );
   expect(diagnostic.issues).toEqual([]);
   expect(diagnostic.issueExpectations).toEqual({
     declared: false,
@@ -155,6 +188,11 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect(svg).toContain(`data-contrastive-row="candidate"`);
   expect(svg).toContain(`FAIL (0.0000)`);
   expect(serialized).toContain(`"weightedScoreContributions"`);
+  expect(svg).toContain(`data-stroke-geometry-table`);
+  expect(svg).toContain(`data-stroke-trajectory-table`);
+  expect(svg).toContain(`data-sustained-tangent-highlights=""`);
+  expect(svg).toContain(`data-angular-threshold="45"`);
+  expect(svg).toContain(`data-terminal-hook-highlights=""`);
   expect(serialized).not.toContain(`"transform":{}`);
   const diagnosticGeometry = diagnostic.algorithm.geometry;
   expect(diagnosticGeometry.sourceStrokes.flat()).toEqual(
@@ -282,6 +320,17 @@ test(`serializes grader diagnostics and keeps raw geometry visible in SVG`, () =
   expect([...svg.matchAll(/data-stroke-number="reference-0"/gu)]).toHaveLength(
     1,
   );
+  for (const kind of [`handwriting`, `reference`] as const) {
+    const label = [
+      ...svg.matchAll(
+        new RegExp(
+          `<g data-stroke-number="${kind}-0"><circle[^>]+r="11"[^>]+stroke-width="1"/><text[^>]+font-size="10"[^>]*>[^<]+</text></g>`,
+          `gu`,
+        ),
+      ),
+    ];
+    expect(label).toHaveLength(1);
+  }
   expect(svg).toContain(`data-dtw-cost-cell=""`);
   expect(svg).toContain(`data-dtw-proportional-diagonal="forward"`);
   expect(svg).toContain(`data-dtw-path-segment="diagonal"`);
