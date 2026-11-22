@@ -51,6 +51,7 @@
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.0",
     "@tanstack/db": "^0.15.2",
+    "@tanstack/hotkeys": "^0.30.0",
     "@tanstack/query-core": "^5.104.1",
     "@tanstack/query-db-collection": "^1.4.8",
     "@tanstack/react-db": "^0.5.4",

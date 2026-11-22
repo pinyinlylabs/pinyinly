@@ -6,24 +6,11 @@ import type {
   FormatDisplayOptions,
   RegisterableHotkey,
 } from "@tanstack/react-hotkeys";
-import { formatForDisplay, useHotkey } from "@tanstack/react-hotkeys";
+import { formatForDisplay } from "@tanstack/hotkeys";
+import { useFormatForDisplay, useHotkey } from "@tanstack/react-hotkeys";
 import { useIsFocused } from "expo-router";
-import { use, useSyncExternalStore } from "react";
-import { AppState, Platform } from "react-native";
-
-function subscribeToPlatformChanges(onStoreChange: () => void) {
-  if (Platform.OS === `web`) {
-    globalThis.addEventListener(`pageshow`, onStoreChange);
-    return () => {
-      globalThis.removeEventListener(`pageshow`, onStoreChange);
-    };
-  }
-
-  const subscription = AppState.addEventListener(`change`, onStoreChange);
-  return () => {
-    subscription.remove();
-  };
-}
+import { use } from "react";
+import { Platform } from "react-native";
 
 export function formatShortcutForDisplay(
   shortcut: RegisterableHotkey,
@@ -33,15 +20,10 @@ export function formatShortcutForDisplay(
 }
 
 export function useShortcutDisplayLabel(shortcut: RegisterableHotkey) {
-  return useSyncExternalStore(
-    subscribeToPlatformChanges,
-    () => formatShortcutForDisplay(shortcut),
-    () =>
-      formatShortcutForDisplay(
-        shortcut,
-        getShortcutDisplayPlatform() ?? `linux`,
-      ),
-  );
+  const formatForDisplay = useFormatForDisplay();
+  return formatForDisplay(shortcut, {
+    platform: getShortcutDisplayPlatform(),
+  });
 }
 
 export function useShortcut(
