@@ -409,7 +409,6 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
     [
       "he:一:one (🌱 NEW SKILL)",
       "he:人:person (🌱 NEW SKILL)",
-      "he:口:mouth (🌱 NEW SKILL)",
       "he:乙:second (🌱 NEW SKILL)",
       "he:八:eight (🌱 NEW SKILL)",
       "he:又:again (🌱 NEW SKILL)",
@@ -417,6 +416,7 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
       "he:凵:box (🌱 NEW SKILL)",
       "he:亻:person (🌱 NEW SKILL)",
       "he:氏:clanName (🌱 NEW SKILL)",
+      "he:厶:private (🌱 NEW SKILL)",
     ]
   `);
 
@@ -434,10 +434,10 @@ test(`new users are taught the simplest words first`, async ({ rizzle }) => {
       "he:𭕄:radical (🟥 BLOCKED)",
       "he:𠂊:hands (🟥 BLOCKED)",
       "he:亅:hook (🟥 BLOCKED)",
-      "he:𠃌:radical (🟥 BLOCKED)",
       "he:丶:dot (🟥 BLOCKED)",
       "he:丿:slash (🟥 BLOCKED)",
       "he:乚:hidden (🟥 BLOCKED)",
+      "he:丨:line (🟥 BLOCKED)",
     ]
   `);
 
