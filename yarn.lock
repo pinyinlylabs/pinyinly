@@ -9046,15 +9046,15 @@ __metadata:
   linkType: hard
 
 "@tanstack/query-db-collection@npm:^1.4.8":
-  version: 1.4.8
-  resolution: "@tanstack/query-db-collection@npm:1.4.8"
+  version: 1.5.2
+  resolution: "@tanstack/query-db-collection@npm:1.5.2"
   dependencies:
     "@standard-schema/spec": "npm:^1.1.0"
-    "@tanstack/db": "npm:0.15.2"
   peerDependencies:
+    "@tanstack/db": ^1.0.0-rc.0
     "@tanstack/query-core": ^5.90.15
     typescript: ">=4.7"
-  checksum: 10c0/88c324f67dc48949db1e2a1b44467ade5bb8214a1c9ff57a91e3fdb7621bf460404d1d56044ac96af804ab8cabe9a19b327f61cdde0e78c7be144f0288089466
+  checksum: 10c0/b9a097ded323a424fc012323b96d20d94873caa9cee510086f64d3c3da4ac96ecc20b3a0336b0647df0f49984003e23861863f0824596e4f91ab8928dc4a2195
   languageName: node
   linkType: hard
 
