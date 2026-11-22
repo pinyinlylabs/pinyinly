@@ -7,6 +7,10 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
+import type {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from "@simplewebauthn/browser";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { DeepReadonly } from "ts-essentials";
 import { z } from "zod";
@@ -148,7 +152,9 @@ export function useAuth(): AuthApi {
     const { options: optionsJSON, cookie } =
       await startPasskeyAuthenticationMutate();
 
-    const res = await startAuthentication({ optionsJSON });
+    const res = await startAuthentication({
+      optionsJSON: optionsJSON as PublicKeyCredentialRequestOptionsJSON,
+    });
 
     const res2 = await completePasskeyAuthenticationMutate({
       response: res,
@@ -210,10 +216,14 @@ export function useAuth(): AuthApi {
 
     const { options: optionsJSON, cookie } = await startAddPasskeyMutate();
 
-    const res = await startRegistration({ optionsJSON });
+    const res = await startRegistration({
+      optionsJSON: optionsJSON as PublicKeyCredentialCreationOptionsJSON,
+    });
 
     await completeAddPasskeyMutate({
-      response: res,
+      response: res as Parameters<
+        typeof completeAddPasskeyMutate
+      >[0][`response`],
       cookie,
     });
   };

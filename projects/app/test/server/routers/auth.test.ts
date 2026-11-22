@@ -16,6 +16,24 @@ import {
 import { afterEach, beforeEach, describe, expect, vi } from "vitest";
 import ms from "ms";
 
+type PasskeyTransport =
+  | `ble`
+  | `cable`
+  | `hybrid`
+  | `internal`
+  | `nfc`
+  | `smart-card`
+  | `usb`;
+
+type PasskeyRegistrationResponse = Omit<
+  RegistrationResponseJSON,
+  `response`
+> & {
+  response: Omit<RegistrationResponseJSON[`response`], `transports`> & {
+    transports?: PasskeyTransport[];
+  };
+};
+
 const { mockWithDrizzle } = vi.hoisted(() => ({ mockWithDrizzle: vi.fn() }));
 vi.mock(`#server/lib/db.ts`, async (importOriginal) => ({
   ...(await importOriginal<typeof import("#server/lib/db.ts")>()),
@@ -57,7 +75,7 @@ function virtualAuthenticator() {
       rpId = `localhost`,
       flags = 0x45,
       aaguid = `00000000-0000-0000-0000-000000000000`,
-    ): RegistrationResponseJSON {
+    ): PasskeyRegistrationResponse {
       const length = Buffer.alloc(2);
       length.writeUInt16BE(credentialId.length);
       const data = Buffer.concat([

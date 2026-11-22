@@ -58,6 +58,10 @@ dbTest(
           "hints": [],
           "pubKeyCredParams": [
             {
+              "alg": -48,
+              "type": "public-key",
+            },
+            {
               "alg": -8,
               "type": "public-key",
             },
@@ -95,6 +99,10 @@ dbTest(
           },
           "hints": [],
           "pubKeyCredParams": [
+            {
+              "alg": -48,
+              "type": "public-key",
+            },
             {
               "alg": -8,
               "type": "public-key",
