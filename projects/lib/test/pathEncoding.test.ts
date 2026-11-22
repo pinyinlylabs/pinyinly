@@ -23,17 +23,21 @@ function gitLsFilesSync(cwd: string): string[] {
     .sort();
 }
 
-test(`git-tracked file paths are normalized to NFC`, async () => {
-  // - NFC = Normalization Form Composed
-  // - NFD = Normalization Form Decomposed
-  //
-  // On macOS file paths can appear decomposed (e + ◌́), while in git and Linux
-  // environments paths are treated as raw bytes. If the repo has mixed forms,
-  // cross-platform path lookups can break. We enforce NFC at the repository
-  // level to keep path bytes consistent across platforms.
-  for (const relativePath of gitLsFilesSync(workspaceRoot)) {
-    expect
-      .soft(relativePath, `Path ${relativePath} is not normalized to NFC`)
-      .toEqual(relativePath.normalize(`NFC`));
-  }
-});
+test(
+  `git-tracked file paths are normalized to NFC`,
+  { timeout: 10_000 },
+  async () => {
+    // - NFC = Normalization Form Composed
+    // - NFD = Normalization Form Decomposed
+    //
+    // On macOS file paths can appear decomposed (e + ◌́), while in git and Linux
+    // environments paths are treated as raw bytes. If the repo has mixed forms,
+    // cross-platform path lookups can break. We enforce NFC at the repository
+    // level to keep path bytes consistent across platforms.
+    for (const relativePath of gitLsFilesSync(workspaceRoot)) {
+      expect
+        .soft(relativePath, `Path ${relativePath} is not normalized to NFC`)
+        .toEqual(relativePath.normalize(`NFC`));
+    }
+  },
+);

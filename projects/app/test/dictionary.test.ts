@@ -908,7 +908,7 @@ test(`dictionary contains entries for decomposition`, async () => {
       "冋 via 向[HSK2], 响[HSK2], 高[HSK1]",
       "冏 via 商",
       "凡 via 恐, 赢[HSK3]",
-      "凶 via 离[HSK2], 脑",
+      "凶 via 离[HSK2], 脑, 鬯",
       "刍 via 急[HSK2]",
       "刖 via 前[HSK1], 输[HSK3]",
       "则 via 则, 原则[HSK4], 否则[HSK4], 规则[HSK4]",
