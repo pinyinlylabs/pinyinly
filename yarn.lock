@@ -5823,7 +5823,7 @@ __metadata:
     "@tailwindcss/vite": "npm:^4.3.3"
     "@tanstack/db": "npm:^0.15.2"
     "@tanstack/eslint-plugin-query": "npm:^5.104.1"
-    "@tanstack/hotkeys": "npm:^0.30.0"
+    "@tanstack/hotkeys": "npm:^0.31.0"
     "@tanstack/query-core": "npm:^5.104.1"
     "@tanstack/query-db-collection": "npm:^1.4.8"
     "@tanstack/react-db": "npm:^0.5.4"
@@ -9041,10 +9041,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/hotkeys@npm:0.30.0, @tanstack/hotkeys@npm:^0.30.0":
+"@tanstack/hotkeys@npm:0.30.0":
   version: 0.30.0
   resolution: "@tanstack/hotkeys@npm:0.30.0"
   checksum: 10c0/7620658a546fd4b3a743136f55884dd6f50ab2d07b223c651c6fd32c9e947389fc168123c5e20b06fc17f8e42b6b45924edbfad797c7066704a70856cd31009f
+  languageName: node
+  linkType: hard
+
+"@tanstack/hotkeys@npm:^0.31.0":
+  version: 0.31.0
+  resolution: "@tanstack/hotkeys@npm:0.31.0"
+  checksum: 10c0/36993243b8f832d97155c835b8ea3bb9be77c06950e00514e2672fdfc98adae7fc8f6c0abcaed1a68db618a584a1a54236dd32110a81bcf7a48a063352638293
   languageName: node
   linkType: hard
 
