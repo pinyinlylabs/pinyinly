@@ -22,6 +22,7 @@ import {
   soundMnemonicsUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
   quizResultTooSlowUserToggleSetting,
+  wikiPageEditingUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,
@@ -96,6 +97,13 @@ describe(`experimental settings`, () => {
     expect(userSettingDefinitions).toContain(
       quizResultTooSlowUserToggleSetting,
     );
+  });
+
+  test(`Wiki page editing is disabled by default and registered for syncing`, () => {
+    expect(
+      getUserSettingDefaultValue(wikiPageEditingUserToggleSetting, {}),
+    ).toEqual({ enabled: false });
+    expect(userSettingDefinitions).toContain(wikiPageEditingUserToggleSetting);
   });
 });
 

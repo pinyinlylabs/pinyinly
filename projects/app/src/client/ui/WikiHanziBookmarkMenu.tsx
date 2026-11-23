@@ -6,15 +6,18 @@ import { DropdownMenu2 } from "./DropdownMenu2";
 import { RectButton } from "./RectButton";
 import { Text } from "./Text";
 import { WikiHanziModalContext } from "./WikiHanziModalContext";
+import type { WikiPageEditModeContextValue } from "./WikiPageEditModeContext";
 
 export function WikiHanziBookmarkMenu({
   hanziWord,
   hanzi,
   onModalDismiss,
+  wikiPageEditMode,
 }: {
   hanziWord: HanziWord | null;
   hanzi: HanziText;
   onModalDismiss?: () => void;
+  wikiPageEditMode?: WikiPageEditModeContextValue | null;
 }) {
   const modalContext = use(WikiHanziModalContext);
   const router = useRouter();
@@ -33,6 +36,14 @@ export function WikiHanziBookmarkMenu({
         />
       </DropdownMenu2.Trigger>
       <DropdownMenu2.Content align="end" sideOffset={4}>
+        {wikiPageEditMode?.isEditPageEnabled === true ? (
+          <DropdownMenu2.CheckboxItem
+            checked={wikiPageEditMode.isEditMode}
+            onCheckedChange={wikiPageEditMode.setIsEditMode}
+          >
+            <Text>Edit page</Text>
+          </DropdownMenu2.CheckboxItem>
+        ) : null}
         {modalContext == null ? null : (
           <DropdownMenu2.Item
             onPress={() => {

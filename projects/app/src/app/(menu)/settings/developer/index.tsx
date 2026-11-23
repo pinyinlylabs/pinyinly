@@ -19,6 +19,7 @@ import {
   soundMnemonicsUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
   quizResultTooSlowUserToggleSetting,
+  wikiPageEditingUserToggleSetting,
 } from "@/data/userSettings";
 import { slowQueriesSetting } from "@/util/devtools";
 import { Link } from "expo-router";
@@ -157,6 +158,21 @@ export default function DeveloperSettingsPage() {
             <UserSettingToggleButton
               entity={quizResultTooSlowUserToggleSetting}
               accessibilityLabel="Too slow quiz result"
+            />
+          </View>
+        </View>
+        <View className="flex-row items-center gap-4">
+          <View className="flex-1">
+            <Text className="pyly-body-heading">Wiki page editing</Text>
+            <Text className="pyly-body-caption">
+              Allow the Edit page menu option to show section edit buttons on
+              wiki pages.
+            </Text>
+          </View>
+          <View>
+            <UserSettingToggleButton
+              entity={wikiPageEditingUserToggleSetting}
+              accessibilityLabel="Wiki page editing"
             />
           </View>
         </View>
