@@ -1,4 +1,6 @@
 import { DeviceStoreToggleButton } from "@/client/ui/DeviceStoreToggleButton";
+import { Breadcrumbs } from "@/client/ui/Breadcrumbs";
+import { HeaderProvider } from "@/client/ui/HeaderProvider";
 import {
   SimpleCronIntervalKind,
   devThemeSwapIntervalSetting,
@@ -40,8 +42,12 @@ export default function DeveloperSettingsPage() {
   return (
     <View className="gap-5">
       {/* Header */}
-      <View>
-        <Text className="pyly-body-title">Developer</Text>
+      <View className="gap-1">
+        <Breadcrumbs>
+          <Breadcrumbs.Item href="/settings">Settings</Breadcrumbs.Item>
+          <Breadcrumbs.Item>Developer</Breadcrumbs.Item>
+        </Breadcrumbs>
+        <HeaderProvider.ScrollTrigger title="Developer" />
       </View>
 
       <View className="gap-2">
