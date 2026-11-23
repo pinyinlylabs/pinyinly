@@ -27,6 +27,12 @@
       rangeStrategy: "in-range-only",
     },
     {
+      description: "Group TanStack Hotkeys packages together",
+      matchDatasources: ["npm"],
+      matchPackageNames: ["@tanstack/react-hotkeys", "@tanstack/hotkeys"],
+      groupName: "TanStack Hotkeys",
+    },
+    {
       description: "tooling deps defaults: automerge, wait 3 days",
       matchDatasources: ["npm", "github-releases"],
       matchDepTypes: ["devDependencies", "packageManager"],
