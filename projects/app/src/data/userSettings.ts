@@ -312,6 +312,13 @@ export const quizResultTooSlowUserToggleSetting = defineUserSetting({
   defaultValue: () => ({ enabled: false }),
 });
 
+export const wikiPageEditingUserToggleSetting = defineUserSetting({
+  entity: r.entity(`wikiPageEditing`, {
+    enabled: r.boolean(`e`),
+  }) satisfies UserSettingToggleableEntity,
+  defaultValue: () => ({ enabled: false }),
+});
+
 export const practiceMeaningUserToggleSetting = defineUserSetting({
   entity: r.entity(`practiceMeaning`, {
     enabled: r.boolean(`e`),
@@ -819,6 +826,7 @@ export const userSettingDefinitions = [
   profileOverviewUserToggleSetting,
   hanziWritingIssuesUserToggleSetting,
   quizResultTooSlowUserToggleSetting,
+  wikiPageEditingUserToggleSetting,
   practiceMeaningUserToggleSetting,
   practicePronunciationUserToggleSetting,
   practiceWritingUserToggleSetting,

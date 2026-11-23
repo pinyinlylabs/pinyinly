@@ -33,18 +33,21 @@ export function WikiTitledBox({
   const wikiPageEditMode = use(WikiPageEditModeContext);
   const isOverflowExpandable = collapsedMaxHeight != null;
   const isEditButtonVisible =
-    wikiPageEditMode == null || wikiPageEditMode.isEditMode;
+    wikiPageEditMode == null ||
+    (wikiPageEditMode.isEditPageEnabled && wikiPageEditMode.isEditMode);
   const headerAction =
     headerCustomAction ??
-    (onEditingChange == null || !isEditButtonVisible ? null : (
-      <WikiEditButton
-        editing={isEditing}
-        onPress={() => {
-          const next = !isEditing;
-          setIsEditing(next);
-          onEditingChange(next);
-        }}
-      />
+    (onEditingChange == null ? null : (
+      <View style={{ visibility: isEditButtonVisible ? `visible` : `hidden` }}>
+        <WikiEditButton
+          editing={isEditing}
+          onPress={() => {
+            const next = !isEditing;
+            setIsEditing(next);
+            onEditingChange(next);
+          }}
+        />
+      </View>
     ));
 
   return (

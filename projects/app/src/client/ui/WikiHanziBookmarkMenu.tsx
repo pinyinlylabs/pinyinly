@@ -36,14 +36,14 @@ export function WikiHanziBookmarkMenu({
         />
       </DropdownMenu2.Trigger>
       <DropdownMenu2.Content align="end" sideOffset={4}>
-        {wikiPageEditMode == null ? null : (
+        {wikiPageEditMode?.isEditPageEnabled === true ? (
           <DropdownMenu2.CheckboxItem
             checked={wikiPageEditMode.isEditMode}
             onCheckedChange={wikiPageEditMode.setIsEditMode}
           >
             <Text>Edit page</Text>
           </DropdownMenu2.CheckboxItem>
-        )}
+        ) : null}
         {modalContext == null ? null : (
           <DropdownMenu2.Item
             onPress={() => {

@@ -1,11 +1,23 @@
 // @vitest-environment happy-dom
 
 import { fireEvent, render, screen } from "@testing-library/react";
-import { use } from "react";
+import { use, useState } from "react";
+import type { PropsWithChildren } from "react";
 import { describe, expect, test, vi } from "vitest";
 import { WikiPageEditModeContext } from "#client/ui/WikiPageEditModeContext.ts";
-import { WikiPageEditModeProvider } from "#client/ui/WikiPageEditModeProvider.tsx";
 import { WikiTitledBox } from "#client/ui/WikiTitledBox.tsx";
+
+function TestWikiPageEditModeProvider({ children }: PropsWithChildren) {
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  return (
+    <WikiPageEditModeContext.Provider
+      value={{ isEditPageEnabled: true, isEditMode, setIsEditMode }}
+    >
+      {children}
+    </WikiPageEditModeContext.Provider>
+  );
+}
 
 function EditModeToggle() {
   const wikiPageEditMode = use(WikiPageEditModeContext);
@@ -31,7 +43,7 @@ describe(`WikiTitledBox`, () => {
     const onEditingChange = vi.fn();
 
     render(
-      <WikiPageEditModeProvider>
+      <TestWikiPageEditModeProvider>
         <EditModeToggle />
         <WikiTitledBox
           title="Remember the meaning"
@@ -39,16 +51,17 @@ describe(`WikiTitledBox`, () => {
         >
           Meaning content
         </WikiTitledBox>
-      </WikiPageEditModeProvider>,
+      </TestWikiPageEditModeProvider>,
     );
 
-    expect(screen.queryByText(`Edit`)).not.toBeInTheDocument();
+    const editButton = screen.getByText(`Edit`);
+    expect(editButton).not.toBeVisible();
 
     fireEvent.click(screen.getByText(`Edit page`));
-    expect(screen.getByText(`Edit`)).toBeInTheDocument();
+    expect(editButton).toBeVisible();
 
     fireEvent.click(screen.getByText(`Edit page`));
-    expect(screen.queryByText(`Edit`)).not.toBeInTheDocument();
+    expect(editButton).not.toBeVisible();
 
     fireEvent.click(screen.getByText(`Edit page`));
     fireEvent.click(screen.getByText(`Edit`));
