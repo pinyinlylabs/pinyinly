@@ -39,7 +39,7 @@ tasks:
       - ci
 
   renovateCheck:
-    command: yarn dlx -p renovate@44.256.0 renovate-config-validator --strict
+    command: yarn dlx -p renovate@44.256.1 renovate-config-validator --strict
     inputs:
       - renovate.json5
     tags:
