@@ -80,16 +80,15 @@ function Header({
           />
         ) : null}
 
-        <View className="w-20 items-start">
-          <CloseButton onPress={onDismiss} />
-        </View>
+        <View className="w-20" />
 
         <View className="flex-1 content-center items-center">
           <HeaderProvider.TitleText className="font-sans text-3xl text-fg-loud" />
         </View>
 
-        <View className="w-20 items-end">
+        <View className="w-20 flex-row items-center justify-end gap-1">
           <HeaderProvider.ActionsSlot />
+          <CloseButton onPress={onDismiss} />
         </View>
       </View>
     </View>
