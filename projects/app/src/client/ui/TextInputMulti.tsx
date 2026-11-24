@@ -116,9 +116,11 @@ const inputClass = tv({
     variant: {
       bare: `font-sans text-fg outline-none`,
       flat: `
-        rounded-xl bg-bg-high px-4 py-3 pyly-body-input outline-none
+        rounded-xl border border-fg/7 bg-bg-high px-4 py-3 pyly-body-input outline-transparent
 
-        focus:outline-2 focus:-outline-offset-2 focus:outline-blue focus:outline-solid
+        focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-blue/50
+
+        dark:border-transparent
       `,
     },
   },

@@ -70,16 +70,18 @@ export function WikiHanziExternalResources({ hanzi }: { hanzi: HanziText }) {
             href={link.href as `https://${string}`}
             target="_blank"
             rel="noopener noreferrer nofollow"
-            className={`
-              my-1 inline-flex w-1/2 items-center text-muted-fg
-
-              hover:text-fg
-            `}
+            className={`group my-1 inline-flex w-1/2 items-center`}
           >
-            <Text className={`mr-1 font-sans text-base font-normal`}>
+            <Text
+              className={`
+                mr-1 font-sans text-base font-normal text-muted-fg
+
+                group-hover:text-fg
+              `}
+            >
               {link.name}
             </Text>
-            <Icon icon="open" size={16} />
+            <Icon icon="open" size={16} tintColorClassName="accent-muted-fg" />
           </Link>
         ))}
       </View>
