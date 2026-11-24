@@ -38,9 +38,7 @@ function WikiHanziBodyContent({
   });
 
   if (isHanziCharacter(hanzi)) {
-    if (dictionaryEntries.length === 0) {
-      return null;
-    } else if (dictionaryEntries.length === 1) {
+    if (dictionaryEntries.length < 2) {
       return (
         <WikiHanziBodyCharacter hanzi={hanzi} onModalDismiss={onModalDismiss} />
       );
