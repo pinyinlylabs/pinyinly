@@ -2,7 +2,6 @@ import { WikiHanziProgressLozengeDisplay } from "#client/ui/WikiHanziProgressLoz
 import { Theme } from "#client/ui/Theme.tsx";
 import { Text } from "#client/ui/Text.tsx";
 import "#global.css";
-import { useState } from "react";
 import { Pressable } from "react-native";
 import { PortalHost, PortalProvider } from "react-native-teleport";
 import { expect, test, vi } from "vitest";
@@ -54,20 +53,15 @@ function Meaning({ onSelect }: { onSelect: () => void }) {
   );
 }
 
-test(`one menu combines bookmark actions and proficiency without selecting the meaning`, async () => {
+test(`the lozenge opens proficiency details without selecting the meaning`, async () => {
   const onSelect = vi.fn();
   await render(<Meaning onSelect={onSelect} />);
 
   const trigger = page.getByRole(`button`, {
-    name: `Novice. Not bookmarked. Bookmark and proficiency details`,
+    name: `Novice. Bookmark and proficiency details`,
   });
   await expect.element(trigger).toBeVisible();
-  await expect
-    .element(page.getByTestId(`bookmark-filled`))
-    .not.toBeInTheDocument();
   await trigger.click();
-  const bookmark = page.getByRole(`menuitemcheckbox`, { name: `Bookmark` });
-  await expect.element(bookmark).not.toBeChecked();
   await expect
     .element(
       page.getByText(`Each word has its own proficiency level.`, {
@@ -78,22 +72,7 @@ test(`one menu combines bookmark actions and proficiency without selecting the m
   await expect
     .element(page.getByText(`Recognize meaning`, { exact: true }))
     .toBeVisible();
-  await bookmark.click();
-
-  const savedTrigger = page.getByRole(`button`, {
-    name: `Novice. Bookmarked. Bookmark and proficiency details`,
-  });
-  await expect.element(savedTrigger).toBeVisible();
-  await expect.element(page.getByTestId(`bookmark-filled`)).toBeVisible();
-  expect(onSelect).not.toHaveBeenCalled();
-
-  await savedTrigger.click();
-  await expect.element(bookmark).toBeChecked();
-  await bookmark.click();
-  await expect.element(trigger).toBeVisible();
-  await expect
-    .element(page.getByTestId(`bookmark-filled`))
-    .not.toBeInTheDocument();
+  await userEvent.keyboard(`{Escape}`);
   expect(onSelect).not.toHaveBeenCalled();
 
   await page.getByText(`feel; think`).click();
@@ -104,14 +83,12 @@ test(`keyboard users can open and dismiss the combined menu without selecting th
   const onSelect = vi.fn();
   await render(<Meaning onSelect={onSelect} />);
   const trigger = page.getByRole(`button`, {
-    name: `Novice. Not bookmarked. Bookmark and proficiency details`,
+    name: `Novice. Bookmark and proficiency details`,
   });
   await expect.element(trigger).toBeVisible();
   trigger.element().focus();
   await userEvent.keyboard(`{Enter}`);
-  await expect
-    .element(page.getByRole(`menuitemcheckbox`, { name: `Bookmark` }))
-    .toBeVisible();
+  await expect.element(page.getByRole(`menu`)).toBeVisible();
   await userEvent.keyboard(`{Escape}`);
   await expect.element(trigger).toHaveFocus();
   expect(onSelect).not.toHaveBeenCalled();
@@ -124,7 +101,7 @@ test(`proficiency details stay scrollable inside a narrow viewport`, async () =>
     await render(<Meaning onSelect={vi.fn()} />);
     await page
       .getByRole(`button`, {
-        name: `Novice. Not bookmarked. Bookmark and proficiency details`,
+        name: `Novice. Bookmark and proficiency details`,
       })
       .click();
     const menu = page.getByRole(`menu`);

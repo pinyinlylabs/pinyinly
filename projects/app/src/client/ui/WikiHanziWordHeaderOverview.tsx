@@ -27,9 +27,6 @@ export function WikiHanziWordHeaderOverview({
 
   return (
     <View className="gap-[10px]">
-      <View className="flex-row items-center gap-1">
-        <View className="flex-1 flex-row items-center gap-1"></View>
-      </View>
       <View>
         <HeaderProvider.ScrollTrigger title={hanzi} />
         <View className="flex-row items-center gap-3">

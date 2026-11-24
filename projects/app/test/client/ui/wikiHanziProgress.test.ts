@@ -74,7 +74,7 @@ describe(`getHanziWordSkillBreakdown`, () => {
         stabilityDays: null,
         targetStabilityDays: 30,
         progress: 0,
-        status: `Not started`,
+        status: `Queued`,
       },
       {
         label: `Type full pronunciation`,
@@ -92,7 +92,7 @@ describe(`getHanziWordSkillBreakdown`, () => {
         stabilityDays: null,
         targetStabilityDays: 30,
         progress: 0,
-        status: `Not started`,
+        status: `Queued`,
       },
       {
         label: `Write character`,
@@ -101,7 +101,7 @@ describe(`getHanziWordSkillBreakdown`, () => {
         stabilityDays: null,
         targetStabilityDays: 30,
         progress: 0,
-        status: `Not started`,
+        status: `Queued`,
       },
     ]);
   });

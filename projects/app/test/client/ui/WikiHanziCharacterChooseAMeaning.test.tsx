@@ -312,15 +312,13 @@ test(`requires a choice when a word has multiple meanings`, ({ rizzle }) => {
   expect(screen.getAllByRole(`radio`)).toHaveLength(2);
   expect(
     screen.getAllByRole(`button`, {
-      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
+      name: `Queued. Bookmark and proficiency details`,
     }),
   ).toHaveLength(2);
   for (const gloss of [`how many, a few`, `small table`]) {
     const glossRow = screen.getByRole(`radio`, { name: gloss }).parentElement;
     expect(glossRow).not.toBeNull();
-    expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
-      `Not Started`,
-    );
+    expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(`Queued`);
   }
 
   fireEvent.click(screen.getByText(`how many, a few`));
@@ -334,26 +332,12 @@ test(`shows a meaning-local lozenge for every character choice`, ({
   rizzle,
 }) => {
   useLiveQueryMock.mockReturnValue({ data: meanings });
-  useBookmarkToggleMock.mockImplementation((hanziWord: HanziWord) => ({
-    isBookmarked: hanziWord === meanings[0]!.hanziWord,
-    isLoading: false,
-    toggle: vi.fn(),
-    add: vi.fn(),
-    remove: vi.fn(),
-  }));
   render(<TestChooser />, { wrapper: providers(rizzle) });
   expect(
-    screen.getByRole(`button`, {
-      name: `Not Started. Bookmarked. Bookmark and proficiency details`,
-    }),
+    screen.getAllByRole(`button`, {
+      name: `Queued. Bookmark and proficiency details`,
+    })[0],
   ).toBeInTheDocument();
-  expect(
-    screen.getByRole(`button`, {
-      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
-    }),
-  ).toBeInTheDocument();
-  expect(useBookmarkToggleMock).toHaveBeenCalledWith(meanings[0]!.hanziWord);
-  expect(useBookmarkToggleMock).toHaveBeenCalledWith(meanings[1]!.hanziWord);
 });
 
 test(`shows no status lozenge when there are no meanings`, ({ rizzle }) => {
@@ -363,7 +347,6 @@ test(`shows no status lozenge when there are no meanings`, ({ rizzle }) => {
   });
   expect(screen.getByText(`No meanings yet.`)).toBeInTheDocument();
   expect(screen.queryByRole(`button`)).not.toBeInTheDocument();
-  expect(useBookmarkToggleMock).not.toHaveBeenCalled();
 });
 
 test(`shows a meaning-local lozenge beside a custom meaning`, ({ rizzle }) => {
@@ -376,10 +359,7 @@ test(`shows a meaning-local lozenge beside a custom meaning`, ({ rizzle }) => {
   const glossRow =
     screen.getByText(`my custom meaning`).parentElement?.parentElement;
   expect(glossRow).not.toBeNull();
-  expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
-    `Not Started`,
-  );
-  expect(useBookmarkToggleMock).toHaveBeenCalledWith(`几:custom`);
+  expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(`Queued`);
   expect(screen.getByText(`Custom`)).toBeInTheDocument();
 });
 
@@ -397,7 +377,7 @@ test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
     { wrapper: providers(rizzle) },
   );
 
-  expect(screen.getByText(`Not Started`)).toBeInTheDocument();
+  expect(screen.getByText(`Queued`)).toBeInTheDocument();
 });
 
 test(`keeps each meaning's proficiency independent`, ({ rizzle }) => {
@@ -430,12 +410,12 @@ test(`keeps each meaning's proficiency independent`, ({ rizzle }) => {
   );
   expect(
     screen.getByRole(`button`, {
-      name: `Master. Not bookmarked. Bookmark and proficiency details`,
+      name: `Master. Bookmark and proficiency details`,
     }),
   ).toBeInTheDocument();
   expect(
     screen.getByRole(`button`, {
-      name: `Not Started. Not bookmarked. Bookmark and proficiency details`,
+      name: `Queued. Bookmark and proficiency details`,
     }),
   ).toBeInTheDocument();
 });

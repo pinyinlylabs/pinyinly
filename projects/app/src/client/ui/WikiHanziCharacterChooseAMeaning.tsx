@@ -15,6 +15,7 @@ import { useDb } from "./hooks/useDb";
 import { tv } from "tailwind-variants";
 import { WikiExampleSentence } from "./WikiExampleSentence";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
+import { HskLozengeWithTooltip } from "./HskLozengeWithTooltip";
 
 export function WikiHanziCharacterChooseAMeaning({
   hanzi,
@@ -40,6 +41,8 @@ export function WikiHanziCharacterChooseAMeaning({
           hanziWord: entry.hanziWord,
           gloss: entry.gloss,
           pinyin: entry.pinyin,
+          hsk: entry.hsk,
+          hskFirstAppearance: entry.hskFirstAppearance,
         })),
   });
   const { data: wikiPayload } = useQuery(wikiPayloadQuery(hanzi));
@@ -87,6 +90,18 @@ export function WikiHanziCharacterChooseAMeaning({
                       {entry.gloss.join(`, `)}
                     </Text>
                   </Pressable>
+                  {entry.hsk == null &&
+                  entry.hskFirstAppearance == null ? null : (
+                    <HskLozengeWithTooltip
+                      entries={[
+                        {
+                          hsk: entry.hsk,
+                          hskFirstAppearance: entry.hskFirstAppearance,
+                        },
+                      ]}
+                      size="sm"
+                    />
+                  )}
                   <WikiHanziProgressLozenge
                     hanziWord={entry.hanziWord}
                     skillSrsStates={skillSrsStates}

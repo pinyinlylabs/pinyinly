@@ -2086,9 +2086,9 @@ export type ProficiencyColor =
 
 export const rankPresentation = {
   0: {
-    label: `Not Started`,
-    description: `You haven't started practising this word yet.`,
-    color: `muted-fg`,
+    label: `Queued`,
+    description: `This word is queued for practice.`,
+    color: `amber`,
   },
   1: {
     label: `Novice`,

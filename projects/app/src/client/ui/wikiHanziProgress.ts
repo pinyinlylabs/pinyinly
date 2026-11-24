@@ -21,7 +21,7 @@ export interface HanziWordSkillBreakdownItem {
   progress: number;
   stabilityDays: number | null;
   targetStabilityDays: number;
-  status: `Not started` | `Learning` | `Target reached`;
+  status: `Queued` | `Learning` | `Target reached`;
 }
 
 const rankGoalTargets = new Map<SkillKind, number>();
@@ -131,7 +131,7 @@ export function getHanziWordSkillBreakdown({
       progress,
       status:
         stabilityDays == null
-          ? `Not started`
+          ? `Queued`
           : progress >= 1
             ? `Target reached`
             : `Learning`,

@@ -9,6 +9,7 @@ import { tv } from "tailwind-variants";
 
 export type LozengeColor =
   | `emerald`
+  | `yellow`
   | `cyan`
   | `blue`
   | `violet`
@@ -153,6 +154,7 @@ const lozengeContainerClass = tv({
   variants: {
     color: {
       emerald: `border-lozenge-emerald-border bg-lozenge-emerald-bg`,
+      yellow: `border-yellow/50 bg-yellow/10`,
       cyan: `border-lozenge-cyan-border bg-lozenge-cyan-bg`,
       blue: `border-lozenge-blue-border bg-lozenge-blue-bg`,
       violet: `border-lozenge-violet-border bg-lozenge-violet-bg`,
@@ -185,6 +187,7 @@ const lozengeTextClass = tv({
   variants: {
     color: {
       emerald: `text-lozenge-emerald-fg`,
+      yellow: `text-yellow`,
       cyan: `text-lozenge-cyan-fg`,
       blue: `text-lozenge-blue-fg`,
       violet: `text-lozenge-violet-fg`,

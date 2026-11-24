@@ -1,5 +1,4 @@
 import type { HanziWord, Skill, SrsStateType } from "@/data/model";
-import { useBookmarkToggle } from "./hooks/useBookmarkToggle";
 import { rankPresentation, rankToWithinLevelProgress } from "@/data/skills";
 import type { RankNumber } from "@/data/skills";
 import { Lozenge } from "./Lozenge";
@@ -8,7 +7,6 @@ import { DropdownMenu2 } from "./DropdownMenu2";
 import { Text } from "./Text";
 import { getHanziWordsProgress } from "./wikiHanziProgress";
 import { WikiHanziSkillLevelBreakdownContent } from "./WikiHanziSkillLevelBreakdown";
-import { BookmarkMenuItemDisplay } from "./WikiHanziBookmarkMenu";
 import { ScrollView, useWindowDimensions } from "react-native";
 
 export function WikiHanziProgressLozenge({
@@ -20,7 +18,6 @@ export function WikiHanziProgressLozenge({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   hasPinyin: boolean;
 }) {
-  const { isBookmarked, isLoading, toggle } = useBookmarkToggle(hanziWord);
   const { progress, rank } = getHanziWordsProgress({
     hanziWords: [hanziWord],
     skillSrsStates,
@@ -33,9 +30,6 @@ export function WikiHanziProgressLozenge({
       hanziWord={hanziWord}
       skillSrsStates={skillSrsStates}
       hasPinyin={hasPinyin}
-      isBookmarked={isBookmarked}
-      isBookmarkLoading={isLoading}
-      onBookmarkToggle={toggle}
     />
   );
 }
@@ -46,22 +40,23 @@ export function WikiHanziProgressLozengeDisplay({
   hanziWord,
   skillSrsStates,
   hasPinyin = false,
-  isBookmarked = false,
-  isBookmarkLoading = false,
-  onBookmarkToggle,
 }: {
   progress: number;
   rank: RankNumber;
   hanziWord?: HanziWord | null;
   skillSrsStates?: ReadonlyMap<Skill, SrsStateType>;
   hasPinyin?: boolean;
-  isBookmarked?: boolean;
-  isBookmarkLoading?: boolean;
-  onBookmarkToggle?: () => void;
 }) {
   const { height } = useWindowDimensions();
   const level = rankPresentation[rank];
-  const style = proficiencyStyle[level.color];
+  const style =
+    rank === 0
+      ? {
+          lozengeColor: `yellow` as const,
+          badgeClass: `border-yellow/50 bg-yellow/10`,
+          badgeProgressClass: `bg-yellow/20`,
+        }
+      : proficiencyStyle[level.color];
   const badgeProgress = rankToWithinLevelProgress({
     rank,
     completion: progress,
@@ -84,9 +79,7 @@ export function WikiHanziProgressLozengeDisplay({
           progress={rank === 0 || rank === 4 ? undefined : visualProgress}
           progressClassName={style.badgeProgressClass}
           accessibilityRole="button"
-          icon={isBookmarked ? `bookmark-filled` : undefined}
-          iconTintColorClassName="accent-muted-fg"
-          accessibilityLabel={`${level.label}. ${isBookmarked ? `Bookmarked` : `Not bookmarked`}. Bookmark and proficiency details`}
+          accessibilityLabel={`${level.label}. Bookmark and proficiency details`}
           onPress={(event) => {
             event.stopPropagation();
           }}
@@ -102,16 +95,6 @@ export function WikiHanziProgressLozengeDisplay({
           event.stopPropagation();
         }}
       >
-        {onBookmarkToggle == null ? null : (
-          <>
-            <BookmarkMenuItemDisplay
-              isBookmarked={isBookmarked}
-              isLoading={isBookmarkLoading}
-              toggle={onBookmarkToggle}
-            />
-            <DropdownMenu2.Separator />
-          </>
-        )}
         <ScrollView
           style={{ maxHeight: height * 0.6 }}
           contentContainerClassName="gap-2"

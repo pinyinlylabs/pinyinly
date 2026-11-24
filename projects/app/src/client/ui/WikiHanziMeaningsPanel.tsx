@@ -6,6 +6,7 @@ import type {
   CharacterExampleSentence,
   HanziText,
   HanziWord,
+  Hsk30Level,
   Skill,
   SrsStateType,
 } from "@/data/model";
@@ -21,6 +22,7 @@ import { useDb } from "./hooks/useDb";
 import { useUserHanziMeaning } from "./hooks/useUserHanziMeaning";
 import { WikiExampleSentence } from "./WikiExampleSentence";
 import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
+import { HskLozengeWithTooltip } from "./HskLozengeWithTooltip";
 
 interface WikiHanziMeaningsPanelProps {
   hanzi: HanziText;
@@ -156,9 +158,10 @@ function DictionaryMeaningListItem({
       className="gap-3"
     >
       <MeaningCoreText
-        hanzi={meaning.hanzi}
         pinyin={primaryPinyin}
         glosses={meaning.gloss}
+        hsk={meaning.hsk}
+        hskFirstAppearance={meaning.hskFirstAppearance}
         hanziWord={meaning.hanziWord}
         skillSrsStates={skillSrsStates}
         selected={selected}
@@ -227,7 +230,6 @@ function UserMeaningListItem({
     >
       <View className="gap-2">
         <MeaningCoreText
-          hanzi={meaning.hanzi}
           pinyin={value.pinyin}
           glosses={[value.gloss]}
           trailingBadge={customBadge}
@@ -282,8 +284,9 @@ function MeaningSelection({
 
 function MeaningCoreText({
   glosses,
-  hanzi,
   pinyin,
+  hsk,
+  hskFirstAppearance,
   trailingBadge,
   hanziWord,
   skillSrsStates,
@@ -291,8 +294,9 @@ function MeaningCoreText({
   onSelect,
 }: {
   glosses: string[];
-  hanzi: HanziText;
   pinyin?: string;
+  hsk?: Hsk30Level;
+  hskFirstAppearance?: Hsk30Level;
   trailingBadge?: React.ReactNode;
   hanziWord: HanziWord;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
@@ -312,15 +316,12 @@ function MeaningCoreText({
 
   return (
     <View className="gap-1">
-      <View className="flex-row flex-wrap items-baseline gap-4">
-        <Text className="font-sans text-base font-normal text-fg-loud">
-          {hanzi}
-        </Text>
-        {pinyin == null || pinyin.length === 0 ? null : (
+      {pinyin == null || pinyin.length === 0 ? null : (
+        <View className="flex-row flex-wrap items-baseline gap-4">
           <Text className="font-sans text-base text-muted-fg">{pinyin}</Text>
-        )}
-        {trailingBadge}
-      </View>
+          {trailingBadge}
+        </View>
+      )}
       <View className="ml-4 flex-row flex-wrap items-center gap-x-2 gap-y-1">
         {onSelect == null ? (
           gloss
@@ -337,6 +338,12 @@ function MeaningCoreText({
           >
             {gloss}
           </Pressable>
+        )}
+        {hsk == null && hskFirstAppearance == null ? null : (
+          <HskLozengeWithTooltip
+            entries={[{ hsk, hskFirstAppearance }]}
+            size="sm"
+          />
         )}
         <WikiHanziProgressLozenge
           hanziWord={hanziWord}
