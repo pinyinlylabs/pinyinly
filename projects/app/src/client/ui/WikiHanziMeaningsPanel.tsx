@@ -80,7 +80,7 @@ export function WikiHanziMeaningsPanel({
     <View className="gap-4">
       {builtInMeanings.length === 0 && userMeanings.length === 0 ? (
         <Text className="font-sans text-base text-muted-fg">
-          No meanings yet.
+          No definitions at the moment.
         </Text>
       ) : (
         <View className="gap-3">
