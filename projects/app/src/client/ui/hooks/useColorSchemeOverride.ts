@@ -45,9 +45,11 @@ export function useColorSchemeOverride() {
   const swapInterval = swapQuery.data?.interval ?? null;
   const now = useSimpleCronInterval(swapInterval);
   const colorScheme =
-    getThemeSwapColorScheme(swapInterval, now) ??
-    override ??
-    (systemTheme === `dark` ? `dark` : `light`);
+    now == null
+      ? `light`
+      : (getThemeSwapColorScheme(swapInterval, now) ??
+        override ??
+        (systemTheme === `dark` ? `dark` : `light`));
 
   return { override, colorScheme };
 }
