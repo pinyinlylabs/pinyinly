@@ -156,6 +156,10 @@ function CharacterWriting({
             ? lastGrade?.issues
             : undefined
         }
+        showWritingIssues={
+          !hanziWritingIssuesSetting.isLoading &&
+          hanziWritingIssuesSetting.isEnabled
+        }
       />
       <Text className="text-center text-muted-fg">
         {isGuided

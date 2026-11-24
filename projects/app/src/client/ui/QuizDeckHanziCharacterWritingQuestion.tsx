@@ -222,6 +222,10 @@ export function QuizDeckHanziCharacterWritingQuestion({
                 ? rating?.geometry.issues
                 : undefined
             }
+            showWritingIssues={
+              !hanziWritingIssuesSetting.isLoading &&
+              hanziWritingIssuesSetting.isEnabled
+            }
             ratingResult={
               rating == null ? null : rating.correct ? `correct` : `incorrect`
             }
