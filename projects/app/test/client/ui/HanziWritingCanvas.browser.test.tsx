@@ -205,7 +205,33 @@ test(`Undo removes the latest stroke through onStrokesChange`, async () => {
   expect(onStrokesChange).toHaveBeenCalledExactlyOnceWith([[{ x: 1, y: 2 }]]);
 });
 
-test(`drawn strokes are black for incorrect ratings`, async () => {
+test(`drawn strokes are dark for incorrect ratings with issue overlays`, async () => {
+  await render(
+    <div data-testid="incorrect-writing-canvas">
+      <HanziWritingCanvas
+        drawnStrokes={[
+          [
+            { x: 100, y: 100 },
+            { x: 300, y: 300 },
+          ],
+        ]}
+        ratingResult="incorrect"
+        showWritingIssues
+        onStrokesChange={vi.fn()}
+      />
+    </div>,
+  );
+
+  const root = page.getByTestId(`incorrect-writing-canvas`);
+  await expect.element(root).toBeInTheDocument();
+  const svg = root.element().querySelector(`svg`);
+  assert(svg != null);
+  const drawnStroke = svg.querySelector(`path[d="M 100 100 L 300 300"]`);
+  expect(drawnStroke?.getAttribute(`stroke`)).toBe(`#334155`);
+  expect(drawnStroke?.getAttribute(`stroke-width`)).toBe(`32`);
+});
+
+test(`drawn strokes are red for incorrect ratings without issue overlays`, async () => {
   await render(
     <div data-testid="incorrect-writing-canvas">
       <HanziWritingCanvas
@@ -226,8 +252,7 @@ test(`drawn strokes are black for incorrect ratings`, async () => {
   const svg = root.element().querySelector(`svg`);
   assert(svg != null);
   const drawnStroke = svg.querySelector(`path[d="M 100 100 L 300 300"]`);
-  expect(drawnStroke?.getAttribute(`stroke`)).toBe(`#334155`);
-  expect(drawnStroke?.getAttribute(`stroke-width`)).toBe(`32`);
+  expect(drawnStroke?.getAttribute(`stroke`)).toBe(`#ef4444`);
 });
 
 test(`renders missing and extra stroke issue highlights`, async () => {

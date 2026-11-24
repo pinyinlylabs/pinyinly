@@ -214,11 +214,13 @@ function WritingResult({
   drawnStrokes,
   guidedPaths,
   issues,
+  showWritingIssues,
   ratingResult,
 }: {
   drawnStrokes: readonly (readonly WritingStrokePoint[])[];
   guidedPaths: readonly string[] | undefined;
   issues: readonly WritingIssue[];
+  showWritingIssues: boolean;
   ratingResult: `correct` | `incorrect` | null | undefined;
 }) {
   return (
@@ -228,7 +230,13 @@ function WritingResult({
           key={`stroke:${index}`}
           d={pathFromPoints(stroke)}
           fill="none"
-          stroke={ratingResult === `incorrect` ? `#334155` : `#19aaf5`}
+          stroke={
+            ratingResult === `incorrect`
+              ? showWritingIssues
+                ? `#334155`
+                : `#ef4444`
+              : `#19aaf5`
+          }
           strokeWidth="32"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -345,6 +353,7 @@ export function HanziWritingCanvas({
   guidedPathIndex,
   drawnStrokes = [],
   issues = [],
+  showWritingIssues = false,
   ratingResult,
   onStrokeStart,
   onStrokesChange,
@@ -358,6 +367,7 @@ export function HanziWritingCanvas({
   guidedPathIndex?: number;
   drawnStrokes?: readonly (readonly WritingStrokePoint[])[];
   issues?: readonly WritingIssue[];
+  showWritingIssues?: boolean;
   ratingResult?: `correct` | `incorrect` | null;
   onStrokeStart?: () => void;
   onStrokesChange: (strokes: WritingStrokePoint[][]) => void;
@@ -526,6 +536,7 @@ export function HanziWritingCanvas({
           drawnStrokes={drawnStrokes}
           guidedPaths={guidedPaths}
           issues={issues}
+          showWritingIssues={showWritingIssues}
           ratingResult={ratingResult}
         />
         <FreeformWritingStroke activePath={activePath} />
