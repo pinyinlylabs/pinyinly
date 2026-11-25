@@ -377,7 +377,7 @@ tasks:
       NODE_OPTIONS: --disable-warning=ExperimentalWarning $NODE_OPTIONS
 
   expoDoctor:
-    command: npx -y expo-doctor@1.21.6
+    command: npx -y expo-doctor@1.21.8
     deps:
       - ~:codegen
     options:
