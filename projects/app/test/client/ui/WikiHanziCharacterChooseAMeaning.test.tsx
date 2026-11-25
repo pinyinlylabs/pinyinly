@@ -366,7 +366,7 @@ test(`shows no status lozenge when there are no meanings`, ({ rizzle }) => {
   render(<WikiHanziMeaningsPanel hanzi={hanzi} skillSrsStates={new Map()} />, {
     wrapper: providers(rizzle),
   });
-  expect(screen.getByText(`No meanings yet.`)).toBeInTheDocument();
+  expect(screen.getByText(`No definitions at the moment.`)).toBeInTheDocument();
   expect(screen.queryByRole(`button`)).not.toBeInTheDocument();
 });
 
