@@ -6,7 +6,7 @@ javascript:
   syncPackageManagerField: true
 
 node:
-  version: "24.11.0" # renovate: datasource=node-version depName=node versioning=node
+  version: "24.22.3" # renovate: datasource=node-version depName=node versioning=node
 
 proto:
   version: 0.62.3
