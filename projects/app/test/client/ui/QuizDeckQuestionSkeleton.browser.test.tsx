@@ -1,6 +1,10 @@
 import { QuizDeckQuestionSkeleton } from "#client/ui/QuizDeckQuestionSkeleton.tsx";
 import { QuizDeckResultToast } from "#client/ui/QuizDeckResultToast.tsx";
 import { Theme } from "#client/ui/Theme.tsx";
+import {
+  RatingReason,
+  ratingToReason,
+} from "#client/ui/QuizDeckRatingReason.ts";
 import { View } from "#client/ui/View.tsx";
 import { Rating } from "#util/fsrs.ts";
 import { SafeAreaInsetsContext } from "react-native-safe-area-context";
@@ -45,7 +49,9 @@ test.for([Rating.Easy, Rating.Good, Rating.Hard, Rating.Again])(
           <View testID="quiz" style={{ width: 390, height: 500 }}>
             <QuizDeckQuestionSkeleton
               skill="hp:test:meaning"
-              rating={rated ? { rating } : undefined}
+              ratingReason={
+                rated ? ratingToReason(rating, rating === Rating.Hard) : null
+              }
               isUserAnswerProvided
               onSubmit={() => undefined}
               onChangeAnswer={() => {}}
@@ -151,7 +157,7 @@ test(`Hard rating shows Nice when Too slow is omitted`, async () => {
       <View testID="stage" style={{ width: 390, height: 740 }}>
         <QuizDeckResultToast
           skill="hp:test:meaning"
-          rating={Rating.Hard}
+          ratingReason={RatingReason.Good}
           onChangeAnswer={() => {}}
         />
       </View>
@@ -168,8 +174,7 @@ test(`Hard rating shows Too slow when the setting is enabled`, async () => {
       <View testID="stage" style={{ width: 390, height: 740 }}>
         <QuizDeckResultToast
           skill="hp:test:meaning"
-          rating={Rating.Hard}
-          showTooSlow
+          ratingReason={RatingReason.Slow}
           onChangeAnswer={() => {}}
         />
       </View>
@@ -187,7 +192,7 @@ test(`advancing before the enter animation finishes prevents replay on exit`, as
         {visible ? (
           <QuizDeckResultToast
             skill="hp:test:meaning"
-            rating={Rating.Good}
+            ratingReason={RatingReason.Good}
             onChangeAnswer={() => {}}
           />
         ) : null}

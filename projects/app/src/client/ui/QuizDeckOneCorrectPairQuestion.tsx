@@ -15,6 +15,7 @@ import {
 import {
   autoCheckUserToggleSetting,
   newSkillLessonUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
 } from "@/data/userSettings";
 import { longestTextByCharacters } from "@/util/unicode";
 import { invariant } from "@pinyinly/lib/invariant";
@@ -30,10 +31,11 @@ import type {
   TextAnswerButtonState,
 } from "./TextAnswerButton.utils";
 import {
-  ratingToButtonState,
+  ratingReasonToButtonState,
   textAnswerButtonFontSize,
 } from "./TextAnswerButton.utils";
 import { WikiHanziModal } from "./WikiHanziModal";
+import { RatingReason } from "./QuizDeckRatingReason";
 
 const buttonThickness = 4;
 const gap = 12;
@@ -59,6 +61,9 @@ export function QuizDeckOneCorrectPairQuestion({
   );
   const { isEnabled: showNewSkillLesson } = useUserSettingToggle(
     newSkillLessonUserToggleSetting,
+  );
+  const { isEnabled: showTooSlow } = useUserSettingToggle(
+    quizResultTooSlowUserToggleSetting,
   );
 
   const [selectedAChoice, setSelectedAChoice] =
@@ -87,6 +92,7 @@ export function QuizDeckOneCorrectPairQuestion({
       aChoice,
       bChoice,
       durationMs,
+      showTooSlow,
     );
 
     setRating(questionRating);
@@ -109,7 +115,7 @@ export function QuizDeckOneCorrectPairQuestion({
 
   return (
     <QuizDeckQuestionSkeleton
-      rating={rating}
+      ratingReason={rating?.ratingReason ?? null}
       isUserAnswerProvided={
         selectedAChoice !== undefined && selectedBChoice !== undefined
       }
@@ -159,7 +165,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     : a === selectedAChoice
                       ? rating == null
                         ? `selected`
-                        : ratingToButtonState(rating.rating)
+                        : ratingReasonToButtonState(rating.ratingReason)
                       : selectedBChoice === undefined
                         ? `default`
                         : `dimmed`
@@ -182,7 +188,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(newSelectedAChoice, selectedBChoice);
                     }
-                  } else if (rating.correct) {
+                  } else if (rating.ratingReason !== RatingReason.Incorrect) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();
@@ -205,7 +211,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     : b === selectedBChoice
                       ? rating == null
                         ? `selected`
-                        : ratingToButtonState(rating.rating)
+                        : ratingReasonToButtonState(rating.ratingReason)
                       : selectedAChoice === undefined
                         ? `default`
                         : `dimmed`
@@ -228,7 +234,7 @@ export function QuizDeckOneCorrectPairQuestion({
                     ) {
                       submitChoices(selectedAChoice, newSelectedBChoice);
                     }
-                  } else if (rating.correct) {
+                  } else if (rating.ratingReason !== RatingReason.Incorrect) {
                     // If the answer is correct, this is a shortcut to the next
                     // question to avoid moving the mouse.
                     onNext();

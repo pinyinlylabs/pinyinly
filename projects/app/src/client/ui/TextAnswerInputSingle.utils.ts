@@ -1,4 +1,4 @@
-import { Rating } from "@/util/fsrs";
+import { RatingReason } from "./QuizDeckRatingReason";
 
 export type TextAnswerInputSingleState =
   | `default`
@@ -12,9 +12,9 @@ export type TextAnswerInputSingleState =
 
 export function ratingToInputState(
   isUserAnswerEmpty: boolean,
-  rating: Rating | undefined,
+  ratingReason: RatingReason | null,
 ): TextAnswerInputSingleState {
-  if (isUserAnswerEmpty || rating == undefined) {
+  if (isUserAnswerEmpty || ratingReason == null) {
     // If the user hasn't provided an answer, we don't want to show a success
     // state even if the grade is technically correct, because it makes it look
     // like their answer was graded, but really it was just skipped because they
@@ -22,15 +22,15 @@ export function ratingToInputState(
     return `default`;
   }
 
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
+  switch (ratingReason) {
+    case RatingReason.Perfect:
+    case RatingReason.Good: {
       return `success`;
     }
-    case Rating.Hard: {
+    case RatingReason.Slow: {
       return `warning`;
     }
-    case Rating.Again: {
+    case RatingReason.Incorrect: {
       return `error`;
     }
   }

@@ -15,6 +15,12 @@ vi.mock(`@sentry/react-native`, () => ({ captureMessage }));
 vi.mock(`#client/ui/hooks/useQuizTimer.ts`, () => ({
   useQuizTimer: () => ({ getDurationMs: () => 12_000 }),
 }));
+vi.mock(`#client/ui/hooks/useUserSettingToggle.ts`, () => ({
+  useUserSettingToggle: () => ({
+    isLoading: false,
+    isEnabled: false,
+  }),
+}));
 vi.mock(`#client/ui/Text.tsx`, () => ({
   Text: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }));
@@ -38,12 +44,12 @@ vi.mock(`#client/ui/TextAnswerInputSingle.tsx`, () => ({
 vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
   QuizDeckQuestionSkeleton: ({
     children,
-    rating,
+    ratingReason,
     onSubmit,
     onReportWrongRating,
   }: {
     children: ReactNode;
-    rating?: { rating: number };
+    ratingReason?: unknown;
     onSubmit: () => void;
     onReportWrongRating?: () => void;
   }) => (
@@ -52,7 +58,7 @@ vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
       <button type="button" onClick={onSubmit}>
         Submit
       </button>
-      {rating == null || onReportWrongRating == null ? null : (
+      {ratingReason == null || onReportWrongRating == null ? null : (
         <button type="button" onClick={onReportWrongRating}>
           Report rating
         </button>

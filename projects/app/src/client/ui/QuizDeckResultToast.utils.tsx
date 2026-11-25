@@ -1,16 +1,16 @@
-import { Rating } from "@/util/fsrs";
+import { RatingReason } from "./QuizDeckRatingReason";
 import type { PylyThemeName } from "./Theme";
 
-export function ratingToThemeName(rating: Rating): PylyThemeName {
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
+export function ratingReasonToThemeName(status: RatingReason): PylyThemeName {
+  switch (status) {
+    case RatingReason.Perfect:
+    case RatingReason.Good: {
       return `success-panel`;
     }
-    case Rating.Hard: {
+    case RatingReason.Slow: {
       return `warning-panel`;
     }
-    case Rating.Again: {
+    case RatingReason.Incorrect: {
       return `danger-panel`;
     }
   }

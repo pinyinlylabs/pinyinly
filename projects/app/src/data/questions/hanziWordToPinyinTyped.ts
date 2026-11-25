@@ -17,7 +17,8 @@ import {
   hanziWordToPinyinTyped,
 } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { Rating } from "@/util/fsrs";
+import { Rating, RatingReason, ratingToReason } from "@/util/fsrs";
+import type { RatingReason as RatingReasonType } from "@/util/fsrs";
 import { sortComparatorNumber } from "@pinyinly/lib/collections";
 import { invariant, nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
@@ -90,11 +91,13 @@ export type HanziToPinyinTypedQuestionRating =
   | {
       correct: true;
       rating: Rating;
+      ratingReason: RatingReasonType;
       skillRatings: UnsavedSkillRating[];
     }
   | {
       correct: false;
       rating: typeof Rating.Again;
+      ratingReason: typeof RatingReason.Incorrect;
       skillRatings: UnsavedSkillRating[];
       expectedAnswer: PinyinText;
       mistakes: MistakeType[];
@@ -108,6 +111,7 @@ export function gradeHanziToPinyinTypedQuestion(
   question: HanziWordToPinyinTypedQuestion,
   userAnswer: string,
   durationMs: number,
+  showTooSlow = false,
 ): HanziToPinyinTypedQuestionRating {
   let actualUnits = matchAllPinyinUnits(userAnswer as PinyinText);
 
@@ -141,6 +145,7 @@ export function gradeHanziToPinyinTypedQuestion(
         return {
           correct,
           rating: skillRating.rating,
+          ratingReason: ratingToReason(skillRating.rating, showTooSlow),
           skillRatings: [skillRating],
         };
       }
@@ -156,6 +161,7 @@ export function gradeHanziToPinyinTypedQuestion(
     return {
       correct,
       rating: Rating.Again,
+      ratingReason: RatingReason.Incorrect,
       skillRatings: [
         computeSkillRating({
           skill: question.skill,

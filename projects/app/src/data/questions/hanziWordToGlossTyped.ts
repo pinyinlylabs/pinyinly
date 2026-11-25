@@ -12,7 +12,8 @@ import {
   hanziWordToGlossTyped,
 } from "@/data/skills";
 import { hanziFromHanziWord, loadDictionary } from "@/dictionary";
-import { Rating } from "@/util/fsrs";
+import { Rating, RatingReason, ratingToReason } from "@/util/fsrs";
+import type { RatingReason as RatingReasonType } from "@/util/fsrs";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import type { Mutable } from "@pinyinly/lib/types";
 
@@ -61,11 +62,13 @@ export type HanziToGlossTypedQuestionRating =
   | {
       correct: true;
       rating: Rating;
+      ratingReason: RatingReasonType;
       skillRatings: UnsavedSkillRating[];
     }
   | {
       correct: false;
       rating: typeof Rating.Again;
+      ratingReason: typeof RatingReason.Incorrect;
       skillRatings: UnsavedSkillRating[];
       expectedAnswer: string;
       mistakes: MistakeType[];
@@ -95,6 +98,7 @@ export function gradeHanziToGlossTypedQuestion(
   question: HanziWordToGlossTypedQuestion,
   userGloss: string,
   durationMs: number,
+  showTooSlow = false,
 ): HanziToGlossTypedQuestionRating {
   const normalizedUserGloss = normalizeGlossForMatch(userGloss);
 
@@ -116,11 +120,13 @@ export function gradeHanziToGlossTypedQuestion(
         correct,
         durationMs,
       });
-      return {
+      const grade: HanziToGlossTypedQuestionRating = {
         correct,
         rating: skillRating.rating,
+        ratingReason: ratingToReason(skillRating.rating, showTooSlow),
         skillRatings: [skillRating],
       };
+      return grade;
     }
   }
 
@@ -130,9 +136,10 @@ export function gradeHanziToGlossTypedQuestion(
     const expectedGloss = nonNullable(
       question.answers.find((a) => a.skill === question.skill)?.glosses[0],
     );
-    return {
+    const grade: HanziToGlossTypedQuestionRating = {
       correct,
       rating: Rating.Again,
+      ratingReason: RatingReason.Incorrect,
       skillRatings: [
         computeSkillRating({
           skill: question.skill,
@@ -149,5 +156,6 @@ export function gradeHanziToGlossTypedQuestion(
         },
       ],
     };
+    return grade;
   }
 }

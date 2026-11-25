@@ -25,7 +25,8 @@ import type {
   ShapeContextSustainedTangentStrokeResult,
   WritingStrokePoint,
 } from "@/util/shapeContextGrader";
-import type { Rating } from "@/util/fsrs";
+import { ratingToReason } from "@/util/fsrs";
+import type { Rating, RatingReason as RatingReasonType } from "@/util/fsrs";
 
 export const hanziCharacterWritingSimilarityThreshold = 0.72;
 
@@ -258,6 +259,7 @@ export async function hanziCharacterWritingQuestionOrThrow(
 export interface HanziCharacterWritingQuestionRating {
   correct: boolean;
   rating: Rating;
+  ratingReason: RatingReasonType;
   skillRatings: UnsavedSkillRating[];
   failure: `shape` | `stroke-segmentation` | `contrastive` | null;
   geometry: ShapeContextGrade;
@@ -286,6 +288,7 @@ export function gradeHanziCharacterWritingQuestion(
   medianPaths: readonly string[],
   durationMs: number,
   similarCharacterReferences: readonly SimilarCharacterReference[] = [],
+  showTooSlow = false,
 ): HanziCharacterWritingQuestionRating {
   const geometry = gradeCharacterShape(drawnStrokes, medianPaths);
   const similarCharacterGrades = gradeSimilarCharacters(
@@ -308,6 +311,7 @@ export function gradeHanziCharacterWritingQuestion(
   return {
     correct,
     rating: skillRating.rating,
+    ratingReason: ratingToReason(skillRating.rating, showTooSlow),
     skillRatings: [skillRating],
     failure: correct
       ? null

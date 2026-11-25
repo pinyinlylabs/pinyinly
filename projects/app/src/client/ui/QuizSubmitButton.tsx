@@ -1,12 +1,10 @@
 import { mergeRefs } from "@/client/react";
-import { Rating } from "@/util/fsrs";
 import type { PropsOf } from "@pinyinly/lib/types";
 import { useLayoutEffect, useRef } from "react";
 import type { ViewInstance } from "react-native";
 import z from "zod";
-import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
-import { Theme } from "./Theme";
+import { RatingReason } from "./QuizDeckRatingReason";
 
 const quizSubmitButtonStateSchema = z.enum({
   Disabled: `Disabled`,
@@ -25,37 +23,36 @@ interface QuizSubmitButtonProps extends Pick<
   autoFocus?: boolean;
   isChecking?: boolean;
   isUserAnswerProvided: boolean;
-  rating: Rating | null | undefined;
+  ratingReason: RatingReason | null;
 }
 
 export const QuizSubmitButton = ({
   autoFocus = false,
   isChecking = false,
   isUserAnswerProvided,
-  rating,
+  ratingReason,
   onPress,
   ref,
 }: QuizSubmitButtonProps) => {
-  const disabled = rating == null && !isUserAnswerProvided;
+  const disabled = ratingReason == null && !isUserAnswerProvided;
 
   let text;
 
   if (isChecking) {
     text = `Checking`;
   } else {
-    switch (rating) {
-      case undefined:
+    switch (ratingReason) {
       case null: {
         text = `Check`;
         break;
       }
-      case Rating.Easy:
-      case Rating.Good:
-      case Rating.Hard: {
+      case RatingReason.Perfect:
+      case RatingReason.Good:
+      case RatingReason.Slow: {
         text = `Continue`;
         break;
       }
-      case Rating.Again: {
+      case RatingReason.Incorrect: {
         text = `Got it`;
         break;
       }
@@ -71,24 +68,14 @@ export const QuizSubmitButton = ({
   }, [autoFocus, buttonRef]);
 
   return (
-    <Theme
-      theme={
-        disabled
-          ? undefined
-          : rating == null
-            ? `success-panel`
-            : ratingToThemeName(rating)
-      }
+    <RectButton
+      variant="filled"
+      ref={mergeRefs(buttonRef, ref)}
+      disabled={disabled || isChecking}
+      className={`flex-1`}
+      onPress={disabled || isChecking ? undefined : onPress}
     >
-      <RectButton
-        variant="filled"
-        ref={mergeRefs(buttonRef, ref)}
-        disabled={disabled || isChecking}
-        className={`flex-1`}
-        onPress={disabled || isChecking ? undefined : onPress}
-      >
-        {text}
-      </RectButton>
-    </Theme>
+      {text}
+    </RectButton>
   );
 };

@@ -7,6 +7,9 @@ import { View } from "@/client/ui/View";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";
+import { ratingReasonToThemeName } from "./QuizDeckResultToast.utils";
+import { ratingToReason } from "./QuizDeckRatingReason";
+import { Theme } from "./Theme";
 
 export default () => {
   const { hanziWord } = useDemoHanziWordKnob(`你好:hello`);
@@ -50,27 +53,38 @@ export default () => {
                   ${css}
                 `}
               >
-                <QuizDeckResultToast
-                  skill={skill}
-                  rating={rating}
-                  disableAnimation
-                  showTooSlow={rating === Rating.Hard}
-                  onChangeAnswer={() => {
-                    console.log(`onChangeAnswer`);
-                  }}
-                />
-                <View
-                  className="absolute inset-x-4 flex-row items-stretch"
-                  style={{
-                    bottom: submitButtonInsetBottom,
-                    height: submitButtonHeight,
-                  }}
+                <Theme
+                  theme={ratingReasonToThemeName(
+                    ratingToReason(rating, rating === Rating.Hard),
+                  )}
                 >
-                  <QuizSubmitButton
-                    rating={rating}
-                    isUserAnswerProvided={false}
+                  <QuizDeckResultToast
+                    skill={skill}
+                    ratingReason={ratingToReason(
+                      rating,
+                      rating === Rating.Hard,
+                    )}
+                    disableAnimation
+                    onChangeAnswer={() => {
+                      console.log(`onChangeAnswer`);
+                    }}
                   />
-                </View>
+                  <View
+                    className="absolute inset-x-4 flex-row items-stretch"
+                    style={{
+                      bottom: submitButtonInsetBottom,
+                      height: submitButtonHeight,
+                    }}
+                  >
+                    <QuizSubmitButton
+                      ratingReason={ratingToReason(
+                        rating,
+                        rating === Rating.Hard,
+                      )}
+                      isUserAnswerProvided={false}
+                    />
+                  </View>
+                </Theme>
               </View>
             </View>
           ))}
