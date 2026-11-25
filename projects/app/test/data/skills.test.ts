@@ -84,14 +84,14 @@ describe(`proficiency presentation`, () => {
   test(`uses the learner-facing proficiency labels`, () => {
     const ranks: RankNumber[] = [0, 1, 2, 3, 4];
     expect(ranks.map(rankName)).toEqual([
-      `Queued`,
+      `Not Started`,
       `Novice`,
       `Apprentice`,
       `Expert`,
       `Master`,
     ]);
     expect(ranks.map((rank) => rankPresentation[rank].color)).toEqual([
-      `amber`,
+      `muted-fg`,
       `blue`,
       `emerald`,
       `violet`,
@@ -100,7 +100,7 @@ describe(`proficiency presentation`, () => {
     expect(
       Object.values(rankPresentation).map((level) => level.description),
     ).toEqual([
-      `This word is queued for practice.`,
+      `You haven't started practising this word yet.`,
       `You're beginning to learn this word.`,
       `You're building familiarity and improving your recall.`,
       `You can remember this word reliably.`,

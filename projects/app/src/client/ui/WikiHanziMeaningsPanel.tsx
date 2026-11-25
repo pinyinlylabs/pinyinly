@@ -342,7 +342,7 @@ function MeaningCoreText({
         {hsk == null && hskFirstAppearance == null ? null : (
           <HskLozengeWithTooltip
             entries={[{ hsk, hskFirstAppearance }]}
-            size="sm"
+            size="md"
           />
         )}
         <WikiHanziProgressLozenge

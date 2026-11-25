@@ -18,7 +18,15 @@ vi.mock(`#client/ui/Icon.tsx`, () => ({
 }));
 vi.mock(`expo-router`, () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
-function Meaning({ onSelect }: { onSelect: () => void }) {
+function Meaning({
+  onSelect,
+  rank = 1,
+  isBookmarked = false,
+}: {
+  onSelect: () => void;
+  rank?: 0 | 1;
+  isBookmarked?: boolean;
+}) {
   return (
     <PortalProvider>
       <Theme theme="dark">
@@ -40,11 +48,12 @@ function Meaning({ onSelect }: { onSelect: () => void }) {
             <Text>feel; think</Text>
           </Pressable>
           <WikiHanziProgressLozengeDisplay
-            rank={1}
+            rank={rank}
             progress={0.5}
             hanziWord={`觉得:feel`}
             skillSrsStates={new Map()}
             hasPinyin
+            isBookmarked={isBookmarked}
           />
         </Pressable>
         <PortalHost name="root" />
@@ -92,6 +101,26 @@ test(`keyboard users can open and dismiss the combined menu without selecting th
   await userEvent.keyboard(`{Escape}`);
   await expect.element(trigger).toHaveFocus();
   expect(onSelect).not.toHaveBeenCalled();
+});
+
+test(`bookmarked rank-zero words are Queued while unbookmarked words are Not Started`, async () => {
+  await render(<Meaning onSelect={vi.fn()} rank={0} />);
+  await expect
+    .element(
+      page.getByRole(`button`, {
+        name: `Not Started. Bookmark and proficiency details`,
+      }),
+    )
+    .toBeVisible();
+
+  await render(<Meaning onSelect={vi.fn()} rank={0} isBookmarked />);
+  await expect
+    .element(
+      page.getByRole(`button`, {
+        name: `Queued. Bookmark and proficiency details`,
+      }),
+    )
+    .toBeVisible();
 });
 
 test(`proficiency details stay scrollable inside a narrow viewport`, async () => {

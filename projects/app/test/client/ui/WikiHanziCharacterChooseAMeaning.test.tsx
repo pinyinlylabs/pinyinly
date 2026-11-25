@@ -312,13 +312,15 @@ test(`requires a choice when a word has multiple meanings`, ({ rizzle }) => {
   expect(screen.getAllByRole(`radio`)).toHaveLength(2);
   expect(
     screen.getAllByRole(`button`, {
-      name: `Queued. Bookmark and proficiency details`,
+      name: `Not Started. Bookmark and proficiency details`,
     }),
   ).toHaveLength(2);
   for (const gloss of [`how many, a few`, `small table`]) {
     const glossRow = screen.getByRole(`radio`, { name: gloss }).parentElement;
     expect(glossRow).not.toBeNull();
-    expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(`Queued`);
+    expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
+      `Not Started`,
+    );
   }
 
   fireEvent.click(screen.getByText(`how many, a few`));
@@ -335,9 +337,28 @@ test(`shows a meaning-local lozenge for every character choice`, ({
   render(<TestChooser />, { wrapper: providers(rizzle) });
   expect(
     screen.getAllByRole(`button`, {
-      name: `Queued. Bookmark and proficiency details`,
+      name: `Not Started. Bookmark and proficiency details`,
     })[0],
   ).toBeInTheDocument();
+});
+
+test(`shows Queued instead of Not Started for a bookmarked meaning`, ({
+  rizzle,
+}) => {
+  useLiveQueryMock.mockReturnValue({ data: meanings });
+  useBookmarkToggleMock.mockReturnValue({
+    isBookmarked: true,
+    isLoading: false,
+    toggle: vi.fn(),
+    add: vi.fn(),
+    remove: vi.fn(),
+  });
+  render(<TestChooser />, { wrapper: providers(rizzle) });
+  expect(
+    screen.getAllByRole(`button`, {
+      name: `Queued. Bookmark and proficiency details`,
+    }).length,
+  ).toBeGreaterThan(0);
 });
 
 test(`shows no status lozenge when there are no meanings`, ({ rizzle }) => {
@@ -359,7 +380,9 @@ test(`shows a meaning-local lozenge beside a custom meaning`, ({ rizzle }) => {
   const glossRow =
     screen.getByText(`my custom meaning`).parentElement?.parentElement;
   expect(glossRow).not.toBeNull();
-  expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(`Queued`);
+  expect(within(glossRow!).getByRole(`button`)).toHaveTextContent(
+    `Not Started`,
+  );
   expect(screen.getByText(`Custom`)).toBeInTheDocument();
 });
 
@@ -377,7 +400,7 @@ test(`shows progress lozenge when the word has no progress`, ({ rizzle }) => {
     { wrapper: providers(rizzle) },
   );
 
-  expect(screen.getByText(`Queued`)).toBeInTheDocument();
+  expect(screen.getByText(`Not Started`)).toBeInTheDocument();
 });
 
 test(`keeps each meaning's proficiency independent`, ({ rizzle }) => {
@@ -415,7 +438,7 @@ test(`keeps each meaning's proficiency independent`, ({ rizzle }) => {
   ).toBeInTheDocument();
   expect(
     screen.getByRole(`button`, {
-      name: `Queued. Bookmark and proficiency details`,
+      name: `Not Started. Bookmark and proficiency details`,
     }),
   ).toBeInTheDocument();
 });

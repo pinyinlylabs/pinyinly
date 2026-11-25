@@ -99,7 +99,7 @@ export function WikiHanziCharacterChooseAMeaning({
                           hskFirstAppearance: entry.hskFirstAppearance,
                         },
                       ]}
-                      size="sm"
+                      size="md"
                     />
                   )}
                   <WikiHanziProgressLozenge

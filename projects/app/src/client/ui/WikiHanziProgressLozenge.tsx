@@ -8,6 +8,7 @@ import { Text } from "./Text";
 import { getHanziWordsProgress } from "./wikiHanziProgress";
 import { WikiHanziSkillLevelBreakdownContent } from "./WikiHanziSkillLevelBreakdown";
 import { ScrollView, useWindowDimensions } from "react-native";
+import { useBookmarkToggle } from "./hooks/useBookmarkToggle";
 
 export function WikiHanziProgressLozenge({
   hanziWord,
@@ -18,6 +19,7 @@ export function WikiHanziProgressLozenge({
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
   hasPinyin: boolean;
 }) {
+  const { isBookmarked } = useBookmarkToggle(hanziWord);
   const { progress, rank } = getHanziWordsProgress({
     hanziWords: [hanziWord],
     skillSrsStates,
@@ -30,6 +32,7 @@ export function WikiHanziProgressLozenge({
       hanziWord={hanziWord}
       skillSrsStates={skillSrsStates}
       hasPinyin={hasPinyin}
+      isBookmarked={isBookmarked}
     />
   );
 }
@@ -40,20 +43,30 @@ export function WikiHanziProgressLozengeDisplay({
   hanziWord,
   skillSrsStates,
   hasPinyin = false,
+  isBookmarked = false,
 }: {
   progress: number;
   rank: RankNumber;
   hanziWord?: HanziWord | null;
   skillSrsStates?: ReadonlyMap<Skill, SrsStateType>;
   hasPinyin?: boolean;
+  isBookmarked?: boolean;
 }) {
   const { height } = useWindowDimensions();
-  const level = rankPresentation[rank];
+  const baseLevel = rankPresentation[rank];
+  const level =
+    rank === 0 && isBookmarked
+      ? {
+          label: `Queued`,
+          description: `This word is queued for practice.`,
+          color: `amber` as const,
+        }
+      : baseLevel;
   const style =
-    rank === 0
+    rank === 0 && isBookmarked
       ? {
           lozengeColor: `yellow` as const,
-          badgeClass: `border-yellow/50 bg-yellow/10`,
+          badgeClass: `border-yellow/25 bg-yellow/10`,
           badgeProgressClass: `bg-yellow/20`,
         }
       : proficiencyStyle[level.color];
@@ -75,6 +88,7 @@ export function WikiHanziProgressLozengeDisplay({
 
             shrink-0 self-center
           `}
+          size="md"
           color={style.lozengeColor}
           progress={rank === 0 || rank === 4 ? undefined : visualProgress}
           progressClassName={style.badgeProgressClass}

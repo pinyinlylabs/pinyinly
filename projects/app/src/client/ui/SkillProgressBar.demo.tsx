@@ -8,7 +8,7 @@ const examples: {
   progress: number;
   color: ProficiencyColor;
 }[] = [
-  { label: `Queued`, progress: 0, color: `amber` },
+  { label: `Not started`, progress: 0, color: `muted-fg` },
   { label: `Novice · 25%`, progress: 0.25, color: `blue` },
   { label: `Apprentice · 50%`, progress: 0.5, color: `emerald` },
   { label: `Expert · 75%`, progress: 0.75, color: `violet` },

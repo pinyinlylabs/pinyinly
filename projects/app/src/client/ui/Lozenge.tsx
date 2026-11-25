@@ -37,6 +37,7 @@ type LozengeProps =
       size?: `sm` | `md`;
       progress?: number;
       progressClassName?: string;
+      textClassName?: string;
       children: ReactNode;
       icon?: IconName;
       iconTintColorClassName?: string;
@@ -90,6 +91,7 @@ function TextLozenge({
   className,
   progress,
   progressClassName = `bg-blue/20`,
+  textClassName,
   icon,
   iconTintColorClassName,
   children,
@@ -98,6 +100,7 @@ function TextLozenge({
   size?: `sm` | `md`;
   progress?: number;
   progressClassName?: string;
+  textClassName?: string;
   icon?: IconName;
   iconTintColorClassName?: string;
   children: ReactNode;
@@ -140,6 +143,7 @@ function TextLozenge({
       <Text
         className={`
           ${lozengeTextClass({ color, size })}
+          ${textClassName ?? ``}
           ${progress == null ? `` : `relative`}
         `}
       >
@@ -154,7 +158,7 @@ const lozengeContainerClass = tv({
   variants: {
     color: {
       emerald: `border-lozenge-emerald-border bg-lozenge-emerald-bg`,
-      yellow: `border-yellow/50 bg-yellow/10`,
+      yellow: `border-yellow/25 bg-yellow/10`,
       cyan: `border-lozenge-cyan-border bg-lozenge-cyan-bg`,
       blue: `border-lozenge-blue-border bg-lozenge-blue-bg`,
       violet: `border-lozenge-violet-border bg-lozenge-violet-bg`,
