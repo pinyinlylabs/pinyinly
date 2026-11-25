@@ -42,7 +42,8 @@ test.for(snapshotCases)(
     await expect.element(input).toBeInTheDocument();
     input.element().blur();
     if (focusState === `focused`) {
-      await forcePseudoStateByTestId(`text-input`, [`focus`]);
+      await forcePseudoStateByTestId(`text-input`, [`focus-visible`]);
+      expect(input.element().matches(`:focus-visible`)).toBe(true);
     }
 
     const snapshotName = theme === `default` ? variant : `${theme}-${variant}`;
