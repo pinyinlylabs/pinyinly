@@ -13,10 +13,7 @@ import { Text } from "./Text";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { useDb } from "./hooks/useDb";
 import { WikiHanziMeaningsPanel } from "./WikiHanziMeaningsPanel";
-import { WikiHanziProgressLozenge } from "./WikiHanziProgressLozenge";
 import { WikiHanziBookmarkMenu } from "./WikiHanziBookmarkMenu";
-import { WikiHanziBookmarkLozenge } from "./WikiHanziBookmarkLozenge";
-import { WikiHanziHskLozenges } from "./WikiHanziHskLozenges";
 import { HanziStrokesAnimatedTile } from "./HanziStrokesAnimatedTile";
 import { WikiPageEditModeContext } from "./WikiPageEditModeContext";
 
@@ -48,16 +45,9 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
     <View className="gap-3 pl-4">
       <View className="flex-row items-center gap-1">
         <View className="flex-1 flex-row items-center gap-1">
-          <WikiHanziBookmarkLozenge hanziWord={hanziWord} />
-          <WikiHanziHskLozenges hanzi={hanzi} />
           {characterData?.isComponent ? (
             <ComponentLozenge isStructural={characterData.isStructural} />
           ) : null}
-          <WikiHanziProgressLozenge
-            hanzi={hanzi}
-            hanziWord={hanziWord}
-            skillSrsStates={skillSrsStates}
-          />
         </View>
       </View>
       <View>
@@ -80,7 +70,7 @@ export function WikiHanziCharacterMultipleMeaningsHeaderOverview({
         </View>
       </View>
       <View className="mb-3">
-        <WikiHanziMeaningsPanel hanzi={hanzi} />
+        <WikiHanziMeaningsPanel hanzi={hanzi} skillSrsStates={skillSrsStates} />
       </View>
     </View>
   );

@@ -1,6 +1,7 @@
 import { use } from "react";
 import { useRouter } from "expo-router";
 import { useBookmarkToggle } from "@/client/ui/hooks/useBookmarkToggle";
+import type { UseBookmarkToggleResult } from "@/client/ui/hooks/useBookmarkToggle";
 import type { HanziText, HanziWord } from "@/data/model";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { RectButton } from "./RectButton";
@@ -67,7 +68,14 @@ export function WikiHanziBookmarkMenu({
 }
 
 function BookmarkMenuItem({ hanziWord }: { hanziWord: HanziWord }) {
-  const { isBookmarked, isLoading, toggle } = useBookmarkToggle(hanziWord);
+  return <BookmarkMenuItemDisplay {...useBookmarkToggle(hanziWord)} />;
+}
+
+export function BookmarkMenuItemDisplay({
+  isBookmarked,
+  isLoading,
+  toggle,
+}: Pick<UseBookmarkToggleResult, `isBookmarked` | `isLoading` | `toggle`>) {
   return (
     <DropdownMenu2.CheckboxItem
       checked={isBookmarked}

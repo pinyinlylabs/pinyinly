@@ -1,5 +1,4 @@
 import type { Hsk30Level } from "@/data/model";
-import { Text } from "@/client/ui/Text";
 import { Lozenge } from "./Lozenge";
 import type { LozengeColor, LozengePressableProps } from "./Lozenge";
 
@@ -18,11 +17,13 @@ export function HskLozenge({
   color ??= hskLevelToColor[hskLevel];
 
   return (
-    <Lozenge {...pressableProps} color={color} size={size}>
-      <Text className={size == `sm` ? `opacity-80` : undefined}>HSK</Text>
-      {` `}
-      {hskLevel}
-      {suffix}
+    <Lozenge
+      {...pressableProps}
+      color={color}
+      size={size}
+      textClassName={color === `muted-fg` ? `text-muted-fg/50` : undefined}
+    >
+      {`HSK ${hskLevel}${suffix ?? ``}`}
     </Lozenge>
   );
 }

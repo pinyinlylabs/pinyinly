@@ -9,6 +9,7 @@ import { tv } from "tailwind-variants";
 
 export type LozengeColor =
   | `emerald`
+  | `yellow`
   | `cyan`
   | `blue`
   | `violet`
@@ -36,9 +37,10 @@ type LozengeProps =
       size?: `sm` | `md`;
       progress?: number;
       progressClassName?: string;
+      textClassName?: string;
       children: ReactNode;
-      icon?: never;
-      iconTintColorClassName?: never;
+      icon?: IconName;
+      iconTintColorClassName?: string;
     })
   | (LozengeBaseProps & {
       kind: `icon`;
@@ -89,12 +91,18 @@ function TextLozenge({
   className,
   progress,
   progressClassName = `bg-blue/20`,
+  textClassName,
+  icon,
+  iconTintColorClassName,
   children,
   ...pressableProps
 }: LozengeBaseProps & {
   size?: `sm` | `md`;
   progress?: number;
   progressClassName?: string;
+  textClassName?: string;
+  icon?: IconName;
+  iconTintColorClassName?: string;
   children: ReactNode;
 }) {
   const Container = pressableProps.onPress == null ? View : Pressable;
@@ -108,6 +116,7 @@ function TextLozenge({
         size,
         interactive: pressableProps.onPress != null,
         className: [
+          `flex-row items-center gap-1`,
           progress == null ? `` : `relative overflow-hidden`,
           className,
         ],
@@ -123,9 +132,18 @@ function TextLozenge({
           style={{ width: `${Math.min(progress, 1) * 100}%` }}
         />
       )}
+      {icon == null ? null : (
+        <Icon
+          icon={icon}
+          size={12}
+          tintColorClassName={iconTintColorClassName}
+          className="relative"
+        />
+      )}
       <Text
         className={`
           ${lozengeTextClass({ color, size })}
+          ${textClassName ?? ``}
           ${progress == null ? `` : `relative`}
         `}
       >
@@ -140,6 +158,7 @@ const lozengeContainerClass = tv({
   variants: {
     color: {
       emerald: `border-lozenge-emerald-border bg-lozenge-emerald-bg`,
+      yellow: `border-yellow/25 bg-yellow/10`,
       cyan: `border-lozenge-cyan-border bg-lozenge-cyan-bg`,
       blue: `border-lozenge-blue-border bg-lozenge-blue-bg`,
       violet: `border-lozenge-violet-border bg-lozenge-violet-bg`,
@@ -172,6 +191,7 @@ const lozengeTextClass = tv({
   variants: {
     color: {
       emerald: `text-lozenge-emerald-fg`,
+      yellow: `text-yellow`,
       cyan: `text-lozenge-cyan-fg`,
       blue: `text-lozenge-blue-fg`,
       violet: `text-lozenge-violet-fg`,

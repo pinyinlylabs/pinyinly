@@ -1,61 +1,27 @@
-import { useDb } from "@/client/ui/hooks/useDb";
-import type { HanziText, HanziWord, Skill, SrsStateType } from "@/data/model";
-import { buildHanziWord } from "@/dictionary";
+import type { HanziWord, Skill, SrsStateType } from "@/data/model";
 import { rankPresentation, rankToWithinLevelProgress } from "@/data/skills";
 import type { RankNumber } from "@/data/skills";
-import { and, eq, useLiveQuery } from "@tanstack/react-db";
 import { Lozenge } from "./Lozenge";
 import { proficiencyFillProgress, proficiencyStyle } from "./proficiencyStyles";
-import { Tooltip } from "./Tooltip";
+import { DropdownMenu2 } from "./DropdownMenu2";
 import { Text } from "./Text";
 import { getHanziWordsProgress } from "./wikiHanziProgress";
 import { WikiHanziSkillLevelBreakdownContent } from "./WikiHanziSkillLevelBreakdown";
+import { ScrollView, useWindowDimensions } from "react-native";
+import { useBookmarkToggle } from "./hooks/useBookmarkToggle";
 
 export function WikiHanziProgressLozenge({
-  hanzi,
   hanziWord,
   skillSrsStates,
+  hasPinyin,
 }: {
-  hanzi: HanziText;
-  hanziWord?: HanziWord | null;
+  hanziWord: HanziWord;
   skillSrsStates: ReadonlyMap<Skill, SrsStateType>;
+  hasPinyin: boolean;
 }) {
-  const db = useDb();
-  const { data: dictionaryMeanings } = useLiveQuery({
-    query: (q) =>
-      q
-        .from({ entry: db.dictionaryCollection })
-        .where(({ entry }) =>
-          and(eq(entry.hanzi, hanzi), eq(entry.sourceKind, `builtIn`)),
-        ),
-  });
-  const { data: userMeanings } = useLiveQuery({
-    query: (q) =>
-      q
-        .from({ dictionary: db.userDictionary })
-        .where(({ dictionary }) => eq(dictionary.hanzi, hanzi)),
-  });
-  const hasPinyin =
-    hanziWord != null &&
-    (dictionaryMeanings.some(
-      (meaning) =>
-        meaning.hanziWord === hanziWord && meaning.pinyin?.[0] != null,
-    ) ||
-      userMeanings.some(
-        (meaning) =>
-          buildHanziWord(hanzi, meaning.meaningKey) === hanziWord &&
-          meaning.pinyin != null,
-      ));
-  const hanziWords = [
-    ...(hanziWord == null
-      ? dictionaryMeanings.map((meaning) => meaning.hanziWord)
-      : [hanziWord]),
-    ...(hanziWord == null
-      ? userMeanings.map((meaning) => buildHanziWord(hanzi, meaning.meaningKey))
-      : []),
-  ].filter((word, index, words) => words.indexOf(word) === index);
+  const { isBookmarked } = useBookmarkToggle(hanziWord);
   const { progress, rank } = getHanziWordsProgress({
-    hanziWords,
+    hanziWords: [hanziWord],
     skillSrsStates,
   });
 
@@ -66,6 +32,7 @@ export function WikiHanziProgressLozenge({
       hanziWord={hanziWord}
       skillSrsStates={skillSrsStates}
       hasPinyin={hasPinyin}
+      isBookmarked={isBookmarked}
     />
   );
 }
@@ -76,15 +43,33 @@ export function WikiHanziProgressLozengeDisplay({
   hanziWord,
   skillSrsStates,
   hasPinyin = false,
+  isBookmarked = false,
 }: {
   progress: number;
   rank: RankNumber;
   hanziWord?: HanziWord | null;
   skillSrsStates?: ReadonlyMap<Skill, SrsStateType>;
   hasPinyin?: boolean;
+  isBookmarked?: boolean;
 }) {
-  const level = rankPresentation[rank];
-  const style = proficiencyStyle[level.color];
+  const { height } = useWindowDimensions();
+  const baseLevel = rankPresentation[rank];
+  const level =
+    rank === 0 && isBookmarked
+      ? {
+          label: `Queued`,
+          description: `This word is queued for practice.`,
+          color: `amber` as const,
+        }
+      : baseLevel;
+  const style =
+    rank === 0 && isBookmarked
+      ? {
+          lozengeColor: `yellow` as const,
+          badgeClass: `border-yellow/25 bg-yellow/10`,
+          badgeProgressClass: `bg-yellow/20`,
+        }
+      : proficiencyStyle[level.color];
   const badgeProgress = rankToWithinLevelProgress({
     rank,
     completion: progress,
@@ -95,36 +80,58 @@ export function WikiHanziProgressLozengeDisplay({
       : proficiencyFillProgress(badgeProgress);
 
   return (
-    <Tooltip placement="top" sideOffset={6}>
-      <Tooltip.Trigger asChild>
+    <DropdownMenu2>
+      <DropdownMenu2.Trigger asChild>
         <Lozenge
-          className={style.badgeClass}
+          className={`
+            ${style.badgeClass}
+
+            shrink-0 self-center
+          `}
+          size="md"
           color={style.lozengeColor}
           progress={rank === 0 || rank === 4 ? undefined : visualProgress}
           progressClassName={style.badgeProgressClass}
           accessibilityRole="button"
-          accessibilityLabel={`${level.label}. ${level.description}`}
+          accessibilityLabel={`${level.label}. Bookmark and proficiency details`}
+          onPress={(event) => {
+            event.stopPropagation();
+          }}
         >
           {level.label}
         </Lozenge>
-      </Tooltip.Trigger>
-      <Tooltip.Content className="gap-2">
-        <Text className="font-sans text-sm font-semibold">{level.label}</Text>
-        <Text className="font-sans text-sm">{level.description}</Text>
-        <Text className="font-sans text-sm">
-          Each word has its own proficiency level. Remembering it during
-          practice helps it grow; repeated forgetting may lower it. The progress
-          fill shows how close this word is to the next level and resets when it
-          advances. Master is the highest level.
-        </Text>
-        {hanziWord == null || skillSrsStates == null ? null : (
-          <WikiHanziSkillLevelBreakdownContent
-            hanziWord={hanziWord}
-            skillSrsStates={skillSrsStates}
-            hasPinyin={hasPinyin}
-          />
-        )}
-      </Tooltip.Content>
-    </Tooltip>
+      </DropdownMenu2.Trigger>
+      <DropdownMenu2.Content
+        align="start"
+        sideOffset={6}
+        className="w-80 max-w-[90vw] gap-2"
+        onPress={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <ScrollView
+          style={{ maxHeight: height * 0.6 }}
+          contentContainerClassName="gap-2"
+        >
+          <Text className="font-sans text-sm font-semibold text-fg">
+            {level.label}
+          </Text>
+          <Text className="font-sans text-sm text-fg">{level.description}</Text>
+          <Text className="font-sans text-sm text-fg">
+            Each word has its own proficiency level. Remembering it during
+            practice helps it grow; repeated forgetting may lower it. The
+            progress fill shows how close this word is to the next level and
+            resets when it advances. Master is the highest level.
+          </Text>
+          {hanziWord == null || skillSrsStates == null ? null : (
+            <WikiHanziSkillLevelBreakdownContent
+              hanziWord={hanziWord}
+              skillSrsStates={skillSrsStates}
+              hasPinyin={hasPinyin}
+            />
+          )}
+        </ScrollView>
+      </DropdownMenu2.Content>
+    </DropdownMenu2>
   );
 }

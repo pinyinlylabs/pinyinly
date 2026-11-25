@@ -186,9 +186,9 @@ test(`shows HSK labels beside words without a leading indentation column`, async
   const rendered = render(<BookmarkList />, { wrapper: providers(rizzle) });
   await waitFor(() => {
     expect(rendered.getByText(`one`)).toBeTruthy();
-    expect(rendered.getByText(`HSK`)).toBeTruthy();
+    expect(rendered.getByText(`HSK 1`)).toBeTruthy();
   });
-  const hskLabel = rendered.getByText(`HSK`);
+  const hskLabel = rendered.getByText(`HSK 1`);
   const hanzi = rendered.getByText(`一`);
   expect(hanzi.parentElement?.parentElement?.contains(hskLabel)).toBe(true);
   const row = rendered.container.querySelector(`a`)?.firstElementChild;

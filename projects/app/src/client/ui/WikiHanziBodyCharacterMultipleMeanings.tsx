@@ -32,7 +32,6 @@ export function WikiHanziBodyCharacterMultipleMeanings({
         <WikiHanziCharacterHeaderOverview
           hanzi={hanzi}
           hanziWord={hanziWord}
-          skillSrsStates={skillSrsStates}
           onModalDismiss={onModalDismiss}
         />
 
@@ -40,6 +39,7 @@ export function WikiHanziBodyCharacterMultipleMeanings({
           hanzi={hanzi}
           hanziWord={hanziWord}
           onHanziWordChanged={setHanziWord}
+          skillSrsStates={skillSrsStates}
         />
 
         <WikiHanziCharacterMeaning hanzi={hanzi} hanziWord={hanziWord} />
