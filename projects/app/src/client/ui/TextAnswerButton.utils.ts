@@ -1,4 +1,4 @@
-import { Rating } from "@/util/fsrs";
+import { RatingReason } from "./QuizDeckRatingReason";
 import { characterCount } from "@/util/unicode";
 import type { PropsOf } from "@pinyinly/lib/types";
 import type { ReactNode } from "react";
@@ -33,16 +33,18 @@ export type TextAnswerButtonProps = {
 /**
  * Maps a quiz rating to the corresponding button state for correct answers.
  */
-export function ratingToButtonState(rating: Rating): TextAnswerButtonState {
-  switch (rating) {
-    case Rating.Easy:
-    case Rating.Good: {
+export function ratingReasonToButtonState(
+  ratingReason: RatingReason,
+): TextAnswerButtonState {
+  switch (ratingReason) {
+    case RatingReason.Perfect:
+    case RatingReason.Good: {
       return `success`;
     }
-    case Rating.Hard: {
+    case RatingReason.Slow: {
       return `warning`;
     }
-    case Rating.Again: {
+    case RatingReason.Incorrect: {
       return `error`;
     }
   }

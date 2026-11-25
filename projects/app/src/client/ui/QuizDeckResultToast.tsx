@@ -1,5 +1,4 @@
 import type { Skill } from "@/data/model";
-import { Rating } from "@/util/fsrs";
 import { invariant } from "@pinyinly/lib/invariant";
 import { useRef } from "react";
 import { Text } from "@/client/ui/Text";
@@ -8,33 +7,28 @@ import { Easing, Keyframe } from "react-native-reanimated";
 import { DropdownMenu2 } from "./DropdownMenu2";
 import { Icon } from "./Icon";
 import { NativeOnlyAnimatedView } from "./NativeOnlyAnimatedView";
-import { ratingToThemeName } from "./QuizDeckResultToast.utils";
 import { RectButton } from "./RectButton";
 import { SkillAnswerText } from "./SkillAnswerText";
 import { Suspense } from "./Suspense";
-import { Theme } from "./Theme";
+import { RatingReason } from "./QuizDeckRatingReason";
 
 export function QuizDeckResultToast({
   skill,
-  rating: ratingProp,
+  ratingReason,
   disableAnimation = false,
   onChangeAnswer,
   onReportWrongRating,
-  showTooSlow = false,
 }: {
   skill: Skill;
-  rating: Rating;
+  ratingReason: RatingReason;
   /**
    * Disable the enter animation for the toast, useful for demo purposes and visual snapshotting.
    */
   disableAnimation?: boolean;
   onChangeAnswer: () => void;
   onReportWrongRating?: () => void;
-  showTooSlow?: boolean;
 }) {
   const cleanupAnimationRef = useRef<(() => void) | null>(null);
-  const rating =
-    ratingProp === Rating.Hard && !showTooSlow ? Rating.Good : ratingProp;
 
   return (
     <Suspense fallback={null}>
@@ -77,76 +71,74 @@ export function QuizDeckResultToast({
                 `
             }
           >
-            <Theme theme={ratingToThemeName(rating)}>
-              <View
-                className={`
-                  w-full gap-3 overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-21
+            <View
+              className={`
+                w-full gap-3 overflow-hidden bg-bg px-4 pt-3 pb-safe-offset-21
 
-                  sm:mb-2 sm:rounded-xl
-                `}
-              >
-                {rating === Rating.Easy ? (
-                  <View className="flex-row items-center gap-2">
-                    <Icon size={32} icon="check-circled-filled" />
+                sm:mb-2 sm:rounded-xl
+              `}
+            >
+              {ratingReason === RatingReason.Perfect ? (
+                <View className="flex-row items-center gap-2">
+                  <Icon size={32} icon="check-circled-filled" />
+                  <Text className="font-sans text-2xl font-bold">Perfect!</Text>
+                  <QuizResultDropdown
+                    onChangeAnswer={onChangeAnswer}
+                    onReportWrongRating={onReportWrongRating}
+                  />
+                </View>
+              ) : ratingReason === RatingReason.Good ? (
+                <View className="flex-row items-center gap-2">
+                  <Icon size={32} icon="check-circled-filled" />
+                  <Text className="font-sans text-2xl font-bold">Nice!</Text>
+                  <QuizResultDropdown
+                    onChangeAnswer={onChangeAnswer}
+                    onReportWrongRating={onReportWrongRating}
+                  />
+                </View>
+              ) : ratingReason === RatingReason.Slow ? (
+                <>
+                  <View className="w-full flex-row items-center gap-2 self-stretch">
+                    <Icon size={32} icon="meh-circled" />
                     <Text className="font-sans text-2xl font-bold">
-                      Perfect!
+                      Too slow
                     </Text>
                     <QuizResultDropdown
                       onChangeAnswer={onChangeAnswer}
                       onReportWrongRating={onReportWrongRating}
                     />
                   </View>
-                ) : rating === Rating.Good ? (
-                  <View className="flex-row items-center gap-2">
-                    <Icon size={32} icon="check-circled-filled" />
-                    <Text className="font-sans text-2xl font-bold">Nice!</Text>
-                    <QuizResultDropdown
-                      onChangeAnswer={onChangeAnswer}
-                      onReportWrongRating={onReportWrongRating}
-                    />
-                  </View>
-                ) : rating === Rating.Hard ? (
+                  <Text className="font-sans text-lg/none">
+                    Keep practicing and you’ll get faster!
+                  </Text>
+                </>
+              ) : (
+                (invariant(
+                  ratingReason satisfies typeof RatingReason.Incorrect,
+                ),
+                (
                   <>
                     <View className="w-full flex-row items-center gap-2 self-stretch">
-                      <Icon size={32} icon="meh-circled" />
+                      <Icon size={32} icon="close-circled-filled" />
                       <Text className="font-sans text-2xl font-bold">
-                        Too slow
+                        Incorrect
                       </Text>
                       <QuizResultDropdown
                         onChangeAnswer={onChangeAnswer}
                         onReportWrongRating={onReportWrongRating}
                       />
                     </View>
-                    <Text className="font-sans text-lg/none">
-                      Keep practicing and you’ll get faster!
+                    <Text className="font-sans text-xl/none font-medium">
+                      Correct answer:
+                    </Text>
+
+                    <Text className="font-sans">
+                      <SkillAnswerText skill={skill} />
                     </Text>
                   </>
-                ) : (
-                  (invariant(rating satisfies typeof Rating.Again),
-                  (
-                    <>
-                      <View className="w-full flex-row items-center gap-2 self-stretch">
-                        <Icon size={32} icon="close-circled-filled" />
-                        <Text className="font-sans text-2xl font-bold">
-                          Incorrect
-                        </Text>
-                        <QuizResultDropdown
-                          onChangeAnswer={onChangeAnswer}
-                          onReportWrongRating={onReportWrongRating}
-                        />
-                      </View>
-                      <Text className="font-sans text-xl/none font-medium">
-                        Correct answer:
-                      </Text>
-
-                      <Text className="font-sans">
-                        <SkillAnswerText skill={skill} />
-                      </Text>
-                    </>
-                  ))
-                )}
-              </View>
-            </Theme>
+                ))
+              )}
+            </View>
           </View>
         </NativeOnlyAnimatedView>
       </View>

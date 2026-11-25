@@ -16,6 +16,32 @@ type Rating = z.infer<typeof ratingSchema>;
 
 export { Rating };
 
+const ratingReasonSchema = z.enum({
+  Perfect: `Perfect`,
+  Good: `Good`,
+  Slow: `Slow`,
+  Incorrect: `Incorrect`,
+});
+
+export const RatingReason = ratingReasonSchema.enum;
+export type RatingReason = z.infer<typeof ratingReasonSchema>;
+
+export function ratingToReason(
+  rating: Rating,
+  showTooSlow: boolean,
+): RatingReason {
+  switch (rating) {
+    case Rating.Easy:
+      return RatingReason.Perfect;
+    case Rating.Good:
+      return RatingReason.Good;
+    case Rating.Hard:
+      return showTooSlow ? RatingReason.Slow : RatingReason.Good;
+    case Rating.Again:
+      return RatingReason.Incorrect;
+  }
+}
+
 const w = [
   0.5701, // initial stability (Again)
   1.4436, // initial stability (Hard)

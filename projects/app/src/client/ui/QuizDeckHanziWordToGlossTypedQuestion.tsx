@@ -10,7 +10,7 @@ import { gradeHanziToGlossTypedQuestion } from "@/data/questions/hanziWordToGlos
 import type { HanziToGlossTypedQuestionRating } from "@/data/questions/hanziWordToGlossTyped";
 import { computeSkillRating, hanziWordFromSkill } from "@/data/skills";
 import { hanziFromHanziWord } from "@/dictionary";
-import { Rating } from "@/util/fsrs";
+import { Rating, RatingReason, ratingToReason } from "@/util/fsrs";
 import { emptyArray } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import * as Sentry from "@sentry/react-native";
@@ -22,6 +22,8 @@ import { QuizFlagText } from "./QuizFlagText";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { TextAnswerInputSingle } from "./TextAnswerInputSingle";
 import { ratingToInputState } from "./TextAnswerInputSingle.utils";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
+import { quizResultTooSlowUserToggleSetting } from "@/data/userSettings";
 
 export function QuizDeckHanziWordToGlossTypedQuestion({
   noAutoFocus = true,
@@ -50,6 +52,9 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [rating, setRating] = useState<HanziToGlossTypedQuestionRating>();
   const [hasReportedRating, setHasReportedRating] = useState(false);
+  const { isEnabled: showTooSlow } = useUserSettingToggle(
+    quizResultTooSlowUserToggleSetting,
+  );
 
   const timer = useQuizTimer();
   const hanziWord = hanziWordFromSkill(skill);
@@ -64,8 +69,8 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         question,
         userAnswerRef.current,
         durationMs,
+        showTooSlow,
       );
-
       setRating(questionRating);
       onRating(
         questionRating.skillRatings,
@@ -119,6 +124,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         ? {
             correct: false,
             rating: Rating.Again,
+            ratingReason: RatingReason.Incorrect,
             skillRatings: [correctedRating],
             expectedAnswer: nonNullable(
               question.answers.find(({ skill }) => skill === question.skill)
@@ -129,6 +135,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
         : {
             correct: true,
             rating: correctedRating.rating,
+            ratingReason: ratingToReason(correctedRating.rating, showTooSlow),
             skillRatings: [correctedRating],
           },
     );
@@ -136,7 +143,7 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
 
   return (
     <QuizDeckQuestionSkeleton
-      rating={rating}
+      ratingReason={rating?.ratingReason ?? null}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
       onChangeAnswer={onChangeAnswer}
@@ -210,7 +217,10 @@ export function QuizDeckHanziWordToGlossTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={ratingToInputState(isUserAnswerEmpty, rating?.rating)}
+        state={ratingToInputState(
+          isUserAnswerEmpty,
+          rating?.ratingReason ?? null,
+        )}
         placeholder="Type in English"
         autoCorrect
       />

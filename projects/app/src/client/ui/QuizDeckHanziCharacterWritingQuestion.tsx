@@ -23,6 +23,7 @@ import { emptyArray } from "@pinyinly/lib/collections";
 import { nonNullable } from "@pinyinly/lib/invariant";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { useState } from "react";
+import { RatingReason, ratingToReason } from "@/util/fsrs";
 import { HanziWritingCanvas } from "./HanziWritingCanvas";
 import { QuizDeckQuestionSkeleton } from "./QuizDeckQuestionSkeleton";
 import { QuizFlagText } from "./QuizFlagText";
@@ -31,7 +32,10 @@ import {
   useQuizTimer,
 } from "@/client/ui/hooks/useQuizTimer";
 import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
-import { hanziWritingIssuesUserToggleSetting } from "@/data/userSettings";
+import {
+  hanziWritingIssuesUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
+} from "@/data/userSettings";
 
 export function QuizDeckHanziCharacterWritingQuestion({
   question,
@@ -57,6 +61,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
     useState<HanziCharacterWritingQuestionRating | null>(null);
   const [hasReportedRating, setHasReportedRating] = useState(false);
   const timer = useQuizTimer();
+  const { isEnabled: showTooSlow } = useUserSettingToggle(
+    quizResultTooSlowUserToggleSetting,
+  );
   const hanziWritingIssuesSetting = useUserSettingToggle(
     hanziWritingIssuesUserToggleSetting,
   );
@@ -101,6 +108,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
       medianPaths,
       durationMs,
       similarCharacterReferences,
+      showTooSlow,
     );
     setRating(result);
     onRating(result.skillRatings, emptyArray);
@@ -138,7 +146,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
     const originalSkillRating = nonNullable(rating.skillRatings[0]);
     const correctedRating = computeSkillRating({
       skill: originalSkillRating.skill,
-      correct: !rating.correct,
+      correct: rating.correct ? false : true,
       durationMs: originalSkillRating.durationMs,
     });
     onReportWrongRating?.([correctedRating], emptyArray);
@@ -147,6 +155,9 @@ export function QuizDeckHanziCharacterWritingQuestion({
       ...rating,
       correct: !rating.correct,
       rating: correctedRating.rating,
+      ratingReason: rating.correct
+        ? RatingReason.Incorrect
+        : ratingToReason(correctedRating.rating, showTooSlow),
       skillRatings: [correctedRating],
       failure: rating.correct ? rating.failure : null,
     });
@@ -154,7 +165,7 @@ export function QuizDeckHanziCharacterWritingQuestion({
 
   return (
     <QuizDeckQuestionSkeleton
-      rating={rating ?? undefined}
+      ratingReason={rating?.ratingReason ?? null}
       isUserAnswerProvided={drawnStrokes.length > 0 && canGrade}
       onSubmit={handleSubmit}
       onChangeAnswer={onChangeAnswer}

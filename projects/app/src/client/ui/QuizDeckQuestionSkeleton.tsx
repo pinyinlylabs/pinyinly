@@ -1,5 +1,4 @@
 import type { Skill } from "@/data/model";
-import type { Rating } from "@/util/fsrs";
 import type { ReactNode } from "react";
 import { View } from "@/client/ui/View";
 import { useLockFn } from "@/client/ui/hooks/useLockFn";
@@ -8,16 +7,13 @@ import { QuizDeckResultToast } from "./QuizDeckResultToast";
 import { QuizSubmitButton } from "./QuizSubmitButton";
 import { RectButton } from "./RectButton";
 import { useState } from "react";
-import { useUserSettingToggle } from "./hooks/useUserSettingToggle";
-import { quizResultTooSlowUserToggleSetting } from "@/data/userSettings";
-
-interface QuizDeckQuestionSkeletonRating {
-  rating: Rating;
-}
+import type { RatingReason } from "./QuizDeckRatingReason";
+import { ratingReasonToThemeName } from "./QuizDeckResultToast.utils";
+import { Theme } from "./Theme";
 
 export function QuizDeckQuestionSkeleton({
   children,
-  rating,
+  ratingReason,
   isUserAnswerProvided,
   onSubmit,
   onChangeAnswer,
@@ -26,7 +22,7 @@ export function QuizDeckQuestionSkeleton({
   skill,
 }: {
   children: ReactNode;
-  rating?: QuizDeckQuestionSkeletonRating;
+  ratingReason: RatingReason | null;
   isUserAnswerProvided: boolean;
   onSubmit: () => Promise<void> | void;
   onChangeAnswer: () => void;
@@ -35,8 +31,6 @@ export function QuizDeckQuestionSkeleton({
   skill: Skill;
 }) {
   const [isChecking, setIsChecking] = useState(false);
-  const { isLoading: isTooSlowSettingLoading, isEnabled: showTooSlow } =
-    useUserSettingToggle(quizResultTooSlowUserToggleSetting);
   const submit = useLockFn(async () => {
     const result = onSubmit();
     if (result == null) {
@@ -55,6 +49,12 @@ export function QuizDeckQuestionSkeleton({
   const idkButtonHeight = showIdkButton ? 28 : 0;
   const idkButtonGap = showIdkButton ? 16 : 0;
   const submitButtonInsetBottom = insets.bottom + 20;
+  const submitDisabled = ratingReason == null && !isUserAnswerProvided;
+  const resultTheme = submitDisabled
+    ? undefined
+    : ratingReason == null
+      ? `success-panel`
+      : ratingReasonToThemeName(ratingReason);
 
   return (
     <View className="flex-1">
@@ -71,22 +71,13 @@ export function QuizDeckQuestionSkeleton({
           }}
         />
       </View>
-      {rating == null ? null : (
-        <QuizDeckResultToast
-          skill={skill}
-          rating={rating.rating}
-          onChangeAnswer={onChangeAnswer}
-          onReportWrongRating={onReportWrongRating}
-          showTooSlow={!isTooSlowSettingLoading && showTooSlow}
-        />
-      )}
       {showIdkButton ? (
         <View
           className="absolute inset-x-4 items-center"
           style={{
             bottom: submitButtonInsetBottom + submitButtonHeight + idkButtonGap,
             height: idkButtonHeight,
-            visibility: rating == null ? `visible` : `hidden`,
+            visibility: ratingReason == null ? `visible` : `hidden`,
           }}
         >
           <RectButton
@@ -101,23 +92,33 @@ export function QuizDeckQuestionSkeleton({
           </RectButton>
         </View>
       ) : null}
-      <View
-        className="absolute inset-x-4 flex-row items-stretch"
-        style={{
-          bottom: submitButtonInsetBottom,
-          height: submitButtonHeight,
-        }}
-      >
-        <QuizSubmitButton
-          autoFocus={showIdkButton && rating != null}
-          isChecking={isChecking}
-          isUserAnswerProvided={isUserAnswerProvided}
-          rating={rating?.rating}
-          onPress={() => {
-            void submit();
+      <Theme theme={resultTheme}>
+        {ratingReason == null ? null : (
+          <QuizDeckResultToast
+            skill={skill}
+            ratingReason={ratingReason}
+            onChangeAnswer={onChangeAnswer}
+            onReportWrongRating={onReportWrongRating}
+          />
+        )}
+        <View
+          className="absolute inset-x-4 flex-row items-stretch"
+          style={{
+            bottom: submitButtonInsetBottom,
+            height: submitButtonHeight,
           }}
-        />
-      </View>
+        >
+          <QuizSubmitButton
+            autoFocus={showIdkButton && ratingReason != null}
+            isChecking={isChecking}
+            isUserAnswerProvided={isUserAnswerProvided}
+            ratingReason={ratingReason}
+            onPress={() => {
+              void submit();
+            }}
+          />
+        </View>
+      </Theme>
     </View>
   );
 }

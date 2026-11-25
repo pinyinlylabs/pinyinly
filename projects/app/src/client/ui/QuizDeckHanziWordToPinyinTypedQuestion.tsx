@@ -12,13 +12,17 @@ import type {
   PinyinUnitSuggestions,
 } from "@/data/pinyin";
 import { pinyinUnitSuggestions } from "@/data/pinyin";
-import type { HanziToPinyinTypedQuestionRating } from "@/data/questions/hanziWordToPinyinTyped";
 import {
   gradeHanziToPinyinTypedQuestion,
   shouldAutoSubmitPinyinTypedAnswer,
 } from "@/data/questions/hanziWordToPinyinTyped";
+import type { HanziToPinyinTypedQuestionRating } from "@/data/questions/hanziWordToPinyinTyped";
 import { hanziWordFromSkill } from "@/data/skills";
-import { autoCheckUserToggleSetting } from "@/data/userSettings";
+import {
+  autoCheckUserToggleSetting,
+  quizResultTooSlowUserToggleSetting,
+} from "@/data/userSettings";
+import { useUserSettingToggle } from "@/client/ui/hooks/useUserSettingToggle";
 import { hanziFromHanziWord } from "@/dictionary";
 import { emptyArray } from "@pinyinly/lib/collections";
 import type { ReactNode, Ref } from "react";
@@ -61,6 +65,9 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
   const userAnswerRef = useRef(``);
   const [isUserAnswerEmpty, setIsUserAnswerEmpty] = useState(true);
   const [rating, setRating] = useState<HanziToPinyinTypedQuestionRating>();
+  const { isEnabled: showTooSlow } = useUserSettingToggle(
+    quizResultTooSlowUserToggleSetting,
+  );
 
   const timer = useQuizTimer();
   const hanziCharacters = splitHanziText(
@@ -75,8 +82,8 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
         question,
         userAnswerRef.current,
         durationMs,
+        showTooSlow,
       );
-
       setRating(questionRating);
       onRating(
         questionRating.skillRatings,
@@ -89,7 +96,7 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
 
   return (
     <QuizDeckQuestionSkeleton
-      rating={rating}
+      ratingReason={rating?.ratingReason ?? null}
       isUserAnswerProvided={!isUserAnswerEmpty}
       onSubmit={submit}
       onChangeAnswer={onChangeAnswer}
@@ -170,7 +177,10 @@ export function QuizDeckHanziWordToPinyinTypedQuestion({
           ) : undefined
         }
         onSubmit={submit}
-        state={ratingToInputState(isUserAnswerEmpty, rating?.rating)}
+        state={ratingToInputState(
+          isUserAnswerEmpty,
+          rating?.ratingReason ?? null,
+        )}
       />
     </QuizDeckQuestionSkeleton>
   );

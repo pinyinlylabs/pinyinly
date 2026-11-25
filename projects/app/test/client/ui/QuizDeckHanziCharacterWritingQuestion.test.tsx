@@ -19,7 +19,7 @@ import type { HanziCharacterWritingQuestionRating } from "#data/questions/hanziC
 import { hanziCharacterToWriting } from "#data/skills.ts";
 import { beforeEach, expect, test, vi } from "vitest";
 import { QuizDeckHanziCharacterWritingQuestion } from "#client/ui/QuizDeckHanziCharacterWritingQuestion.tsx";
-import { Rating } from "#util/fsrs.ts";
+import { Rating, RatingReason, ratingToReason } from "#util/fsrs.ts";
 
 const mocks = vi.hoisted(() => ({
   captureMessage: vi.fn(),
@@ -62,13 +62,13 @@ vi.mock(`#client/ui/hooks/useUserSettingToggle.ts`, () => ({
 vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
   QuizDeckQuestionSkeleton: ({
     children,
-    rating,
+    ratingReason,
     isUserAnswerProvided,
     onSubmit,
     onReportWrongRating,
   }: {
     children: React.ReactNode;
-    rating?: { rating: number };
+    ratingReason?: `Perfect` | `Good` | `Slow` | `Incorrect`;
     isUserAnswerProvided: boolean;
     onSubmit: () => Promise<void>;
     onReportWrongRating?: () => void;
@@ -76,13 +76,22 @@ vi.mock(`#client/ui/QuizDeckQuestionSkeleton.tsx`, () => ({
     <div
       data-testid="quiz-question"
       data-answer-ready={isUserAnswerProvided}
-      data-rating={rating?.rating}
+      data-rating={
+        ratingReason == null
+          ? undefined
+          : {
+              Perfect: `4`,
+              Good: `3`,
+              Slow: `2`,
+              Incorrect: `1`,
+            }[ratingReason]
+      }
     >
       {children}
       <button type="button" onClick={() => void onSubmit()}>
         Submit
       </button>
-      {rating == null || onReportWrongRating == null ? null : (
+      {ratingReason == null || onReportWrongRating == null ? null : (
         <button type="button" onClick={onReportWrongRating}>
           Report rating
         </button>
@@ -138,6 +147,7 @@ test(`renders grader issues in the writing canvas only when enabled`, async () =
   mocks.rating = {
     correct: false,
     rating: Rating.Again,
+    ratingReason: RatingReason.Incorrect,
     skillRatings: [
       { skill: question.skill, rating: Rating.Again, durationMs: 12_000 },
     ],
@@ -268,6 +278,9 @@ test.for([
     mocks.rating = {
       correct: wasCorrect,
       rating: originalRating,
+      ratingReason: wasCorrect
+        ? ratingToReason(originalRating, false)
+        : RatingReason.Incorrect,
       skillRatings: [
         { skill: question.skill, rating: originalRating, durationMs: 12_000 },
       ],
@@ -332,7 +345,7 @@ test.for([
     );
     expect(screen.getByTestId(`quiz-question`)).toHaveAttribute(
       `data-rating`,
-      String(correctedRating),
+      String(correctedRating === 2 ? 3 : correctedRating),
     );
 
     fetch.mockRestore();
